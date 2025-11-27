@@ -115,6 +115,12 @@
             font-weight:700;
             font-size:17px;
         }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -129,42 +135,66 @@
 
         <tr>
             <td>Plant ID</td>
-            <td><input type="number" id="plantID"></td>
+            <td>
+                <input type="number" id="plantID">
+                <span class="error" id="err_plantID"></span>
+            </td>
         </tr>
 
         <tr>
             <td>Plant Name</td>
-            <td><input type="text" id="plantName"></td>
+            <td>
+                <input type="text" id="plantName">
+                <span class="error" id="err_plantName"></span>
+            </td>
         </tr>
 
         <tr>
             <td>State Code</td>
-            <td><input type="text" id="stateCode"></td>
+            <td>
+                <input type="text" id="stateCode">
+                <span class="error" id="err_stateCode"></span>
+            </td>
         </tr>
 
         <tr>
             <td>District</td>
-            <td><input type="text" id="district"></td>
+            <td>
+                <input type="text" id="district">
+                <span class="error" id="err_district"></span>
+            </td>
         </tr>
 
         <tr>
             <td>KLD</td>
-            <td><input type="number" id="kld"></td>
+            <td>
+                <input type="number" id="kld">
+                <span class="error" id="err_kld"></span>
+            </td>
         </tr>
 
         <tr>
             <td>Ward No</td>
-            <td><input type="number" id="wardNo"></td>
+            <td>
+                <input type="number" id="wardNo">
+                <span class="error" id="err_wardNo"></span>
+            </td>
         </tr>
 
         <tr>
             <td>Pin Code</td>
-            <td><input type="number" id="pinCode"></td>
+            <td>
+                <input type="number" id="pinCode">
+                <span class="error" id="err_pinCode"></span>
+            </td>
         </tr>
 
         <tr>
             <td>Zones</td>
-            <td><input type="number" id="zones"></td>
+            <td>
+                <input type="number" id="zones">
+                <span class="error" id="err_zones"></span>
+            </td>
         </tr>
 
         <!-- YES/NO merged inside table -->
@@ -211,6 +241,35 @@
 <script>
     async function createPlant(){
 
+        // Required fields list
+        const required = [
+            "plantID",
+            "plantName",
+            "stateCode",
+            "district",
+            "kld",
+            "wardNo",
+            "pinCode",
+            "zones"
+        ];
+
+        let valid = true;
+
+        // Clear all previous errors
+        document.querySelectorAll(".error").forEach(e => e.innerText = "");
+
+        // Validate each required field
+        required.forEach(id => {
+            const value = document.getElementById(id).value.trim();
+            if (!value) {
+                document.getElementById("err_" + id).innerText = "Required";
+                valid = false;
+            }
+        });
+
+        // Stop if validation fails
+        if (!valid) return;
+
         function getRadio(name){
             let r = document.querySelector(`input[name="${name}"]:checked`);
             return r ? Number(r.value) : 0;
@@ -242,12 +301,10 @@
             if(res.ok){
                 document.getElementById("msg").innerText = "Plant added successfully!";
                 document.querySelectorAll("input").forEach(i => i.value = "");
-            } else {
-                document.getElementById("msg").innerText = "Error saving plant";
             }
         }
         catch(err){
-            document.getElementById("msg").innerText = "Error: " + err;
+            console.log(err);
         }
     }
 </script>
