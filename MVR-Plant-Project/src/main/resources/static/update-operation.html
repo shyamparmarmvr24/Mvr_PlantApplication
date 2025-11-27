@@ -41,17 +41,11 @@
 </div>
 
 <script>
-    /*
-      - Preserves original fetch/save logic.
-      - Adds: dgUsed radio behavior (No -> disable dgRunHrs)
-      - After save redirects back keeping filter/date via URL params (filter & value)
-    */
 
     const params = new URLSearchParams(window.location.search);
     const plantID = params.get('plantID');
     const date = params.get('date');
 
-    // filter preservation params (may be null)
     const filter = params.get('filter');
     const value = params.get('value');
 
@@ -78,14 +72,13 @@
 
     async function loadOperation(){
         try {
-            const res = await fetch(`http://localhost:8080/api/operations/plant/${plantID}?date=${date}`);
+            const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
             let text = await res.text();
             let op = {};
             if (text && text.trim().length > 0) {
                 try { op = JSON.parse(text); } catch(e) { op = {}; }
             }
 
-            // render fields
             fieldsBody.innerHTML = '';
             fields.forEach(f => {
                 const tr = document.createElement('tr');
@@ -114,19 +107,17 @@
                 fieldsBody.appendChild(tr);
             });
 
-            // set dgUsed radio checked based on op
+
             const yes = document.getElementById('dg_yes');
             const no  = document.getElementById('dg_no');
             if (yes && no) {
                 if (op['dgUsed'] === true) yes.checked = true;
                 if (op['dgUsed'] === false) no.checked = true;
 
-                // attach listeners to enable/disable dgRunHrs
                 yes.addEventListener('change', applyDGLogic);
                 no.addEventListener('change', applyDGLogic);
             }
 
-            // initial apply
             applyDGLogic();
 
         } catch (e) {
@@ -149,7 +140,6 @@
         }
     }
 
-    // When saving: keep behavior — set dgRunHrs=null if dgUsed === false
     document.getElementById('saveBtn').addEventListener('click', async () => {
         const data = {};
         fields.forEach(f => {
@@ -167,7 +157,7 @@
         }
 
         try {
-            const res = await fetch(`http://localhost:8080/api/operations/${plantID}?date=${encodeURIComponent(date)}`, {
+            const res = await fetch(`/api/operations/${plantID}?date=${encodeURIComponent(date)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)

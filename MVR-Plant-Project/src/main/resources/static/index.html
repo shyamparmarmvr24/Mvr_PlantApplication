@@ -39,13 +39,12 @@
             padding:6px 10px;
             border-radius:6px;
             border:1px solid #ddd;
-            background:#fff; /* makes it clickable on all browsers */
+            background:#fff;
             color:#000;
             font-size:15px;
             cursor:pointer;
         }
 
-        /* Dashboard title section */
         .dashboard-title {
             text-align:center;
             margin:18px auto 6px;
@@ -121,12 +120,11 @@
 
         .no-data { text-align:center; padding:18px; color:#6b7280; }
 
-        /* Responsive */
         @media (max-width:900px){
             header { flex-direction:column; align-items:flex-start; gap:10px; padding:12px; }
             .dashboard-title { font-size:20px; }
             th, td{ padding:10px 8px; font-size:14px; }
-            .date-picker label{ display:none; } /* save space */
+            .date-picker label{ display:none; }
         }
     </style>
 </head>
@@ -180,14 +178,6 @@
 </div>
 
 <script>
-    /*
-      Notes:
-      - This file preserves your logic and endpoint URLs.
-      - Improvements:
-          * Caches operation responses per plant+date
-          * Renders rows progressively (so page becomes responsive quickly)
-          * Preserves filter (filter=id/value or filter=zone/value) across view/update/back
-    */
 
     const plantTableBody = document.getElementById('plantTableBody');
     const reportDateInput = document.getElementById('reportDate');
@@ -195,8 +185,8 @@
     const searchZoneBtn = document.getElementById('searchZoneBtn');
 
     let allPlants = [];
-    const cachedOps = {}; // key = plantId_date -> op object or special {progress,status}
-    let visiblePlants = []; // currently displayed list
+    const cachedOps = {};
+    let visiblePlants = [];
     let lastFilterType = null;
     let lastFilterValue = null;
 
@@ -210,7 +200,6 @@
     reportDateInput.value = today;
     reportDateInput.max = today;
 
-    /* Load URL params for filter or date */
     function applyInitialUrlParams() {
         const url = new URLSearchParams(window.location.search);
         const urlDate = url.get("date");
@@ -229,7 +218,6 @@
         }
     }
 
-    /* Redirect home helper preserves current filter & date */
     function redirectHome() {
         let url = `index.html?date=${encodeURIComponent(reportDateInput.value)}`;
         if (lastFilterType && lastFilterValue) {
@@ -238,16 +226,14 @@
         window.location.href = url;
     }
 
-    /* Fetch plants once */
     async function fetchPlants() {
         plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">Loading plants...</td></tr>`;
         try {
-            const res = await fetch('http://localhost:8080/api/plants');
+            const res = await fetch('/api/plants');
             if (!res.ok) throw new Error('Failed to fetch plants');
             allPlants = await res.json();
             applyInitialUrlParams();
 
-            // If initial filter present, apply it; else show all
             if (lastFilterType === 'id' && lastFilterValue) {
                 const filtered = allPlants.filter(p => String(p.plantID) === String(lastFilterValue));
                 renderFiltered(filtered, reportDateInput.value, true);
@@ -263,13 +249,12 @@
         }
     }
 
-    /* OP Data fetch with caching. Also treat dgUsed === false as dgRunHrs filled for progress */
     async function fetchOp(plantID, date) {
         const key = `${plantID}_${date}`;
         if (cachedOps[key]) return cachedOps[key];
 
         try {
-            const res = await fetch(`http://localhost:8080/api/operations/plant/${plantID}?date=${date}`);
+            const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
             const text = await res.text();
             if (!text || !text.trim()) {
                 cachedOps[key] = { progress: 0, status: 'update', op: null };
@@ -277,7 +262,6 @@
             }
             const op = JSON.parse(text);
 
-            // Count filled fields. If dgUsed === false, count dgRunHrs as filled
             let filled = 0;
             fields.forEach(f => {
                 if (f === 'dgRunHrs') {
@@ -300,13 +284,11 @@
         }
     }
 
-    /* Render row (string) */
     function makeRowHtml(p, opData) {
         const clr = opData.progress === 100 ? 'progress-green' : opData.progress > 0 ? 'progress-yellow' : 'progress-red';
         const statusLabel = opData.status.charAt(0).toUpperCase() + opData.status.slice(1);
         const dateVal = reportDateInput.value;
 
-        // Build action link including filters so back returns correctly
         const filterPart = lastFilterType && lastFilterValue ? `&filter=${encodeURIComponent(lastFilterType)}&value=${encodeURIComponent(lastFilterValue)}` : '';
         const actionUrl = opData.status === 'view'
             ? `view-operation.html?plantID=${p.plantID}&date=${dateVal}${filterPart}`
@@ -330,19 +312,15 @@
         </tr>`;
     }
 
-    /* Progressive render: fill table rows as opData is resolved */
     async function renderTable(date) {
         if (!allPlants.length) {
             plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">No plants found</td></tr>`;
             return;
         }
 
-        // Reset visiblePlants
         visiblePlants = allPlants.slice();
-        // show serial numbers
         visiblePlants.forEach((p, i) => p.serialNo = i + 1);
 
-        // Initial table with placeholders (faster paint)
         const placeholders = visiblePlants.map(p => `
             <tr data-plant="${p.plantID}">
                 <td>${p.serialNo}</td>
@@ -355,28 +333,21 @@
             </tr>`).join('');
         plantTableBody.innerHTML = placeholders;
 
-        // Fetch ops in parallel but update DOM as each resolves
-        visiblePlants.forEach(async (p, idx) => {
+        visiblePlants.forEach(async (p) => {
             const opData = await fetchOp(p.plantID, date);
-            // find row and replace innerHTML
             const row = plantTableBody.querySelector(`tr[data-plant="${p.plantID}"]`);
-            if (row) {
-                row.outerHTML = makeRowHtml(p, opData);
-            }
+            if (row) row.outerHTML = makeRowHtml(p, opData);
         });
     }
 
-    /* Render a filtered list (used for search results) */
     async function renderFiltered(filtered, date, initial=false) {
         if (!filtered.length) {
             plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">No plants found</td></tr>`;
             return;
         }
 
-        // set visiblePlants to filtered and assign serials
         visiblePlants = filtered.map((p,i) => { p.serialNo = i+1; return p; });
 
-        // placeholders
         const placeholders = visiblePlants.map(p => `
             <tr data-plant="${p.plantID}">
                 <td>${p.serialNo}</td>
@@ -389,29 +360,26 @@
             </tr>`).join('');
         plantTableBody.innerHTML = placeholders;
 
-        // fetch & update each row
         visiblePlants.forEach(async (p) => {
             const opData = await fetchOp(p.plantID, date);
             const row = plantTableBody.querySelector(`tr[data-plant="${p.plantID}"]`);
             if (row) row.outerHTML = makeRowHtml(p, opData);
         });
 
-        // If this call came from initial URL params, don't update the URL now.
         if (!initial) {
-            // Update URL to reflect filter
             const url = new URL(window.location);
             url.searchParams.set('date', date);
             if (lastFilterType && lastFilterValue) {
                 url.searchParams.set('filter', lastFilterType);
                 url.searchParams.set('value', lastFilterValue);
             } else {
-                url.searchParams.delete('filter'); url.searchParams.delete('value');
+                url.searchParams.delete('filter');
+                url.searchParams.delete('value');
             }
             history.replaceState({}, '', url.toString());
         }
     }
 
-    /* Event handlers for search */
     function searchByID() {
         const id = document.getElementById('plantIDInput').value.trim();
         lastFilterType = id ? 'id' : null;
@@ -430,7 +398,6 @@
         renderFiltered(filtered, date);
     }
 
-    /* When selecting a new date, keep current filter and update listing */
     reportDateInput.addEventListener('change', () => {
         const d = reportDateInput.value;
         const url = new URL(window.location);
@@ -439,15 +406,15 @@
             url.searchParams.set('filter', lastFilterType);
             url.searchParams.set('value', lastFilterValue);
         } else {
-            url.searchParams.delete('filter'); url.searchParams.delete('value');
+            url.searchParams.delete('filter');
+            url.searchParams.delete('value');
         }
         history.replaceState({}, '', url.toString());
-        // Clear cache for new date to avoid stale op data
-        // Only clear cachedOps entries for different date
+
         Object.keys(cachedOps).forEach(k => {
             if (!k.endsWith(`_${d}`)) delete cachedOps[k];
         });
-        // re-render based on current filter
+
         if (lastFilterType === 'id' && lastFilterValue) {
             const filtered = allPlants.filter(p => String(p.plantID) === String(lastFilterValue));
             renderFiltered(filtered, d);
@@ -459,35 +426,26 @@
         }
     });
 
-    /* attach click handlers */
     searchIdBtn.addEventListener('click', searchByID);
     searchZoneBtn.addEventListener('click', searchByZone);
 
-    /* Initial load */
     fetchPlants();
 
-    // RESET BUTTON: clears filters & reloads all
-document.getElementById('resetBtn').addEventListener('click', () => {
-    // Clear input boxes
-    document.getElementById('plantIDInput').value = "";
-    document.getElementById('zoneInput').value = "";
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        document.getElementById('plantIDInput').value = "";
+        document.getElementById('zoneInput').value = "";
 
-    // Clear filter memory
-    lastFilterType = null;
-    lastFilterValue = null;
+        lastFilterType = null;
+        lastFilterValue = null;
 
-    // Clear URL params
-    const url = new URL(window.location);
-    url.searchParams.set('date', reportDateInput.value);
-    url.searchParams.delete('filter');
-    url.searchParams.delete('value');
-    history.replaceState({}, '', url.toString());
+        const url = new URL(window.location);
+        url.searchParams.set('date', reportDateInput.value);
+        url.searchParams.delete('filter');
+        url.searchParams.delete('value');
+        history.replaceState({}, '', url.toString());
 
-    // Load full list again
-    renderTable(reportDateInput.value);
-});
-
-
+        renderTable(reportDateInput.value);
+    });
 
 </script>
 </body>

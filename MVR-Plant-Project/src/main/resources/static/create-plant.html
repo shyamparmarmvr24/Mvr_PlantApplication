@@ -50,7 +50,7 @@
             zones:Number(document.getElementById("zones").value)
         };
         try{
-            const res = await fetch("http://localhost:8080/api/plants",{
+            const res = await fetch("/api/plants",{
                 method:"POST",
                 headers:{"Content-Type":"application/json"},
                 body:JSON.stringify(plant)

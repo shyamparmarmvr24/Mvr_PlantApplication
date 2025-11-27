@@ -47,6 +47,7 @@
 </div>
 
 <script>
+
     const params = new URLSearchParams(window.location.search);
     const plantID = params.get('plantID');
     const date = params.get('date');
@@ -78,7 +79,10 @@
     const updateBtn = document.getElementById('updateBtn');
 
     function applyProgressBar(progress) {
-        const cls = progress === 100 ? 'progress-green' : progress > 0 ? 'progress-yellow' : 'progress-red';
+        const cls = progress === 100 ? 'progress-green' :
+                     progress > 0 ? 'progress-yellow' :
+                     'progress-red';
+
         progressFill.className = `progress-fill ${cls}`;
         progressFill.style.width = progress + '%';
         progressText.innerText = progress + '% Completed';
@@ -99,7 +103,7 @@
 
     async function loadOperation() {
         try {
-            const res = await fetch(`http://localhost:8080/api/operations/plant/${plantID}?date=${date}`);
+            const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
             let op = {};
             if (res.ok) {
                 const text = await res.text();
@@ -121,7 +125,6 @@
             applyProgressBar(progress);
 
             updateBtn.addEventListener('click', () => {
-                // keep filter & date
                 let url = `update-operation.html?plantID=${encodeURIComponent(plantID)}&date=${encodeURIComponent(date)}`;
                 if (filter && value) url += `&filter=${encodeURIComponent(filter)}&value=${encodeURIComponent(value)}`;
                 window.location.href = url;
