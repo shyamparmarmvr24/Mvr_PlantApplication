@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Update Plant Operation</title>
+    <style>
+        body { font-family:'Segoe UI',sans-serif; background:#f5f7fa; margin:0; padding:0; display:flex; justify-content:center; }
+        .card { background:white; padding:28px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); max-width:900px; width:100%; margin:20px; }
+        h2 { text-align:center; color:#0369a1; margin-bottom:8px; }
+        .top-info { text-align:center; font-weight:700; margin-bottom:14px; }
+        table { width:100%; border-collapse:collapse; margin-top:8px; }
+        table th, table td { border:1px solid #e6eef6; padding:10px; }
+        table th { background:#0369a1; color:white; text-align:left; }
+        .input-box { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #ccc; }
+        .buttons { text-align:center; margin-top:18px; }
+        .btn { padding:10px 18px; margin:0 8px; border:none; border-radius:6px; font-size:15px; cursor:pointer; }
+        .btn-save { background:#059669; color:white; }
+        .btn-back { background:#94a3b8; color:white; }
+        input:disabled { background:#f3f4f6; cursor:not-allowed; }
+        @media (max-width:720px){ .card{ padding:16px; } table th, table td{ padding:8px; font-size:14px; } }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Update Operation</h2>
+    <div class="top-info" id="infoBox"></div>
+
+    <table id="inputTable" aria-live="polite">
+        <thead>
+        <tr><th>Field</th><th>Value</th></tr>
+        </thead>
+        <tbody id="fieldsBody"></tbody>
+    </table>
+
+    <div class="buttons">
+        <button class="btn btn-save" id="saveBtn">Save</button>
+        <button class="btn btn-back" id="backBtn">Back</button>
+    </div>
+</div>
+
+<script>
+    /*
+      - Preserves original fetch/save logic.
+      - Adds: dgUsed radio behavior (No -> disable dgRunHrs)
+      - After save redirects back keeping filter/date via URL params (filter & value)
+    */
+
+    const params = new URLSearchParams(window.location.search);
+    const plantID = params.get('plantID');
+    const date = params.get('date');
+
+    // filter preservation params (may be null)
+    const filter = params.get('filter');
+    const value = params.get('value');
+
+    function goBack() {
+        let url = `index.html?date=${encodeURIComponent(date)}`;
+        if (filter && value) url += `&filter=${encodeURIComponent(filter)}&value=${encodeURIComponent(value)}`;
+        window.location.href = url;
+    }
+
+    if (!plantID) goBack();
+
+    document.getElementById('backBtn').addEventListener('click', goBack);
+
+    document.getElementById('infoBox').innerHTML =
+        `Date: <span style="color:#f97316">${date}</span> &nbsp; | &nbsp; Plant ID: <span style="color:#059669">${plantID}</span>`;
+
+    const fields = [
+        "sludgeTankLevel","sludgeProcessed","sludgeReceived","biocharProduced","plantRunningHrs",
+        "solarReadingAm","solarReadingPm","powerReadingAm","powerReadingPm",
+        "noOfTrips","vehicleReadingAm","vehicleReadingPm","dgUsed","dgRunHrs"
+    ];
+
+    const fieldsBody = document.getElementById('fieldsBody');
+
+    async function loadOperation(){
+        try {
+            const res = await fetch(`http://localhost:8080/api/operations/plant/${plantID}?date=${date}`);
+            let text = await res.text();
+            let op = {};
+            if (text && text.trim().length > 0) {
+                try { op = JSON.parse(text); } catch(e) { op = {}; }
+            }
+
+            // render fields
+            fieldsBody.innerHTML = '';
+            fields.forEach(f => {
+                const tr = document.createElement('tr');
+                const labelTd = document.createElement('td');
+                labelTd.innerText = f.replace(/([A-Z])/g, ' $1');
+
+                const inputTd = document.createElement('td');
+
+                if (f === 'dgUsed') {
+                    inputTd.innerHTML = `
+                        <label><input type="radio" name="dgUsed" value="Yes" id="dg_yes"> Yes</label>
+                        &nbsp;&nbsp;
+                        <label><input type="radio" name="dgUsed" value="No" id="dg_no"> No</label>
+                    `;
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = f;
+                    input.className = 'input-box';
+                    if (op[f] !== null && op[f] !== undefined) input.value = op[f];
+                    inputTd.appendChild(input);
+                }
+
+                tr.appendChild(labelTd);
+                tr.appendChild(inputTd);
+                fieldsBody.appendChild(tr);
+            });
+
+            // set dgUsed radio checked based on op
+            const yes = document.getElementById('dg_yes');
+            const no  = document.getElementById('dg_no');
+            if (yes && no) {
+                if (op['dgUsed'] === true) yes.checked = true;
+                if (op['dgUsed'] === false) no.checked = true;
+
+                // attach listeners to enable/disable dgRunHrs
+                yes.addEventListener('change', applyDGLogic);
+                no.addEventListener('change', applyDGLogic);
+            }
+
+            // initial apply
+            applyDGLogic();
+
+        } catch (e) {
+            fieldsBody.innerHTML = `<tr><td colspan="2">Error: ${e.message}</td></tr>`;
+        }
+    }
+
+    function applyDGLogic() {
+        const no = document.querySelector('input[name="dgUsed"][value="No"]');
+        const yes = document.querySelector('input[name="dgUsed"][value="Yes"]');
+        const dgHours = document.getElementById('dgRunHrs');
+
+        if (!dgHours) return;
+
+        if (no && no.checked) {
+            dgHours.value = '';
+            dgHours.disabled = true;
+        } else {
+            dgHours.disabled = false;
+        }
+    }
+
+    // When saving: keep behavior — set dgRunHrs=null if dgUsed === false
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+        const data = {};
+        fields.forEach(f => {
+            if (f === 'dgUsed') {
+                const checked = document.querySelector('input[name="dgUsed"]:checked');
+                data[f] = checked ? (checked.value === 'Yes') : null;
+            } else {
+                const input = document.getElementById(f);
+                data[f] = input ? (input.value === '' ? null : input.value) : null;
+            }
+        });
+
+        if (data['dgUsed'] === false) {
+            data['dgRunHrs'] = null;
+        }
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/operations/${plantID}?date=${encodeURIComponent(date)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if(!res.ok) {
+                const txt = await res.text();
+                throw new Error(txt || 'Save failed');
+            }
+            alert('Operation updated successfully!');
+            goBack();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    });
+
+    loadOperation();
+</script>
+</body>
+</html>

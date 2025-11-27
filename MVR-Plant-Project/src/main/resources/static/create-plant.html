@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Plant</title>
+    <style>
+        body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f4f6f8;margin:0;padding:0;}
+        header{background:#2ecc71;color:white;padding:20px;text-align:center;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+        header h1{margin:0;font-size:28px;}
+        .container{max-width:600px;margin:40px auto;background:white;padding:30px;border-radius:10px;box-shadow:0 5px 20px rgba(0,0,0,0.1);}
+        label{display:block;font-weight:600;margin-top:15px;color:#34495e;}
+        input{width:100%;padding:12px;margin-top:5px;border:1px solid #ccc;border-radius:6px;font-size:16px;}
+        button{padding:12px 20px;border:none;border-radius:8px;font-size:16px;color:white;margin-top:20px;cursor:pointer;}
+        .addBtn{background:#2ecc71;}
+        .addBtn:hover{background:#27ae60;}
+        .back-btn{background:#95a5a6;margin-left:10px;}
+        .back-btn:hover{background:#7f8c8d;}
+        .success{margin-top:15px;color:#2ecc71;font-weight:600;}
+    </style>
+</head>
+<body>
+
+<header><h1>Add New Plant</h1></header>
+<div class="container">
+    <label>Plant ID</label><input type="number" id="plantID">
+    <label>Plant Name</label><input type="text" id="plantName">
+    <label>State Code</label><input type="text" id="stateCode">
+    <label>District</label><input type="text" id="district">
+    <label>KLD</label><input type="number" id="kld">
+    <label>Ward No</label><input type="number" id="wardNo">
+    <label>Pin Code</label><input type="number" id="pinCode">
+    <label>Zone</label><input type="number" id="zones">
+
+    <button class="addBtn" onclick="createPlant()">Add Plant</button>
+    <button class="back-btn" onclick="location.href='index.html'">Back to Home</button>
+    <p class="success" id="msg"></p>
+</div>
+
+<script>
+    async function createPlant(){
+        const plant = {
+            plantID:Number(document.getElementById("plantID").value),
+            plantName:document.getElementById("plantName").value,
+            stateCode:document.getElementById("stateCode").value,
+            district:document.getElementById("district").value,
+            kld:Number(document.getElementById("kld").value),
+            wardNo:Number(document.getElementById("wardNo").value),
+            pinCode:Number(document.getElementById("pinCode").value),
+            zones:Number(document.getElementById("zones").value)
+        };
+        try{
+            const res = await fetch("http://localhost:8080/api/plants",{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(plant)
+            });
+            if(res.ok){
+                document.getElementById("msg").innerText="Plant added successfully!";
+                document.querySelectorAll('input').forEach(i=>i.value="");
+            }else{
+                const text = await res.text();
+                document.getElementById("msg").innerText="Error: "+text;
+            }
+        }catch(err){
+            document.getElementById("msg").innerText="Error: "+err;
+        }
+    }
+</script>
+</body>
+</html>

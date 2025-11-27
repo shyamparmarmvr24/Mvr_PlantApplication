@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MVR TECHNOLOGY - Plant Management Dashboard</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin:0; padding:0;
+            background:#f5f7fa;
+            color:#222;
+        }
+
+        /* Header */
+        header {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            background: linear-gradient(90deg,#0f172a,#0ea5e9);
+            padding:14px 20px;
+            color:#fff;
+            gap:12px;
+        }
+        .logo-left {
+            display:flex;
+            align-items:center;
+            gap:12px;
+            cursor:pointer;
+        }
+        .logo-left img { height:48px; width:auto; display:block; }
+        .logo-left .brand { font-size:20px; font-weight:700; letter-spacing:0.6px; }
+
+        /* Date picker */
+        .date-picker { display:flex; align-items:center; gap:8px; }
+        .date-picker label { font-weight:600; color:#fff; }
+        .date-picker input[type="date"]{
+            padding:6px 10px;
+            border-radius:6px;
+            border:1px solid #ddd;
+            background:#fff; /* makes it clickable on all browsers */
+            color:#000;
+            font-size:15px;
+            cursor:pointer;
+        }
+
+        /* Dashboard title section */
+        .dashboard-title {
+            text-align:center;
+            margin:18px auto 6px;
+            max-width:1100px;
+            font-size:26px;
+            color:#0f172a;
+            font-weight:700;
+        }
+
+        .container {
+            max-width:1100px;
+            margin:8px auto 40px;
+            padding:0 16px;
+        }
+
+        .search-section {
+            display:flex;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-bottom:18px;
+            align-items:center;
+        }
+        .search-box { flex:1; min-width:180px; display:flex; }
+        .search-box input {
+            flex:1;
+            padding:10px;
+            border:1px solid #ccc;
+            border-radius:6px 0 0 6px;
+            font-size:15px;
+        }
+        .search-box button {
+            padding:10px 16px;
+            border:none;
+            background:#0369a1;
+            color:white;
+            font-size:15px;
+            border-radius:0 6px 6px 0;
+            cursor:pointer;
+        }
+        .addBtn {
+            padding:10px 16px;
+            background:#059669;
+            color:white;
+            border:none;
+            border-radius:6px;
+            font-size:15px;
+            cursor:pointer;
+        }
+
+        table {
+            width:100%;
+            border-collapse:collapse;
+            background:white;
+            border-radius:8px;
+            overflow:hidden;
+            box-shadow:0 4px 12px rgba(2,6,23,0.06);
+        }
+        th, td { padding:12px 10px; text-align:center; border-bottom:1px solid #f1f5f9; }
+        th { background:#0369a1; color:white; font-weight:600; text-transform:uppercase; font-size:13px; }
+        tr:nth-child(even){ background:#fbfdff; }
+        tr:hover { background:#f0f9ff; }
+
+        .progress-bar { width:120px; height:12px; background:#e6eef8; border-radius:8px; overflow:hidden; margin:auto;}
+        .progress-fill { height:100%; width:0; transition:width .25s ease-in-out; }
+        .progress-red{ background:#ef4444; }
+        .progress-yellow{ background:#f59e0b; }
+        .progress-green{ background:#10b981; }
+
+        .btn-update { padding:6px 10px; border-radius:6px; border:none; cursor:pointer; font-weight:600; }
+        .btn-update.update { background:#ef4444; color:white; }
+        .btn-update.pending { background:#f59e0b; color:#111; }
+        .btn-update.view { background:#10b981; color:white; }
+
+        .no-data { text-align:center; padding:18px; color:#6b7280; }
+
+        /* Responsive */
+        @media (max-width:900px){
+            header { flex-direction:column; align-items:flex-start; gap:10px; padding:12px; }
+            .dashboard-title { font-size:20px; }
+            th, td{ padding:10px 8px; font-size:14px; }
+            .date-picker label{ display:none; } /* save space */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-left" onclick="redirectHome()">
+        <img src="https://mvrtech.org/MVR_Company_Logo%20copy.png" alt="MVR Logo" />
+        <div class="brand">MVR TECHNOLOGY</div>
+    </div>
+
+    <div class="date-picker">
+        <label for="reportDate">Date:</label>
+        <input type="date" id="reportDate" />
+    </div>
+</header>
+
+<div class="dashboard-title">Plant Management Dashboard</div>
+
+<div class="container">
+    <div class="search-section">
+        <div class="search-box">
+            <input type="number" id="plantIDInput" placeholder="Search by Plant ID" min="1" />
+            <button id="searchIdBtn">Search</button>
+        </div>
+        <div class="search-box">
+            <input type="number" id="zoneInput" placeholder="Search by Zone" min="1" />
+            <button id="searchZoneBtn">Search</button>
+        </div>
+
+        <button class="addBtn" id="resetBtn" style="background:#6b7280;">Reset</button>
+        <button class="addBtn" onclick="location.href='create-plant.html'">Add New Plant</button>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Serial</th>
+            <th>Plant ID</th>
+            <th>Name</th>
+            <th>KLD</th>
+            <th>Progress</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="plantTableBody">
+        <tr><td colspan="7" class="no-data">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    /*
+      Notes:
+      - This file preserves your logic and endpoint URLs.
+      - Improvements:
+          * Caches operation responses per plant+date
+          * Renders rows progressively (so page becomes responsive quickly)
+          * Preserves filter (filter=id/value or filter=zone/value) across view/update/back
+    */
+
+    const plantTableBody = document.getElementById('plantTableBody');
+    const reportDateInput = document.getElementById('reportDate');
+    const searchIdBtn = document.getElementById('searchIdBtn');
+    const searchZoneBtn = document.getElementById('searchZoneBtn');
+
+    let allPlants = [];
+    const cachedOps = {}; // key = plantId_date -> op object or special {progress,status}
+    let visiblePlants = []; // currently displayed list
+    let lastFilterType = null;
+    let lastFilterValue = null;
+
+    const fields = [
+        "sludgeTankLevel","sludgeProcessed","sludgeReceived","biocharProduced","plantRunningHrs",
+        "solarReadingAm","solarReadingPm","powerReadingAm","powerReadingPm",
+        "noOfTrips","vehicleReadingAm","vehicleReadingPm","dgUsed","dgRunHrs"
+    ];
+
+    const today = new Date().toISOString().split('T')[0];
+    reportDateInput.value = today;
+    reportDateInput.max = today;
+
+    /* Load URL params for filter or date */
+    function applyInitialUrlParams() {
+        const url = new URLSearchParams(window.location.search);
+        const urlDate = url.get("date");
+        const filter = url.get("filter");
+        const value = url.get("value");
+
+        if (urlDate) reportDateInput.value = urlDate;
+        if (filter && value) {
+            lastFilterType = filter;
+            lastFilterValue = value;
+            if (filter === 'id') {
+                document.getElementById('plantIDInput').value = value;
+            } else if (filter === 'zone') {
+                document.getElementById('zoneInput').value = value;
+            }
+        }
+    }
+
+    /* Redirect home helper preserves current filter & date */
+    function redirectHome() {
+        let url = `index.html?date=${encodeURIComponent(reportDateInput.value)}`;
+        if (lastFilterType && lastFilterValue) {
+            url += `&filter=${encodeURIComponent(lastFilterType)}&value=${encodeURIComponent(lastFilterValue)}`;
+        }
+        window.location.href = url;
+    }
+
+    /* Fetch plants once */
+    async function fetchPlants() {
+        plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">Loading plants...</td></tr>`;
+        try {
+            const res = await fetch('http://localhost:8080/api/plants');
+            if (!res.ok) throw new Error('Failed to fetch plants');
+            allPlants = await res.json();
+            applyInitialUrlParams();
+
+            // If initial filter present, apply it; else show all
+            if (lastFilterType === 'id' && lastFilterValue) {
+                const filtered = allPlants.filter(p => String(p.plantID) === String(lastFilterValue));
+                renderFiltered(filtered, reportDateInput.value, true);
+            } else if (lastFilterType === 'zone' && lastFilterValue) {
+                const filtered = allPlants.filter(p => String(p.zones) === String(lastFilterValue));
+                renderFiltered(filtered, reportDateInput.value, true);
+            } else {
+                renderTable(reportDateInput.value);
+            }
+        } catch (e) {
+            plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">Error loading plants</td></tr>`;
+            console.error(e);
+        }
+    }
+
+    /* OP Data fetch with caching. Also treat dgUsed === false as dgRunHrs filled for progress */
+    async function fetchOp(plantID, date) {
+        const key = `${plantID}_${date}`;
+        if (cachedOps[key]) return cachedOps[key];
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/operations/plant/${plantID}?date=${date}`);
+            const text = await res.text();
+            if (!text || !text.trim()) {
+                cachedOps[key] = { progress: 0, status: 'update', op: null };
+                return cachedOps[key];
+            }
+            const op = JSON.parse(text);
+
+            // Count filled fields. If dgUsed === false, count dgRunHrs as filled
+            let filled = 0;
+            fields.forEach(f => {
+                if (f === 'dgRunHrs') {
+                    if (op['dgUsed'] === false) filled++;
+                    else if (op[f] !== null && op[f] !== undefined && op[f] !== '') filled++;
+                } else {
+                    if (op[f] !== null && op[f] !== undefined && op[f] !== '') filled++;
+                }
+            });
+
+            const progress = Math.round((filled / fields.length) * 100);
+            const status = progress === 100 ? 'view' : progress > 0 ? 'pending' : 'update';
+
+            cachedOps[key] = { progress, status, op };
+            return cachedOps[key];
+        } catch (e) {
+            console.error('fetchOp error', e);
+            cachedOps[key] = { progress: 0, status: 'update', op: null };
+            return cachedOps[key];
+        }
+    }
+
+    /* Render row (string) */
+    function makeRowHtml(p, opData) {
+        const clr = opData.progress === 100 ? 'progress-green' : opData.progress > 0 ? 'progress-yellow' : 'progress-red';
+        const statusLabel = opData.status.charAt(0).toUpperCase() + opData.status.slice(1);
+        const dateVal = reportDateInput.value;
+
+        // Build action link including filters so back returns correctly
+        const filterPart = lastFilterType && lastFilterValue ? `&filter=${encodeURIComponent(lastFilterType)}&value=${encodeURIComponent(lastFilterValue)}` : '';
+        const actionUrl = opData.status === 'view'
+            ? `view-operation.html?plantID=${p.plantID}&date=${dateVal}${filterPart}`
+            : `update-operation.html?plantID=${p.plantID}&date=${dateVal}${filterPart}`;
+
+        return `<tr data-plant="${p.plantID}">
+            <td>${p.serialNo}</td>
+            <td>${p.plantID}</td>
+            <td>${p.plantName}</td>
+            <td>${p.kld}</td>
+            <td>
+                <div class="progress-bar">
+                    <div class="progress-fill ${clr}" style="width:${opData.progress}%"></div>
+                </div>
+                <small>${opData.progress}%</small>
+            </td>
+            <td>${statusLabel}</td>
+            <td>
+                <button class="btn-update ${opData.status}" onclick="window.location.href='${actionUrl}'">${statusLabel}</button>
+            </td>
+        </tr>`;
+    }
+
+    /* Progressive render: fill table rows as opData is resolved */
+    async function renderTable(date) {
+        if (!allPlants.length) {
+            plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">No plants found</td></tr>`;
+            return;
+        }
+
+        // Reset visiblePlants
+        visiblePlants = allPlants.slice();
+        // show serial numbers
+        visiblePlants.forEach((p, i) => p.serialNo = i + 1);
+
+        // Initial table with placeholders (faster paint)
+        const placeholders = visiblePlants.map(p => `
+            <tr data-plant="${p.plantID}">
+                <td>${p.serialNo}</td>
+                <td>${p.plantID}</td>
+                <td>${p.plantName}</td>
+                <td>${p.kld}</td>
+                <td><div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div><small>0%</small></td>
+                <td>Loading</td>
+                <td><button class="btn-update pending">...</button></td>
+            </tr>`).join('');
+        plantTableBody.innerHTML = placeholders;
+
+        // Fetch ops in parallel but update DOM as each resolves
+        visiblePlants.forEach(async (p, idx) => {
+            const opData = await fetchOp(p.plantID, date);
+            // find row and replace innerHTML
+            const row = plantTableBody.querySelector(`tr[data-plant="${p.plantID}"]`);
+            if (row) {
+                row.outerHTML = makeRowHtml(p, opData);
+            }
+        });
+    }
+
+    /* Render a filtered list (used for search results) */
+    async function renderFiltered(filtered, date, initial=false) {
+        if (!filtered.length) {
+            plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">No plants found</td></tr>`;
+            return;
+        }
+
+        // set visiblePlants to filtered and assign serials
+        visiblePlants = filtered.map((p,i) => { p.serialNo = i+1; return p; });
+
+        // placeholders
+        const placeholders = visiblePlants.map(p => `
+            <tr data-plant="${p.plantID}">
+                <td>${p.serialNo}</td>
+                <td>${p.plantID}</td>
+                <td>${p.plantName}</td>
+                <td>${p.kld}</td>
+                <td><div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div><small>0%</small></td>
+                <td>Loading</td>
+                <td><button class="btn-update pending">...</button></td>
+            </tr>`).join('');
+        plantTableBody.innerHTML = placeholders;
+
+        // fetch & update each row
+        visiblePlants.forEach(async (p) => {
+            const opData = await fetchOp(p.plantID, date);
+            const row = plantTableBody.querySelector(`tr[data-plant="${p.plantID}"]`);
+            if (row) row.outerHTML = makeRowHtml(p, opData);
+        });
+
+        // If this call came from initial URL params, don't update the URL now.
+        if (!initial) {
+            // Update URL to reflect filter
+            const url = new URL(window.location);
+            url.searchParams.set('date', date);
+            if (lastFilterType && lastFilterValue) {
+                url.searchParams.set('filter', lastFilterType);
+                url.searchParams.set('value', lastFilterValue);
+            } else {
+                url.searchParams.delete('filter'); url.searchParams.delete('value');
+            }
+            history.replaceState({}, '', url.toString());
+        }
+    }
+
+    /* Event handlers for search */
+    function searchByID() {
+        const id = document.getElementById('plantIDInput').value.trim();
+        lastFilterType = id ? 'id' : null;
+        lastFilterValue = id || null;
+        const date = reportDateInput.value;
+        const filtered = id ? allPlants.filter(p => String(p.plantID) === String(id)) : allPlants;
+        renderFiltered(filtered, date);
+    }
+
+    function searchByZone() {
+        const zone = document.getElementById('zoneInput').value.trim();
+        lastFilterType = zone ? 'zone' : null;
+        lastFilterValue = zone || null;
+        const date = reportDateInput.value;
+        const filtered = zone ? allPlants.filter(p => String(p.zones) === String(zone)) : allPlants;
+        renderFiltered(filtered, date);
+    }
+
+    /* When selecting a new date, keep current filter and update listing */
+    reportDateInput.addEventListener('change', () => {
+        const d = reportDateInput.value;
+        const url = new URL(window.location);
+        url.searchParams.set('date', d);
+        if (lastFilterType && lastFilterValue) {
+            url.searchParams.set('filter', lastFilterType);
+            url.searchParams.set('value', lastFilterValue);
+        } else {
+            url.searchParams.delete('filter'); url.searchParams.delete('value');
+        }
+        history.replaceState({}, '', url.toString());
+        // Clear cache for new date to avoid stale op data
+        // Only clear cachedOps entries for different date
+        Object.keys(cachedOps).forEach(k => {
+            if (!k.endsWith(`_${d}`)) delete cachedOps[k];
+        });
+        // re-render based on current filter
+        if (lastFilterType === 'id' && lastFilterValue) {
+            const filtered = allPlants.filter(p => String(p.plantID) === String(lastFilterValue));
+            renderFiltered(filtered, d);
+        } else if (lastFilterType === 'zone' && lastFilterValue) {
+            const filtered = allPlants.filter(p => String(p.zones) === String(lastFilterValue));
+            renderFiltered(filtered, d);
+        } else {
+            renderTable(d);
+        }
+    });
+
+    /* attach click handlers */
+    searchIdBtn.addEventListener('click', searchByID);
+    searchZoneBtn.addEventListener('click', searchByZone);
+
+    /* Initial load */
+    fetchPlants();
+
+    // RESET BUTTON: clears filters & reloads all
+document.getElementById('resetBtn').addEventListener('click', () => {
+    // Clear input boxes
+    document.getElementById('plantIDInput').value = "";
+    document.getElementById('zoneInput').value = "";
+
+    // Clear filter memory
+    lastFilterType = null;
+    lastFilterValue = null;
+
+    // Clear URL params
+    const url = new URL(window.location);
+    url.searchParams.set('date', reportDateInput.value);
+    url.searchParams.delete('filter');
+    url.searchParams.delete('value');
+    history.replaceState({}, '', url.toString());
+
+    // Load full list again
+    renderTable(reportDateInput.value);
+});
+
+
+
+</script>
+</body>
+</html>
