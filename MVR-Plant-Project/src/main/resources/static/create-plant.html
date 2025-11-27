@@ -4,68 +4,253 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Plant</title>
+
     <style>
-        body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f4f6f8;margin:0;padding:0;}
-        header{background:#2ecc71;color:white;padding:20px;text-align:center;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-        header h1{margin:0;font-size:28px;}
-        .container{max-width:600px;margin:40px auto;background:white;padding:30px;border-radius:10px;box-shadow:0 5px 20px rgba(0,0,0,0.1);}
-        label{display:block;font-weight:600;margin-top:15px;color:#34495e;}
-        input{width:100%;padding:12px;margin-top:5px;border:1px solid #ccc;border-radius:6px;font-size:16px;}
-        button{padding:12px 20px;border:none;border-radius:8px;font-size:16px;color:white;margin-top:20px;cursor:pointer;}
-        .addBtn{background:#2ecc71;}
-        .addBtn:hover{background:#27ae60;}
-        .back-btn{background:#95a5a6;margin-left:10px;}
-        .back-btn:hover{background:#7f8c8d;}
-        .success{margin-top:15px;color:#2ecc71;font-weight:600;}
+        body{
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:#e8fdf3;
+            margin:0;
+            padding:0;
+        }
+
+        header{
+            background:#27ae60;
+            color:white;
+            padding:22px;
+            text-align:center;
+            font-size:28px;
+            font-weight:700;
+            letter-spacing:1px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .container{
+            max-width:900px;
+            margin:40px auto;
+            background:white;
+            padding:20px 30px 35px;
+            border-radius:12px;
+            box-shadow:0 6px 25px rgba(0,0,0,0.15);
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            background:#f3fff9;
+            border-radius:12px;
+            overflow:hidden;
+        }
+
+        th{
+            background:#27ae60;
+            padding:15px;
+            color:white;
+            text-transform:uppercase;
+            font-size:17px;
+            letter-spacing:1px;
+            text-align:center;
+        }
+
+        td{
+            padding:14px 15px;
+            border-bottom:1px solid #caeede;
+            font-size:16px;
+            font-weight:500;
+            color:#2d4b3f;
+        }
+
+        tr:last-child td{
+            border-bottom:none;
+        }
+
+        input[type="text"],
+        input[type="number"]{
+            width:95%;
+            padding:10px;
+            border:1px solid #bbb;
+            border-radius:6px;
+            font-size:15px;
+            background:white;
+        }
+
+        /* Yes/No toggle style */
+        .yesno{
+            display:flex;
+            gap:20px;
+            align-items:center;
+        }
+        .yesno label{
+            font-weight:600;
+            color:#2d4b3f;
+        }
+
+        button{
+            padding:12px 25px;
+            border:none;
+            border-radius:8px;
+            font-size:17px;
+            color:white;
+            cursor:pointer;
+            margin-top:20px;
+        }
+
+        .addBtn{
+            background:#27ae60;
+        }
+        .addBtn:hover{
+            background:#1e8f4e;
+        }
+
+        .back-btn{
+            background:#95a5a6;
+            margin-left:10px;
+        }
+        .back-btn:hover{
+            background:#7f8c8d;
+        }
+
+        .success{
+            margin-top:15px;
+            color:#27ae60;
+            font-weight:700;
+            font-size:17px;
+        }
     </style>
 </head>
 <body>
 
-<header><h1>Add New Plant</h1></header>
+<header>Add New Plant</header>
+
 <div class="container">
-    <label>Plant ID</label><input type="number" id="plantID">
-    <label>Plant Name</label><input type="text" id="plantName">
-    <label>State Code</label><input type="text" id="stateCode">
-    <label>District</label><input type="text" id="district">
-    <label>KLD</label><input type="number" id="kld">
-    <label>Ward No</label><input type="number" id="wardNo">
-    <label>Pin Code</label><input type="number" id="pinCode">
-    <label>Zone</label><input type="number" id="zones">
+
+    <!-- ONE MERGED TABLE -->
+    <table>
+        <tr><th colspan="2">Plant Information</th></tr>
+
+        <tr>
+            <td>Plant ID</td>
+            <td><input type="number" id="plantID"></td>
+        </tr>
+
+        <tr>
+            <td>Plant Name</td>
+            <td><input type="text" id="plantName"></td>
+        </tr>
+
+        <tr>
+            <td>State Code</td>
+            <td><input type="text" id="stateCode"></td>
+        </tr>
+
+        <tr>
+            <td>District</td>
+            <td><input type="text" id="district"></td>
+        </tr>
+
+        <tr>
+            <td>KLD</td>
+            <td><input type="number" id="kld"></td>
+        </tr>
+
+        <tr>
+            <td>Ward No</td>
+            <td><input type="number" id="wardNo"></td>
+        </tr>
+
+        <tr>
+            <td>Pin Code</td>
+            <td><input type="number" id="pinCode"></td>
+        </tr>
+
+        <tr>
+            <td>Zones</td>
+            <td><input type="number" id="zones"></td>
+        </tr>
+
+        <!-- YES/NO merged inside table -->
+        <tr>
+            <td>MNIT</td>
+            <td class="yesno">
+                <label><input type="radio" name="mnit" value="1"> Yes</label>
+                <label><input type="radio" name="mnit" value="0" checked> No</label>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Permanent Power</td>
+            <td class="yesno">
+                <label><input type="radio" name="permanentPower" value="1"> Yes</label>
+                <label><input type="radio" name="permanentPower" value="0" checked> No</label>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Solar</td>
+            <td class="yesno">
+                <label><input type="radio" name="solar" value="1"> Yes</label>
+                <label><input type="radio" name="solar" value="0" checked> No</label>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Internet</td>
+            <td class="yesno">
+                <label><input type="radio" name="internet" value="1"> Yes</label>
+                <label><input type="radio" name="internet" value="0" checked> No</label>
+            </td>
+        </tr>
+
+    </table>
 
     <button class="addBtn" onclick="createPlant()">Add Plant</button>
     <button class="back-btn" onclick="location.href='index.html'">Back to Home</button>
+
     <p class="success" id="msg"></p>
 </div>
 
 <script>
     async function createPlant(){
+
+        function getRadio(name){
+            let r = document.querySelector(`input[name="${name}"]:checked`);
+            return r ? Number(r.value) : 0;
+        }
+
         const plant = {
-            plantID:Number(document.getElementById("plantID").value),
-            plantName:document.getElementById("plantName").value,
-            stateCode:document.getElementById("stateCode").value,
-            district:document.getElementById("district").value,
-            kld:Number(document.getElementById("kld").value),
-            wardNo:Number(document.getElementById("wardNo").value),
-            pinCode:Number(document.getElementById("pinCode").value),
-            zones:Number(document.getElementById("zones").value)
+            plantID: Number(document.getElementById("plantID").value),
+            plantName: document.getElementById("plantName").value,
+            stateCode: document.getElementById("stateCode").value,
+            district: document.getElementById("district").value,
+            kld: Number(document.getElementById("kld").value),
+            wardNo: Number(document.getElementById("wardNo").value),
+            pinCode: Number(document.getElementById("pinCode").value),
+            zones: Number(document.getElementById("zones").value),
+
+            mnit: getRadio("mnit"),
+            permanentPower: getRadio("permanentPower"),
+            solar: getRadio("solar"),
+            internet: getRadio("internet")
         };
+
         try{
-            const res = await fetch("/api/plants",{
+            const res = await fetch("/api/plants", {
                 method:"POST",
                 headers:{"Content-Type":"application/json"},
                 body:JSON.stringify(plant)
             });
+
             if(res.ok){
-                document.getElementById("msg").innerText="Plant added successfully!";
-                document.querySelectorAll('input').forEach(i=>i.value="");
-            }else{
-                const text = await res.text();
-                document.getElementById("msg").innerText="Error: "+text;
+                document.getElementById("msg").innerText = "Plant added successfully!";
+                document.querySelectorAll("input").forEach(i => i.value = "");
+            } else {
+                document.getElementById("msg").innerText = "Error saving plant";
             }
-        }catch(err){
-            document.getElementById("msg").innerText="Error: "+err;
+        }
+        catch(err){
+            document.getElementById("msg").innerText = "Error: " + err;
         }
     }
 </script>
+
 </body>
 </html>

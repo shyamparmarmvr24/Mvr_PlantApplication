@@ -52,6 +52,18 @@ public class FstpPlant
     @Column(name = "Zones")
     private Integer zones;
 
+    @Column(name = "MNIT", columnDefinition = "BIT DEFAULT 0")
+    private Boolean mnit = false;
+
+    @Column(name = "PermanentPower", columnDefinition = "BIT DEFAULT 0")
+    private Boolean permanentPower = false;
+
+    @Column(name = "Solar", columnDefinition = "BIT DEFAULT 0")
+    private Boolean solar = false;
+
+    @Column(name = "Internet", columnDefinition = "BIT DEFAULT 0")
+    private Boolean internet = false;
+
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<PlantOperation> operations = new ArrayList<>();
