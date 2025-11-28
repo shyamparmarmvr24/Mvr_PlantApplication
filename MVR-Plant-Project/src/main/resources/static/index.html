@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
+
     <title>MVR TECHNOLOGY - Plant Management Dashboard</title>
     <style>
         * { box-sizing: border-box; }
@@ -14,13 +16,11 @@
         }
 
         header {
-               position: sticky;
-               top: 0;
-               z-index: 999;
-               }
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
 
-
-        /* Header */
         header {
             display:flex;
             justify-content:space-between;
@@ -30,16 +30,17 @@
             color:#fff;
             gap:12px;
         }
+
         .logo-left {
             display:flex;
             align-items:center;
             gap:12px;
             cursor:pointer;
         }
+
         .logo-left img { height:48px; width:auto; display:block; }
         .logo-left .brand { font-size:20px; font-weight:700; letter-spacing:0.6px; }
 
-        /* Date picker */
         .date-picker { display:flex; align-items:center; gap:8px; }
         .date-picker label { font-weight:600; color:#fff; }
         .date-picker input[type="date"]{
@@ -74,7 +75,9 @@
             margin-bottom:18px;
             align-items:center;
         }
+
         .search-box { flex:1; min-width:180px; display:flex; }
+
         .search-box input {
             flex:1;
             padding:10px;
@@ -82,6 +85,7 @@
             border-radius:6px 0 0 6px;
             font-size:15px;
         }
+
         .search-box button {
             padding:10px 16px;
             border:none;
@@ -91,6 +95,7 @@
             border-radius:0 6px 6px 0;
             cursor:pointer;
         }
+
         .addBtn {
             padding:10px 16px;
             background:#059669;
@@ -101,6 +106,7 @@
             cursor:pointer;
         }
 
+        /* ⭐ TABLE FIXED SPACING */
         table {
             width:100%;
             border-collapse:collapse;
@@ -108,30 +114,80 @@
             border-radius:8px;
             overflow:hidden;
             box-shadow:0 4px 12px rgba(2,6,23,0.06);
+            table-layout: fixed;
         }
-        th, td { padding:12px 10px; text-align:center; border-bottom:1px solid #f1f5f9; }
-        th { background:#0369a1; color:white; font-weight:600; text-transform:uppercase; font-size:13px; }
+
+        thead {
+            display:table;
+            width:100%;
+            table-layout:fixed;
+        }
+
+        tbody {
+            display:block;
+            max-height: calc(100vh - 260px);
+            overflow-y:auto;
+            width:100%;
+        }
+
+        tbody tr {
+            display:table;
+            width:100%;
+            table-layout:fixed;
+        }
+
+        th, td {
+            padding:14px 12px;   /* ⭐ More spacing */
+            text-align:center;
+            border-bottom:1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+
+        /* ⭐ Column width balancing */
+        th:nth-child(1), td:nth-child(1) { width: 8%; }
+        th:nth-child(2), td:nth-child(2) { width: 12%; }
+        th:nth-child(3), td:nth-child(3) { width: 22%; }
+        th:nth-child(4), td:nth-child(4) { width: 12%; }
+        th:nth-child(5), td:nth-child(5) { width: 10%; }
+        th:nth-child(6), td:nth-child(6) { width: 22%; }
+        th:nth-child(7), td:nth-child(7) { width: 14%; }
+
+        th {
+            background:#0369a1;
+            color:white;
+            font-weight:600;
+            text-transform:uppercase;
+            font-size:13px;
+        }
+
         tr:nth-child(even){ background:#fbfdff; }
         tr:hover { background:#f0f9ff; }
 
-        .progress-bar { width:120px; height:12px; background:#e6eef8; border-radius:8px; overflow:hidden; margin:auto;}
+        /* ⭐ Increased progress bar width */
+        .progress-bar {
+            width:170px;    /* little bigger */
+            height:14px;
+            background:#e6eef8;
+            border-radius:8px;
+            overflow:hidden;
+            margin:auto;
+        }
+
         .progress-fill { height:100%; width:0; transition:width .25s ease-in-out; }
         .progress-red{ background:#ef4444; }
         .progress-yellow{ background:#f59e0b; }
         .progress-green{ background:#10b981; }
 
         .btn-update {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    min-width: 90px;
-    text-align: center;
-}
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            min-width: 100px; /* ⭐ Gives breathing room */
+            text-align: center;
+        }
 
-
-        .btn-update { padding:6px 10px; border-radius:6px; border:none; cursor:pointer; font-weight:600; }
         .btn-update.update { background:#ef4444; color:white; }
         .btn-update.pending { background:#f59e0b; color:#111; }
         .btn-update.view { background:#10b981; color:white; }
@@ -144,6 +200,105 @@
             th, td{ padding:10px 8px; font-size:14px; }
             .date-picker label{ display:none; }
         }
+
+ /* 📱 Mobile Fix: Only data should scroll */
+@media (max-width: 600px) {
+
+    /* Remove full table scrolling */
+    table {
+        width: 100%;
+        display: table;
+        table-layout: fixed;
+    }
+
+    thead {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    /* 👉 Only tbody scrolls horizontally */
+    tbody {
+        display: block;
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: calc(100vh - 260px);
+        white-space: nowrap;
+    }
+
+    /* keep rows fixed width so scrolling works */
+    tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    th, td {
+        padding: 8px 6px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    /* search section should never scroll sideways */
+    body, html {
+        overflow-x: hidden !important;
+    }
+
+    /* Progress + buttons stacking fix */
+    td:nth-child(6), td:nth-child(7) {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .progress-bar {
+        width: 90px;
+        height: 10px;
+    }
+
+    .btn-update {
+        min-width: 80px;
+        padding: 6px 6px;
+        font-size: 12px;
+    }
+}
+
+        /* 📱 Fix search section buttons overlap */
+@media (max-width: 600px) {
+
+    /* Stack search items vertically */
+    .search-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .search-box {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .search-box input {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .search-box button {
+        font-size: 14px;
+        padding: 8px 12px;
+        white-space: nowrap;
+    }
+
+    /* Reset button full width on mobile */
+    #resetBtn {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -168,27 +323,29 @@
             <input type="number" id="plantIDInput" placeholder="Search by Plant ID" min="1" />
             <button id="searchIdBtn">Search</button>
         </div>
+
         <div class="search-box">
             <input type="number" id="zoneInput" placeholder="Search by Zone" min="1" />
             <button id="searchZoneBtn">Search</button>
         </div>
 
         <button class="addBtn" id="resetBtn" style="background:#6b7280;">Reset</button>
-        <button class="addBtn" onclick="location.href='create-plant.html'">Add New Plant</button>
+<!--        <button class="addBtn" onclick="location.href='create-plant.html'">Add New Plant</button>-->
     </div>
 
     <table>
         <thead>
         <tr>
-            <th>Serial</th>
+            <th>S.No</th>
             <th>Plant ID</th>
             <th>Name</th>
             <th>KLD</th>
+            <th>Zone</th>
             <th>Progress</th>
-            <th>Status</th>
             <th>Action</th>
         </tr>
         </thead>
+
         <tbody id="plantTableBody">
         <tr><td colspan="7" class="no-data">Loading...</td></tr>
         </tbody>
@@ -245,7 +402,7 @@
     }
 
     async function fetchPlants() {
-        plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">Loading plants...</td></tr>`;
+        plantTableBody.innerHTML = `<tr><td colspan="6" class="no-data">Loading plants...</td></tr>`;
         try {
             const res = await fetch('/api/plants');
             if (!res.ok) throw new Error('Failed to fetch plants');
@@ -262,7 +419,7 @@
                 renderTable(reportDateInput.value);
             }
         } catch (e) {
-            plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">Error loading plants</td></tr>`;
+            plantTableBody.innerHTML = `<tr><td colspan="6" class="no-data">Error loading plants</td></tr>`;
             console.error(e);
         }
     }
@@ -317,13 +474,13 @@
             <td>${p.plantID}</td>
             <td>${p.plantName}</td>
             <td>${p.kld}</td>
+            <td>${p.zones}</td>
             <td>
                 <div class="progress-bar">
                     <div class="progress-fill ${clr}" style="width:${opData.progress}%"></div>
                 </div>
                 <small>${opData.progress}%</small>
             </td>
-            <td>${statusLabel}</td>
             <td>
                 <button class="btn-update ${opData.status}" onclick="window.location.href='${actionUrl}'">${statusLabel}</button>
             </td>
@@ -332,7 +489,7 @@
 
     async function renderTable(date) {
         if (!allPlants.length) {
-            plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">No plants found</td></tr>`;
+            plantTableBody.innerHTML = `<tr><td colspan="6" class="no-data">No plants found</td></tr>`;
             return;
         }
 
@@ -345,8 +502,8 @@
                 <td>${p.plantID}</td>
                 <td>${p.plantName}</td>
                 <td>${p.kld}</td>
+                <td>${p.zones}</td>
                 <td><div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div><small>0%</small></td>
-                <td>Loading</td>
                 <td><button class="btn-update pending">...</button></td>
             </tr>`).join('');
         plantTableBody.innerHTML = placeholders;
@@ -360,7 +517,7 @@
 
     async function renderFiltered(filtered, date, initial=false) {
         if (!filtered.length) {
-            plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">No plants found</td></tr>`;
+            plantTableBody.innerHTML = `<tr><td colspan="6" class="no-data">No plants found</td></tr>`;
             return;
         }
 
@@ -372,8 +529,8 @@
                 <td>${p.plantID}</td>
                 <td>${p.plantName}</td>
                 <td>${p.kld}</td>
+                <td>${p.zones}</td>
                 <td><div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div><small>0%</small></td>
-                <td>Loading</td>
                 <td><button class="btn-update pending">...</button></td>
             </tr>`).join('');
         plantTableBody.innerHTML = placeholders;

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
     <title>View Operation</title>
     <style>
         body{ font-family:'Segoe UI',sans-serif; background:#f5f7fa; margin:0; padding:0; display:flex; justify-content:center; }
@@ -114,12 +115,22 @@
 
             fieldsBody.innerHTML = '';
             fields.forEach(f => {
-                const tr = document.createElement('tr');
-                const label = f.replace(/([A-Z])/g, ' $1');
-                const val = (op[f] === null || op[f] === undefined || op[f] === '') ? '-' : op[f];
-                tr.innerHTML = `<td>${label}</td><td>${val}</td>`;
-                fieldsBody.appendChild(tr);
-            });
+                    const tr = document.createElement('tr');
+                    const label = f.replace(/([A-Z])/g, ' $1');
+
+                    let value = op[f];
+                    if (f === 'dgUsed') {
+                    if (value === true) value = "Yes";
+                    else if (value === false) value = "No";
+            }
+
+    // default formatting
+    const val = (value === null || value === undefined || value === '') ? '-' : value;
+
+    tr.innerHTML = `<td>${label}</td><td>${val}</td>`;
+    fieldsBody.appendChild(tr);
+});
+
 
             const progress = calculateProgressFromOp(op);
             applyProgressBar(progress);

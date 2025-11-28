@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
     <title>Add New Plant</title>
 
     <style>
@@ -73,7 +74,6 @@
             background:white;
         }
 
-        /* Yes/No toggle style */
         .yesno{
             display:flex;
             gap:20px;
@@ -94,33 +94,22 @@
             margin-top:20px;
         }
 
-        .addBtn{
-            background:#27ae60;
-        }
-        .addBtn:hover{
-            background:#1e8f4e;
-        }
+        .addBtn{ background:#27ae60; }
+        .addBtn:hover{ background:#1e8f4e; }
 
         .back-btn{
             background:#95a5a6;
             margin-left:10px;
         }
-        .back-btn:hover{
-            background:#7f8c8d;
-        }
+        .back-btn:hover{ background:#7f8c8d; }
 
         .success{
             margin-top:15px;
-            color:#27ae60;
             font-weight:700;
             font-size:17px;
         }
 
-        .error {
-            color: red;
-            font-size: 14px;
-            margin-left: 10px;
-        }
+        .error { color: red; font-size: 14px; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -129,7 +118,6 @@
 
 <div class="container">
 
-    <!-- ONE MERGED TABLE -->
     <table>
         <tr><th colspan="2">Plant Information</th></tr>
 
@@ -239,35 +227,21 @@
 </div>
 
 <script>
-    async function createPlant(){
+    async function createPlant() {
 
-        // Required fields list
-        const required = [
-            "plantID",
-            "plantName",
-            "stateCode",
-            "district",
-            "kld",
-            "wardNo",
-            "pinCode",
-            "zones"
-        ];
-
+        // Required fields
+        const required = ["plantID","plantName","stateCode","district","kld","wardNo","pinCode","zones"];
         let valid = true;
 
-        // Clear all previous errors
         document.querySelectorAll(".error").forEach(e => e.innerText = "");
 
-        // Validate each required field
         required.forEach(id => {
-            const value = document.getElementById(id).value.trim();
-            if (!value) {
+            if (!document.getElementById(id).value.trim()) {
                 document.getElementById("err_" + id).innerText = "Required";
                 valid = false;
             }
         });
 
-        // Stop if validation fails
         if (!valid) return;
 
         function getRadio(name){
@@ -284,26 +258,43 @@
             wardNo: Number(document.getElementById("wardNo").value),
             pinCode: Number(document.getElementById("pinCode").value),
             zones: Number(document.getElementById("zones").value),
-
             mnit: getRadio("mnit"),
             permanentPower: getRadio("permanentPower"),
             solar: getRadio("solar"),
             internet: getRadio("internet")
         };
 
-        try{
+        try {
             const res = await fetch("/api/plants", {
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify(plant)
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(plant)
             });
 
-            if(res.ok){
-                document.getElementById("msg").innerText = "Plant added successfully!";
-                document.querySelectorAll("input").forEach(i => i.value = "");
+            if (!res.ok) {
+                let errorMessage = "Unknown error occurred";
+
+                try {
+                    const text = await res.text();
+                    try {
+                        const json = JSON.parse(text);
+                        errorMessage = json.message || errorMessage;
+                    } catch {
+                        errorMessage = text;
+                    }
+                } catch {}
+
+                document.getElementById("msg").innerText = "Error: " + errorMessage;
+                document.getElementById("msg").style.color = "red";
+                return;
             }
-        }
-        catch(err){
+
+            document.getElementById("msg").innerText = "Plant added successfully!";
+            document.getElementById("msg").style.color = "#27ae60";
+
+            document.querySelectorAll("input").forEach(i => i.value = "");
+
+        } catch (err) {
             console.log(err);
         }
     }

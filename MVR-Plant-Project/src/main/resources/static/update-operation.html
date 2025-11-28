@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
     <title>Update Plant Operation</title>
     <style>
         body { font-family:'Segoe UI',sans-serif; background:#f5f7fa; margin:0; padding:0; display:flex; justify-content:center; }
@@ -162,10 +163,12 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            if(!res.ok) {
-                const txt = await res.text();
-                throw new Error(txt || 'Save failed');
-            }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: "Save failed" }));
+                alert("Error: " + err.message);
+                return;
+                }
+
             alert('Operation updated successfully!');
             goBack();
         } catch (e) {
