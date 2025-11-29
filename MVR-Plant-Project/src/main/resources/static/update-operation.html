@@ -84,7 +84,10 @@
             fields.forEach(f => {
                 const tr = document.createElement('tr');
                 const labelTd = document.createElement('td');
-                labelTd.innerText = f.replace(/([A-Z])/g, ' $1');
+                labelTd.innerText = f
+                .replace(/([A-Z])/g, ' $1')   // insert spaces
+                .replace(/\b\w/g, c => c.toUpperCase()); // capitalize each word
+
 
                 const inputTd = document.createElement('td');
 
@@ -120,6 +123,7 @@
             }
 
             applyDGLogic();
+            enableKeyboardNavigation();
 
         } catch (e) {
             fieldsBody.innerHTML = `<tr><td colspan="2">Error: ${e.message}</td></tr>`;
@@ -176,7 +180,56 @@
         }
     });
 
-    loadOperation();
+ function enableKeyboardNavigation() {
+    // Collect inputs in exact visible row order
+    const rows = Array.from(document.querySelectorAll("#fieldsBody tr"));
+
+    let allInputs = [];
+    rows.forEach(tr => {
+        const inputs = tr.querySelectorAll("input");
+        inputs.forEach(inp => allInputs.push(inp));
+    });
+
+    // Assign tabindex so browser respects navigation
+    allInputs.forEach((inp, i) => inp.tabIndex = i + 1);
+
+    const saveBtn = document.getElementById("saveBtn");
+    saveBtn.tabIndex = allInputs.length + 1;
+
+    allInputs.forEach((input, index) => {
+        input.addEventListener("keydown", function (e) {
+
+            // ONLY ENTER → go to next field
+            if (e.key === "Enter") {
+                e.preventDefault();
+                moveNext(index, allInputs, saveBtn);
+            }
+        });
+    });
+
+    // ENTER on Save → trigger save
+    saveBtn.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            saveBtn.click();
+        }
+    });
+}
+
+function moveNext(index, allInputs, saveBtn) {
+    let next = index + 1;
+
+    // Skip disabled inputs
+    while (next < allInputs.length && allInputs[next].disabled) next++;
+
+    if (next < allInputs.length) {
+        allInputs[next].focus();
+    } else {
+        saveBtn.focus();
+    }
+}
+
+   loadOperation();
 </script>
 </body>
 </html>

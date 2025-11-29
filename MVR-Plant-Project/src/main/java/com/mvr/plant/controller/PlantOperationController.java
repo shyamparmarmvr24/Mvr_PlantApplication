@@ -16,6 +16,10 @@ public class PlantOperationController
     @Autowired
     private IPlantOperationService plantOpService;
 
+    @Autowired
+    private SseController sseController;   // ✅ ADD THIS
+
+
     @PutMapping("/{plantId}")
     public ResponseEntity<Map<String,Integer>> updateOperation(
             @PathVariable Long plantId,
@@ -28,6 +32,9 @@ public class PlantOperationController
         plantOp.setOperationDate(localDate);
 
         Map<String, Integer> result = plantOpService.updateOperationById(plantId, plantOp);
+
+        sseController.broadcastUpdate();
+
         return ResponseEntity.ok(result);
     }
 
