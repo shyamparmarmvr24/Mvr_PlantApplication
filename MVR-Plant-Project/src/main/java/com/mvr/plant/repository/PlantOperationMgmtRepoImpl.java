@@ -53,168 +53,105 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
 
     int count = 0;
 
-    //for button logics it gives update count
-    if (plantOp.getSludgeTankLevel() != null) count++;
-    if (plantOp.getSludgeProcessed() != null) count++;
-    if (plantOp.getSludgeReceived() != null) count++;
-    if (plantOp.getBiocharProduced() != null) count++;
-    if (plantOp.getPlantRunningHrs() != null) count++;
+        if (plantOp.getSludgeTankLevelAm() != null) count++;
+        if (plantOp.getSludgeTankLevelPm() != null) count++;
+        if (plantOp.getSludgeReceived() != null) count++;
+        if (plantOp.getNoOfTrips() != null) count++;
+        if (plantOp.getSludgeProcessed() != null) count++;
+        if (plantOp.getBiocharProduced() != null) count++;
+        if (plantOp.getPlantRunningHrs() != null) count++;
+        if (plantOp.getSolarIntegration() != null) count++;
+        if (plantOp.getPowerReadingAmImport() != null) count++;
+        if (plantOp.getPowerReadingAmExport() != null) count++;
+        if (plantOp.getPowerReadingPmImport() != null) count++;
+        if (plantOp.getPowerReadingPmExport() != null) count++;
+        if (plantOp.getPowerReadingAm() != null) count++;
+        if (plantOp.getPowerReadingPm() != null) count++;
+        if (plantOp.getDgReadingAm() != null) count++;
+        if (plantOp.getDgReadingPm() != null) count++;
+        if (plantOp.getDgDiesalPercentageAm() != null) count++;
+        if (plantOp.getDgDiesalPercentagePm() != null) count++;
+        if (plantOp.getVehicleReadingAm() != null) count++;
+        if (plantOp.getVehicleReadingPm() != null) count++;
+        if (plantOp.getVehicleFuelLevel() != null) count++;
+        if (plantOp.getPolymerUsage() != null) count++;
+        if (plantOp.getPillets() != null) count++;
+        if (plantOp.getFlowMeterReadingAm() != null) count++;
+        if (plantOp.getFlowMeterReadingPm() != null) count++;
+        if (plantOp.getCod() != null) count++;
+        if (plantOp.getBod()!= null) count++;
+        if (plantOp.getTn()!= null) count++;
+        if (plantOp.getTemperature()!= null) count++;
+        if (plantOp.getTss()!= null) count++;
+        if (plantOp.getPh()!= null) count++; //31
 
-    if (plantOp.getSolarReadingAm() != null) count++;
-    if (plantOp.getSolarReadingPm() != null) count++;
 
-    if (plantOp.getPowerReadingAm() != null) count++;
-    if (plantOp.getPowerReadingPm() != null) count++;
+        existing.setSludgeTankLevelAm(plantOp.getSludgeTankLevelAm());
+        existing.setSludgeTankLevelPm(plantOp.getSludgeTankLevelPm());
+        existing.setSludgeReceived(plantOp.getSludgeReceived());
+        existing.setNoOfTrips(plantOp.getNoOfTrips());
+        existing.setSludgeProcessed(plantOp.getSludgeProcessed());
+        existing.setBiocharProduced(plantOp.getBiocharProduced());
+        existing.setPlantRunningHrs(plantOp.getPlantRunningHrs());
+        existing.setSolarIntegration(plantOp.getSolarIntegration());
+        existing.setPowerReadingAmImport(plantOp.getPowerReadingAmImport());
+        existing.setPowerReadingAmExport(plantOp.getPowerReadingAmExport());
+        existing.setPowerReadingPmImport(plantOp.getPowerReadingPmImport());
+        existing.setPowerReadingPmExport(plantOp.getPowerReadingPmExport());
+        existing.setPowerReadingAm(plantOp.getPowerReadingAm());
+        existing.setPowerReadingPm(plantOp.getPowerReadingPm());
+        if (plantOp.getPowerReadingAm() != null && plantOp.getPowerReadingPm() != null) {
+            existing.setPowerConsumed(Math.abs(
+                    plantOp.getPowerReadingAm() - plantOp.getPowerReadingPm()
+            ));
+        }
+        else
+        {
+            existing.setPowerConsumed(0.0);
+        }
+        existing.setDgReadingAm(plantOp.getDgReadingAm());
+        existing.setDgReadingPm(plantOp.getDgReadingPm());
+        existing.setDgDiesalPercentageAm(plantOp.getDgDiesalPercentageAm());
+        existing.setDgDiesalPercentagePm(plantOp.getDgDiesalPercentagePm());
+        if (plantOp.getDgReadingAm() != null && plantOp.getDgReadingPm() != null) {
+            existing.setDgRunHours(Math.abs(
+                    plantOp.getDgReadingAm() - plantOp.getDgReadingPm()
+            ));
+        }
+        else
+        {
+            existing.setDgRunHours(0.0);
+        }
+        existing.setVehicleReadingAm(plantOp.getVehicleReadingAm());
+        existing.setVehicleReadingPm(plantOp.getVehicleReadingPm());
+        existing.setVehicleFuelLevel(plantOp.getVehicleFuelLevel());
+        existing.setPolymerUsage(plantOp.getPolymerUsage());
+        existing.setPillets(plantOp.getPillets());
+        existing.setFlowMeterReadingAm(plantOp.getFlowMeterReadingAm());
+        existing.setFlowMeterReadingPm(plantOp.getFlowMeterReadingPm());
+        existing.setRemarks(plantOp.getRemarks());
+        existing.setCod(plantOp.getCod());
+        existing.setBod(plantOp.getBod());
+        existing.setTn(plantOp.getTn());
+        existing.setTemperature(plantOp.getTemperature());
+        existing.setTss(plantOp.getTss());
+        existing.setPh(plantOp.getPh());
 
-    if (plantOp.getNoOfTrips() != null) count++;
-    if (plantOp.getVehicleReadingAm() != null) count++;
-    if (plantOp.getVehicleReadingPm() != null) count++;
+       //save the update on db
+       operationRepo.save(existing);
 
-    if (plantOp.getDgUsed() != null) count++;
-    if (plantOp.getDgRunHrs() != null) count++;
+       Map<String, Integer> map = new HashMap<>();
+       map.put("Operation Details Updated Successfully", count);
+       return map;
+       }
 
-    //set the existing object for update
-    existing.setSludgeTankLevel(plantOp.getSludgeTankLevel());
-    existing.setSludgeProcessed(plantOp.getSludgeProcessed());
-    existing.setSludgeReceived(plantOp.getSludgeReceived());
-    existing.setBiocharProduced(plantOp.getBiocharProduced());
-    existing.setPlantRunningHrs(plantOp.getPlantRunningHrs());
-
-    existing.setSolarReadingAm(plantOp.getSolarReadingAm());
-    existing.setSolarReadingPm(plantOp.getSolarReadingPm());
-
-    existing.setPowerReadingAm(plantOp.getPowerReadingAm());
-    existing.setPowerReadingPm(plantOp.getPowerReadingPm());
-
-    existing.setNoOfTrips(plantOp.getNoOfTrips());
-    existing.setVehicleReadingAm(plantOp.getVehicleReadingAm());
-    existing.setVehicleReadingPm(plantOp.getVehicleReadingPm());
-
-    existing.setDgUsed(plantOp.getDgUsed());
-    existing.setDgRunHrs(plantOp.getDgRunHrs());
-
-    //save the update on db
-    operationRepo.save(existing);
-
-    Map<String, Integer> map = new HashMap<>();
-    map.put("Operation Details Updated Successfully", count);
-    return map;
-    }
-
-    //getting date wise operation from db
-    @Override
-    public PlantOperation getAllOperationDataByIdAndDate(Long plantId, LocalDate date)
-    {
+      //getting date wise operation from db
+      @Override
+      public PlantOperation getAllOperationDataByIdAndDate(Long plantId, LocalDate date)
+      {
         return operationRepo.getOperationByPlantIdAndDate(plantId, date)
                 .orElse(null);
-    }
+      }
 
 }
 
-
-//    @Override
-//    @Transactional
-//    public Map<String, Integer> updateOperationById(Long plantId, PlantOperation plantOp)
-//    {
-//
-//        PlantOperation exist = operationRepo
-//                .getOperationByPlantId(plantId)
-//                .orElse(null);
-//
-//        // If no existing operation → CREATE NEW ONE
-//        if(exist == null) {
-//            // First fetch the parent plant
-//            FstpPlant plant = plantRepo.findPlantByPlantID(plantId)
-//                    .orElseThrow(() -> new IllegalStateException("Parent plant not found"));
-//
-//            // Set parent reference
-//            plantOp.setPlant(plant);
-//
-//            // Insert new operation
-//            operationRepo.save(plantOp);
-//        }
-//
-//
-//        // Fetch existing operation by plantId
-//        PlantOperation existing = operationRepo
-//                .getOperationByPlantId(plantId)
-//                .orElseThrow(() -> new IllegalStateException("Plant Id Not Found"));
-//
-//        int count = 0;
-//
-//        // Check each of the 14 updatable fields for non-null in the incoming object
-//        if (plantOp.getSludgeTankLevel() != null) count++;
-//        if (plantOp.getSludgeProcessed() != null) count++;
-//        if (plantOp.getSludgeReceived() != null) count++;
-//        if (plantOp.getBiocharProduced() != null) count++;
-//        if (plantOp.getPlantRunningHrs() != null) count++;
-//
-//        if (plantOp.getSolarReadingAm() != null) count++;
-//        if (plantOp.getSolarReadingPm() != null) count++;
-//
-//        if (plantOp.getPowerReadingAm() != null) count++;
-//        if (plantOp.getPowerReadingPm() != null) count++;
-//
-//        if (plantOp.getNoOfTrips() != null) count++;
-//        if (plantOp.getVehicleReadingAm() != null) count++;
-//        if (plantOp.getVehicleReadingPm() != null) count++;
-//
-//        if (plantOp.getDgUsed() != null) count++;
-//        if (plantOp.getDgRunHrs() != null) count++;
-//
-//
-//        if (plantOp.getSludgeTankLevel() != null) existing.setSludgeTankLevel(plantOp.getSludgeTankLevel());
-//        if (plantOp.getSludgeProcessed() != null) existing.setSludgeProcessed(plantOp.getSludgeProcessed());
-//        if (plantOp.getSludgeReceived() != null) existing.setSludgeReceived(plantOp.getSludgeReceived());
-//        if (plantOp.getBiocharProduced() != null) existing.setBiocharProduced(plantOp.getBiocharProduced());
-//        if (plantOp.getPlantRunningHrs() != null) existing.setPlantRunningHrs(plantOp.getPlantRunningHrs());
-
-//        if (plantOp.getSolarReadingAm() != null) existing.setSolarReadingAm(plantOp.getSolarReadingAm());
-//        if (plantOp.getSolarReadingPm() != null) existing.setSolarReadingPm(plantOp.getSolarReadingPm());
-//
-//        if (plantOp.getPowerReadingAm() != null) existing.setPowerReadingAm(plantOp.getPowerReadingAm());
-//        if (plantOp.getPowerReadingPm() != null) existing.setPowerReadingPm(plantOp.getPowerReadingPm());
-
-//        if (plantOp.getNoOfTrips() != null) existing.setNoOfTrips(plantOp.getNoOfTrips());
-//        if (plantOp.getVehicleReadingAm() != null) existing.setVehicleReadingAm(plantOp.getVehicleReadingAm());
-//        if (plantOp.getVehicleReadingPm() != null) existing.setVehicleReadingPm(plantOp.getVehicleReadingPm());
-//
-//        if (plantOp.getDgUsed() != null) existing.setDgUsed(plantOp.getDgUsed());
-//        if(plantOp.getDgRunHrs() != null) existing.setDgRunHrs(plantOp.getDgRunHrs());
-//
-//        existing.setSludgeTankLevel(plantOp.getSludgeTankLevel());
-//        existing.setSludgeProcessed(plantOp.getSludgeProcessed());
-//        existing.setSludgeReceived(plantOp.getSludgeReceived());
-//        existing.setBiocharProduced(plantOp.getBiocharProduced());
-//        existing.setPlantRunningHrs(plantOp.getPlantRunningHrs());
-//
-//        existing.setSolarReadingAm(plantOp.getSolarReadingAm());
-//        existing.setSolarReadingPm(plantOp.getSolarReadingPm());
-//
-//        existing.setPowerReadingAm(plantOp.getPowerReadingAm());
-//        existing.setPowerReadingPm(plantOp.getPowerReadingPm());
-//
-//        existing.setNoOfTrips(plantOp.getNoOfTrips());
-//        existing.setVehicleReadingAm(plantOp.getVehicleReadingAm());
-//        existing.setVehicleReadingPm(plantOp.getVehicleReadingPm());
-//
-//        existing.setDgUsed(plantOp.getDgUsed());
-//        existing.setDgRunHrs(plantOp.getDgRunHrs());
-//
-//        // Save updated operation
-//        operationRepo.save(existing);
-//
-//        // Prepare result
-//        Map<String, Integer> map = new HashMap<>();
-//        map.put("Operation Details Updated Successfully", count);
-//        return map;
-//    }
-//
-//
-//
-//    @Override
-//    public PlantOperation getAllOperationDataById(Long id)
-//    {
-//        PlantOperation plantOp= operationRepo.getOperationByPlantId(id).orElseThrow(() -> new IllegalStateException("Plant Operation Not Found"));
-//         return plantOp;
-//    }

@@ -17,10 +17,4 @@ public interface IPlantRepository extends JpaRepository<FstpPlant,Long>
     @Query("SELECT p FROM FstpPlant p WHERE p.plantID = :plantID")
     Optional<FstpPlant> findPlantByPlantID(@Param("plantID") Long plantID);
 
-//    @Query("SELECT p.serialNo AS serialNo, p.plantID AS plantID, p.plantName AS plantName, p.kld AS kld FROM FstpPlant p WHERE p.zones = :zone")
-//    List<FstpPlant> getPlantsByZone(@Param("zone") Integer zone);
-//
-//    @Query("SELECT p.serialNo AS serialNo, p.plantID AS plantID, p.plantName AS plantName, p.kld AS kld FROM FstpPlant p WHERE p.plantID = :plantID")
-//    Optional<FstpPlant> findPlantByPlantID(@Param("plantID") Long plantID);
-
 }

@@ -5,30 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
     <title>Update Plant Operation</title>
+
     <style>
-        body { font-family:'Segoe UI',sans-serif; background:#f5f7fa; margin:0; padding:0; display:flex; justify-content:center; }
-        .card { background:white; padding:28px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); max-width:900px; width:100%; margin:20px; }
+        body {
+            font-family:'Segoe UI',sans-serif;
+            background:#f5f7fa;
+            margin:0; padding:0;
+            display:flex;
+            justify-content:center;
+        }
+        .card {
+            background:white;
+            padding:28px;
+            border-radius:12px;
+            box-shadow:0 10px 25px rgba(0,0,0,0.08);
+            max-width:900px;
+            width:100%;
+            margin:20px;
+        }
         h2 { text-align:center; color:#0369a1; margin-bottom:8px; }
         .top-info { text-align:center; font-weight:700; margin-bottom:14px; }
-        table { width:100%; border-collapse:collapse; margin-top:8px; }
-        table th, table td { border:1px solid #e6eef6; padding:10px; }
-        table th { background:#0369a1; color:white; text-align:left; }
-        .input-box { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #ccc; }
+
+        table {
+            width:100%;
+            border-collapse:collapse;
+            margin-top:8px;
+        }
+        table th, table td {
+            border:1px solid #e6eef6;
+            padding:12px;
+        }
+        table th {
+            background:#0369a1;
+            color:white;
+            text-align:left;
+            width:260px;
+            font-size:15px;
+        }
+
+        /* ★ NEW FIX — FULL-WIDTH INPUTS INSIDE TABLE */
+        .input-box, textarea {
+            width:100%;
+            box-sizing:border-box;
+            padding:8px 10px;
+            border-radius:6px;
+            border:1px solid #ccc;
+            font-size:15px;
+        }
+
+        textarea {
+            min-height:90px;
+            resize:vertical;
+        }
+
+        input:disabled, textarea:disabled {
+            background:#f1f5f9;
+            color:#6b7280;
+            cursor:not-allowed;
+        }
+
         .buttons { text-align:center; margin-top:18px; }
-        .btn { padding:10px 18px; margin:0 8px; border:none; border-radius:6px; font-size:15px; cursor:pointer; }
+        .btn {
+            padding:10px 18px;
+            margin:0 8px;
+            border:none;
+            border-radius:6px;
+            font-size:15px;
+            cursor:pointer;
+        }
         .btn-save { background:#059669; color:white; }
         .btn-back { background:#94a3b8; color:white; }
-        input:disabled { background:#f3f4f6; cursor:not-allowed; }
-        @media (max-width:720px){ .card{ padding:16px; } table th, table td{ padding:8px; font-size:14px; } }
     </style>
 </head>
+
 <body>
 
 <div class="card">
+
     <h2>Update Operation</h2>
+
     <div class="top-info" id="infoBox"></div>
 
-    <table id="inputTable" aria-live="polite">
+    <table>
         <thead>
         <tr><th>Field</th><th>Value</th></tr>
         </thead>
@@ -39,197 +97,214 @@
         <button class="btn btn-save" id="saveBtn">Save</button>
         <button class="btn btn-back" id="backBtn">Back</button>
     </div>
+
 </div>
 
 <script>
 
     const params = new URLSearchParams(window.location.search);
-    const plantID = params.get('plantID');
-    const date = params.get('date');
+    const plantID = params.get("plantID");
+    const date = params.get("date");
 
-    const filter = params.get('filter');
-    const value = params.get('value');
+    document.getElementById("infoBox").innerHTML =
+        `Date: <span style="color:#f97316">${date}</span>
+         &nbsp; | &nbsp;
+         Plant ID: <span style="color:#059669">${plantID}</span>`;
 
-    function goBack() {
-        let url = `index.html?date=${encodeURIComponent(date)}`;
-        if (filter && value) url += `&filter=${encodeURIComponent(filter)}&value=${encodeURIComponent(value)}`;
-        window.location.href = url;
-    }
+    document.getElementById("backBtn").addEventListener("click", () => {
+        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+    });
 
-    if (!plantID) goBack();
-
-    document.getElementById('backBtn').addEventListener('click', goBack);
-
-    document.getElementById('infoBox').innerHTML =
-        `Date: <span style="color:#f97316">${date}</span> &nbsp; | &nbsp; Plant ID: <span style="color:#059669">${plantID}</span>`;
-
+    // ----------------------------------------
+    // FIELD ORDER FOLLOWING ENTITY EXACTLY
+    // ----------------------------------------
     const fields = [
-        "sludgeTankLevel","sludgeProcessed","sludgeReceived","biocharProduced","plantRunningHrs",
-        "solarReadingAm","solarReadingPm","powerReadingAm","powerReadingPm",
-        "noOfTrips","vehicleReadingAm","vehicleReadingPm","dgUsed","dgRunHrs"
+        {id:"sludgeTankLevelAm", label:"Sludge Tank Level AM"},
+        {id:"sludgeTankLevelPm", label:"Sludge Tank Level PM"},
+        {id:"sludgeReceived", label:"Sludge Received"},
+        {id:"noOfTrips", label:"Number of Trips"},
+        {id:"sludgeProcessed", label:"Sludge Processed"},
+        {id:"biocharProduced", label:"Biochar Produced"},
+        {id:"plantRunningHrs", label:"Plant Running Hours"},
+
+        {id:"solarIntegration", label:"Solar Integration", type:"radio"},
+
+        // Solar YES
+        {id:"powerReadingAmImport", label:"Power Reading AM Import"},
+        {id:"powerReadingAmExport", label:"Power Reading AM Export"},
+        {id:"powerReadingPmImport", label:"Power Reading PM Import"},
+        {id:"powerReadingPmExport", label:"Power Reading PM Export"},
+
+        // Solar NO
+        {id:"powerReadingAm", label:"Power Reading AM"},
+        {id:"powerReadingPm", label:"Power Reading PM"},
+
+        {id:"dgReadingAm", label:"DG Reading AM"},
+        {id:"dgReadingPm", label:"DG Reading PM"},
+        {id:"dgDiesalPercentageAm", label:"DG Diesel Percentage AM"},
+        {id:"dgDiesalPercentagePm", label:"DG Diesel Percentage PM"},
+
+        {id:"vehicleReadingAm", label:"Vehicle Reading AM"},
+        {id:"vehicleReadingPm", label:"Vehicle Reading PM"},
+        {id:"vehicleFuelLevel", label:"Vehicle Fuel Level"},
+
+        {id:"polymerUsage", label:"Polymer Usage"},
+        {id:"pillets", label:"Pellets"},
+        {id:"flowMeterReadingAm", label:"Flow Meter Reading AM"},
+        {id:"flowMeterReadingPm", label:"Flow Meter Reading PM"},
+
+        {id:"cod", label:"COD"},
+        {id:"bod", label:"BOD"},
+        {id:"tn", label:"TN"},
+        {id:"temperature", label:"Temperature"},
+        {id:"tss", label:"TSS"},
+        {id:"ph", label:"PH"},
+
+        {id:"remarks", label:"Remarks", type:"textarea"}
     ];
 
-    const fieldsBody = document.getElementById('fieldsBody');
+    let currentOp = {};
+    const fieldsBody = document.getElementById("fieldsBody");
 
-    async function loadOperation(){
-        try {
-            const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
-            let text = await res.text();
-            let op = {};
-            if (text && text.trim().length > 0) {
-                try { op = JSON.parse(text); } catch(e) { op = {}; }
-            }
+    async function loadOperation() {
+        const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
+        const text = await res.text();
+        currentOp = text ? JSON.parse(text) : {};
 
-            fieldsBody.innerHTML = '';
-            fields.forEach(f => {
-                const tr = document.createElement('tr');
-                const labelTd = document.createElement('td');
-                labelTd.innerText = f
-                .replace(/([A-Z])/g, ' $1')   // insert spaces
-                .replace(/\b\w/g, c => c.toUpperCase()); // capitalize each word
-
-
-                const inputTd = document.createElement('td');
-
-                if (f === 'dgUsed') {
-                    inputTd.innerHTML = `
-                        <label><input type="radio" name="dgUsed" value="Yes" id="dg_yes"> Yes</label>
-                        &nbsp;&nbsp;
-                        <label><input type="radio" name="dgUsed" value="No" id="dg_no"> No</label>
-                    `;
-                } else {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.id = f;
-                    input.className = 'input-box';
-                    if (op[f] !== null && op[f] !== undefined) input.value = op[f];
-                    inputTd.appendChild(input);
-                }
-
-                tr.appendChild(labelTd);
-                tr.appendChild(inputTd);
-                fieldsBody.appendChild(tr);
-            });
-
-
-            const yes = document.getElementById('dg_yes');
-            const no  = document.getElementById('dg_no');
-            if (yes && no) {
-                if (op['dgUsed'] === true) yes.checked = true;
-                if (op['dgUsed'] === false) no.checked = true;
-
-                yes.addEventListener('change', applyDGLogic);
-                no.addEventListener('change', applyDGLogic);
-            }
-
-            applyDGLogic();
-            enableKeyboardNavigation();
-
-        } catch (e) {
-            fieldsBody.innerHTML = `<tr><td colspan="2">Error: ${e.message}</td></tr>`;
-        }
+        renderFields();
     }
 
-    function applyDGLogic() {
-        const no = document.querySelector('input[name="dgUsed"][value="No"]');
-        const yes = document.querySelector('input[name="dgUsed"][value="Yes"]');
-        const dgHours = document.getElementById('dgRunHrs');
+    function renderFields() {
+        fieldsBody.innerHTML = "";
 
-        if (!dgHours) return;
+        fields.forEach(field => {
+            const tr = document.createElement("tr");
+            const labelTd = document.createElement("td");
+            labelTd.textContent = field.label;
 
-        if (no && no.checked) {
-            dgHours.value = '';
-            dgHours.disabled = true;
-        } else {
-            dgHours.disabled = false;
-        }
-    }
+            const valTd = document.createElement("td");
 
-    document.getElementById('saveBtn').addEventListener('click', async () => {
-        const data = {};
-        fields.forEach(f => {
-            if (f === 'dgUsed') {
-                const checked = document.querySelector('input[name="dgUsed"]:checked');
-                data[f] = checked ? (checked.value === 'Yes') : null;
+            if (field.type === "radio") {
+                valTd.innerHTML = `
+                    <label><input type="radio" name="solarIntegration" value="true"> Yes</label>
+                    &nbsp;&nbsp;
+                    <label><input type="radio" name="solarIntegration" value="false"> No</label>
+                `;
+
+                const yes = valTd.querySelector('input[value="true"]');
+                const no = valTd.querySelector('input[value="false"]');
+
+                if (currentOp.solarIntegration === true) yes.checked = true;
+                if (currentOp.solarIntegration === false) no.checked = true;
+
+                yes.addEventListener("change", applySolarLogic);
+                no.addEventListener("change", applySolarLogic);
+
+            } else if (field.type === "textarea") {
+                const ta = document.createElement("textarea");
+                ta.id = field.id;
+                ta.value = currentOp[field.id] ?? "";
+                valTd.appendChild(ta);
+
             } else {
-                const input = document.getElementById(f);
-                data[f] = input ? (input.value === '' ? null : input.value) : null;
+                const input = document.createElement("input");
+                input.className = "input-box";
+                input.id = field.id;
+
+                if (currentOp[field.id] !== undefined && currentOp[field.id] !== null)
+                    input.value = currentOp[field.id];
+
+                valTd.appendChild(input);
             }
+
+            tr.appendChild(labelTd);
+            tr.appendChild(valTd);
+            fieldsBody.appendChild(tr);
         });
 
-        if (data['dgUsed'] === false) {
-            data['dgRunHrs'] = null;
-        }
-
-        try {
-            const res = await fetch(`/api/operations/${plantID}?date=${encodeURIComponent(date)}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({ message: "Save failed" }));
-                alert("Error: " + err.message);
-                return;
-                }
-
-            alert('Operation updated successfully!');
-            goBack();
-        } catch (e) {
-            alert('Error: ' + e.message);
-        }
-    });
-
- function enableKeyboardNavigation() {
-    // Collect inputs in exact visible row order
-    const rows = Array.from(document.querySelectorAll("#fieldsBody tr"));
-
-    let allInputs = [];
-    rows.forEach(tr => {
-        const inputs = tr.querySelectorAll("input");
-        inputs.forEach(inp => allInputs.push(inp));
-    });
-
-    // Assign tabindex so browser respects navigation
-    allInputs.forEach((inp, i) => inp.tabIndex = i + 1);
-
-    const saveBtn = document.getElementById("saveBtn");
-    saveBtn.tabIndex = allInputs.length + 1;
-
-    allInputs.forEach((input, index) => {
-        input.addEventListener("keydown", function (e) {
-
-            // ONLY ENTER → go to next field
-            if (e.key === "Enter") {
-                e.preventDefault();
-                moveNext(index, allInputs, saveBtn);
-            }
-        });
-    });
-
-    // ENTER on Save → trigger save
-    saveBtn.addEventListener("keydown", e => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            saveBtn.click();
-        }
-    });
-}
-
-function moveNext(index, allInputs, saveBtn) {
-    let next = index + 1;
-
-    // Skip disabled inputs
-    while (next < allInputs.length && allInputs[next].disabled) next++;
-
-    if (next < allInputs.length) {
-        allInputs[next].focus();
-    } else {
-        saveBtn.focus();
+        disableAllPowerFields();
+        applySolarLogic();
+        enableEnterNavigation();
     }
-}
 
-   loadOperation();
+    function disableAllPowerFields() {
+        [
+            "powerReadingAmImport","powerReadingAmExport",
+            "powerReadingPmImport","powerReadingPmExport",
+            "powerReadingAm","powerReadingPm"
+        ].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) input.disabled = true;
+        });
+    }
+
+    function applySolarLogic() {
+        const yes = document.querySelector('input[name="solarIntegration"][value="true"]');
+        const no = document.querySelector('input[name="solarIntegration"][value="false"]');
+
+        const isYes = yes?.checked;
+        const isNo = no?.checked;
+
+        const importExport = [
+            "powerReadingAmImport","powerReadingAmExport",
+            "powerReadingPmImport","powerReadingPmExport"
+        ];
+        const ampm = ["powerReadingAm","powerReadingPm"];
+
+        if (isYes) {
+            importExport.forEach(id => document.getElementById(id).disabled = false);
+            ampm.forEach(id => document.getElementById(id).disabled = true);
+        } else if (isNo) {
+            ampm.forEach(id => document.getElementById(id).disabled = false);
+            importExport.forEach(id => document.getElementById(id).disabled = true);
+        }
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+        const data = {};
+
+        fields.forEach(f => {
+            if (f.type === "radio") {
+                const sel = document.querySelector('input[name="solarIntegration"]:checked');
+                data["solarIntegration"] = sel ? sel.value === "true" : null;
+            } else if (f.type === "textarea") {
+                data[f.id] = document.getElementById(f.id).value || null;
+            } else {
+                const inp = document.getElementById(f.id);
+                if (!inp) return;
+
+                if (inp.disabled)
+                    data[f.id] = null;
+                else
+                    data[f.id] = inp.value === "" ? null : inp.value;
+            }
+        });
+
+        await fetch(`/api/operations/${plantID}?date=${date}`, {
+            method:"PUT",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify(data)
+        });
+
+        alert("Updated successfully!");
+        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+    });
+
+    function enableEnterNavigation() {
+        const inputs = Array.from(document.querySelectorAll("input, textarea"));
+        inputs.forEach((input, index) => {
+            input.addEventListener("keydown", e => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    const next = inputs[index + 1];
+                    if (next) next.focus();
+                }
+            });
+        });
+    }
+
+    loadOperation();
+
 </script>
 </body>
 </html>

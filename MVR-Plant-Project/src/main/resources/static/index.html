@@ -6,6 +6,7 @@
     <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
 
     <title>MVR TECHNOLOGY - Plant Management Dashboard</title>
+
     <style>
         * { box-sizing: border-box; }
         body {
@@ -19,9 +20,6 @@
             position: sticky;
             top: 0;
             z-index: 999;
-        }
-
-        header {
             display:flex;
             justify-content:space-between;
             align-items:center;
@@ -38,25 +36,20 @@
             cursor:pointer;
         }
 
-<!--        .logo-left img { height:48px; width:auto; display:block; }-->
-<!--        .logo-left .brand { font-size:20px; font-weight:700; letter-spacing:0.6px; }-->
+        .logo-left img {
+            height:28px;
+            width:auto;
+            display:block;
+        }
 
-       /* ⭐ Refined Logo + Brand Design */
-.logo-left img {
-    height:28px;            /* smaller logo */
-    width:auto;
-    display:block;
-}
-
-.logo-left .brand {
-    font-family: "Times New Roman", Times, serif !important;
-    font-size:25px;         /* bigger text */
-    font-weight:700;
-    letter-spacing:1px;
-    color:#ffffff;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.25); /* smooth professional shadow */
-}
-
+        .logo-left .brand {
+            font-family: "Times New Roman", Times, serif !important;
+            font-size:25px;
+            font-weight:700;
+            letter-spacing:1px;
+            color:#ffffff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+        }
 
         .date-picker { display:flex; align-items:center; gap:8px; }
         .date-picker label { font-weight:600; color:#fff; }
@@ -77,6 +70,7 @@
             font-size:26px;
             color:#0f172a;
             font-weight:700;
+            font-family: "Times New Roman", Times, serif !important;
         }
 
         .container {
@@ -123,7 +117,6 @@
             cursor:pointer;
         }
 
-        /* ⭐ TABLE FIXED SPACING */
         table {
             width:100%;
             border-collapse:collapse;
@@ -154,13 +147,12 @@
         }
 
         th, td {
-            padding:14px 12px;   /* ⭐ More spacing */
+            padding:14px 12px;
             text-align:center;
             border-bottom:1px solid #f1f5f9;
             white-space: nowrap;
         }
 
-        /* ⭐ Column width balancing */
         th:nth-child(1), td:nth-child(1) { width: 8%; }
         th:nth-child(2), td:nth-child(2) { width: 12%; }
         th:nth-child(3), td:nth-child(3) { width: 22%; }
@@ -180,9 +172,8 @@
         tr:nth-child(even){ background:#fbfdff; }
         tr:hover { background:#f0f9ff; }
 
-        /* ⭐ Increased progress bar width */
         .progress-bar {
-            width:170px;    /* little bigger */
+            width:170px;
             height:14px;
             background:#e6eef8;
             border-radius:8px;
@@ -201,7 +192,7 @@
             border: none;
             cursor: pointer;
             font-weight: 600;
-            min-width: 100px; /* ⭐ Gives breathing room */
+            min-width: 100px;
             text-align: center;
         }
 
@@ -211,120 +202,9 @@
 
         .no-data { text-align:center; padding:18px; color:#6b7280; }
 
-        @media (max-width:900px){
-            header { flex-direction:column; align-items:flex-start; gap:10px; padding:12px; }
-            .dashboard-title { font-size:20px; }
-            th, td{ padding:10px 8px; font-size:14px; }
-            .date-picker label{ display:none; }
-        }
-
- /* 📱 Mobile Fix: Only data should scroll */
-@media (max-width: 600px) {
-
-    /* Remove full table scrolling */
-    table {
-        width: 100%;
-        display: table;
-        table-layout: fixed;
-    }
-
-    thead {
-        display: table;
-        width: 100%;
-        table-layout: fixed;
-    }
-
-    /* 👉 Only tbody scrolls horizontally */
-    tbody {
-        display: block;
-        overflow-x: auto;
-        overflow-y: auto;
-        max-height: calc(100vh - 260px);
-        white-space: nowrap;
-    }
-
-    /* keep rows fixed width so scrolling works */
-    tbody tr {
-        display: table;
-        width: 100%;
-        table-layout: fixed;
-    }
-
-    th, td {
-        padding: 8px 6px;
-        font-size: 12px;
-        white-space: nowrap;
-    }
-
-    /* search section should never scroll sideways */
-    body, html {
-        overflow-x: hidden !important;
-    }
-
-    /* Progress + buttons stacking fix */
-    td:nth-child(6), td:nth-child(7) {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        white-space: nowrap;
-    }
-
-    .progress-bar {
-        width: 90px;
-        height: 10px;
-    }
-
-    .btn-update {
-        min-width: 80px;
-        padding: 6px 6px;
-        font-size: 12px;
-    }
-}
-
-        /* 📱 Fix search section buttons overlap */
-@media (max-width: 600px) {
-
-    /* Stack search items vertically */
-    .search-section {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-
-    .search-box {
-        width: 100%;
-        min-width: 100%;
-    }
-
-    .search-box input {
-        font-size: 14px;
-        padding: 8px;
-    }
-
-    .search-box button {
-        font-size: 14px;
-        padding: 8px 12px;
-        white-space: nowrap;
-    }
-
-    /* Reset button full width on mobile */
-    #resetBtn {
-        width: 100%;
-        padding: 10px;
-        font-size: 14px;
-    }
-}
-        /* ⭐ Apply Times New Roman to the brand title & dashboard title */
-.brand,
-.dashboard-title {
-    font-family: "Times New Roman", Times, serif !important;
-    letter-spacing: 0.5px;
-}
-
-
     </style>
 </head>
+
 <body>
 
 <header>
@@ -342,6 +222,7 @@
 <div class="dashboard-title">Plant Management Dashboard</div>
 
 <div class="container">
+
     <div class="search-section">
         <div class="search-box">
             <input type="number" id="plantIDInput" placeholder="Search by Plant ID" min="1" />
@@ -354,7 +235,6 @@
         </div>
 
         <button class="addBtn" id="resetBtn" style="background:#6b7280;">Reset</button>
-<!--        <button class="addBtn" onclick="location.href='create-plant.html'">Add New Plant</button>-->
     </div>
 
     <table>
@@ -374,353 +254,281 @@
         <tr><td colspan="7" class="no-data">Loading...</td></tr>
         </tbody>
     </table>
+
 </div>
 
 <script>
 
-    const plantTableBody = document.getElementById('plantTableBody');
-    const reportDateInput = document.getElementById('reportDate');
-    const searchIdBtn = document.getElementById('searchIdBtn');
-    const searchZoneBtn = document.getElementById('searchZoneBtn');
+    // ----- PROGRESS FIELD LIST ------
+    const backendFields = [
+        "sludgeTankLevelAm","sludgeTankLevelPm","sludgeReceived","noOfTrips","sludgeProcessed",
+        "biocharProduced","plantRunningHrs","solarIntegration",
 
-    let allPlants = [];
-    let cachedOps = {};
-    let visiblePlants = [];
-    let lastFilterType = null;
-    let lastFilterValue = null;
+        "powerReadingAmImport","powerReadingAmExport","powerReadingPmImport","powerReadingPmExport",
+        "powerReadingAm","powerReadingPm",
 
-    const fields = [
-        "sludgeTankLevel","sludgeProcessed","sludgeReceived","biocharProduced","plantRunningHrs",
-        "solarReadingAm","solarReadingPm","powerReadingAm","powerReadingPm",
-        "noOfTrips","vehicleReadingAm","vehicleReadingPm","dgUsed","dgRunHrs"
+        "powerConsumed",
+
+        "dgReadingAm","dgReadingPm","dgDiesalPercentageAm","dgDiesalPercentagePm","dgRunHours",
+
+        "vehicleReadingAm","vehicleReadingPm","vehicleFuelLevel",
+
+        "polymerUsage","pillets","flowMeterReadingAm","flowMeterReadingPm","cod","bod","tn","temperature","tss","ph"
     ];
 
-    const today = new Date().toISOString().split('T')[0];
-    reportDateInput.value = today;
-    reportDateInput.max = today;
+    function calculateProgress(op) {
+        const total = op.solarIntegration === true ? 31 : 29;
+        let filled = 0;
 
-    function applyInitialUrlParams() {
-        const url = new URLSearchParams(window.location.search);
-        const urlDate = url.get("date");
-        const filter = url.get("filter");
-        const value = url.get("value");
+        backendFields.forEach(f => {
+            if (op.solarIntegration === true &&
+                (f === "powerReadingAm" || f === "powerReadingPm")) return;
 
-        if (urlDate) reportDateInput.value = urlDate;
-        if (filter && value) {
-            lastFilterType = filter;
-            lastFilterValue = value;
-            if (filter === 'id') {
-                document.getElementById('plantIDInput').value = value;
-            } else if (filter === 'zone') {
-                document.getElementById('zoneInput').value = value;
-            }
-        }
+            if (op.solarIntegration === false &&
+                (f === "powerReadingAmImport" || f === "powerReadingAmExport" ||
+                 f === "powerReadingPmImport" || f === "powerReadingPmExport")) return;
+
+            if (op[f] !== null && op[f] !== undefined && op[f] !== "") filled++;
+        });
+
+        return Math.min(100, Math.round((filled / total) * 100));
     }
 
-    function redirectHome() {
-        let url = `index.html?date=${encodeURIComponent(reportDateInput.value)}`;
-        if (lastFilterType && lastFilterValue) {
-            url += `&filter=${encodeURIComponent(lastFilterType)}&value=${encodeURIComponent(lastFilterValue)}`;
-        }
-        window.location.href = url;
-    }
+    // ---------------- PAGE VARIABLES ---------------- //
+   const plantTableBody = document.getElementById("plantTableBody");
+const reportDateInput = document.getElementById("reportDate");
 
+// ---------------- DATE LIMIT (Correct implementation) ---------------- //
+const today = new Date().toISOString().split("T")[0];
+reportDateInput.max = today;
+
+const urlDate = new URLSearchParams(window.location.search).get("date");
+reportDateInput.value = (urlDate && urlDate <= today) ? urlDate : today;
+
+let allPlants = [];
+    let originalPlants = [];   // keeps copy for reset
+    let cachedOps = {};
+
+    let filterType = null;
+    let filterValue = null;
+
+<!--    const today = new Date().toISOString().split("T")[0];-->
+<!--    reportDateInput.value = today;-->
+
+    // ---------------- FETCH PLANTS ---------------- //
     async function fetchPlants() {
-<!--        plantTableBody.innerHTML = `<tr><td colspan="6" class="no-data">Loading plants...</td></tr>`;-->
-
-        plantTableBody.innerHTML = `
-        <tr><td colspan="7" class="no-data">
-        <div style="color:#0369a1; font-size:16px; font-weight:600;">
-        Refreshing...
-        </div>
-        </td></tr>`;
-
+        plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">Refreshing...</td></tr>`;
 
         try {
-            const res = await fetch('/api/plants');
-            if (!res.ok) throw new Error('Failed to fetch plants');
+            const res = await fetch("/api/plants");
             allPlants = await res.json();
-            applyInitialUrlParams();
+            originalPlants = [...allPlants];
 
-            if (lastFilterType === 'id' && lastFilterValue) {
-                const filtered = allPlants.filter(p => String(p.plantID) === String(lastFilterValue));
-                renderFiltered(filtered, reportDateInput.value, true);
-            } else if (lastFilterType === 'zone' && lastFilterValue) {
-                const filtered = allPlants.filter(p => String(p.zones) === String(lastFilterValue));
-                renderFiltered(filtered, reportDateInput.value, true);
-            } else {
-                renderTable(reportDateInput.value);
-            }
+            // Apply existing filter again after refresh
+            applyFilter(true);
         } catch (e) {
-            plantTableBody.innerHTML = `<tr><td colspan="6" class="no-data">Error loading plants</td></tr>`;
-            console.error(e);
+            plantTableBody.innerHTML =
+                `<tr><td colspan="7" class="no-data">Error loading plants</td></tr>`;
         }
     }
 
+    // ---------------- FETCH OP ---------------- //
     async function fetchOp(plantID, date) {
-        const key = `${plantID}_${date}`;
+        const key = plantID + "_" + date;
+
         if (cachedOps[key]) return cachedOps[key];
 
         try {
             const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
             const text = await res.text();
+
             if (!text || !text.trim()) {
-                cachedOps[key] = { progress: 0, status: 'update', op: null };
+                cachedOps[key] = { progress: 0, status: "update", op: {} };
                 return cachedOps[key];
             }
+
             const op = JSON.parse(text);
+            const progress = calculateProgress(op);
 
-            let filled = 0;
-            fields.forEach(f => {
-                if (f === 'dgRunHrs') {
-                    if (op['dgUsed'] === false) filled++;
-                    else if (op[f] !== null && op[f] !== undefined && op[f] !== '') filled++;
-                } else {
-                    if (op[f] !== null && op[f] !== undefined && op[f] !== '') filled++;
-                }
-            });
-
-            const progress = Math.round((filled / fields.length) * 100);
-            const status = progress === 100 ? 'view' : progress > 0 ? 'pending' : 'update';
+            const status = progress === 100 ? "view"
+                        : progress > 0 ? "pending"
+                        : "update";
 
             cachedOps[key] = { progress, status, op };
             return cachedOps[key];
-        } catch (e) {
-            console.error('fetchOp error', e);
-            cachedOps[key] = { progress: 0, status: 'update', op: null };
+
+        } catch {
+            cachedOps[key] = { progress: 0, status: "update", op: {} };
             return cachedOps[key];
         }
     }
 
+    // ---------------- RENDER ROW ---------------- //
     function makeRowHtml(p, opData) {
-        const clr = opData.progress === 100 ? 'progress-green' : opData.progress > 0 ? 'progress-yellow' : 'progress-red';
-        const statusLabel = opData.status.charAt(0).toUpperCase() + opData.status.slice(1);
-        const dateVal = reportDateInput.value;
+        const color = opData.progress === 100 ? "progress-green"
+                    : opData.progress > 0 ? "progress-yellow"
+                    : "progress-red";
 
-        const filterPart = lastFilterType && lastFilterValue ? `&filter=${encodeURIComponent(lastFilterType)}&value=${encodeURIComponent(lastFilterValue)}` : '';
-        const actionUrl = opData.status === 'view'
-            ? `view-operation.html?plantID=${p.plantID}&date=${dateVal}${filterPart}`
-            : `update-operation.html?plantID=${p.plantID}&date=${dateVal}${filterPart}`;
+        const btnLabel = opData.status[0].toUpperCase() + opData.status.slice(1);
 
-        return `<tr data-plant="${p.plantID}">
+        const urlFilter = filterType ? `&filter=${filterType}&value=${filterValue}` : "";
+        const date = reportDateInput.value;
+
+        const page =
+            opData.status === "view"
+                ? "view-operation.html"
+                : "update-operation.html";
+
+        return `
+        <tr data-plant="${p.plantID}">
             <td>${p.serialNo}</td>
             <td>${p.plantID}</td>
             <td>${p.plantName}</td>
             <td>${p.kld}</td>
             <td>${p.zones}</td>
+
             <td>
                 <div class="progress-bar">
-                    <div class="progress-fill ${clr}" style="width:${opData.progress}%"></div>
+                    <div class="progress-fill ${color}" style="width:${opData.progress}%"></div>
                 </div>
                 <small>${opData.progress}%</small>
             </td>
+
             <td>
-                <button class="btn-update ${opData.status}" onclick="window.location.href='${actionUrl}'">${statusLabel}</button>
+                <button class="btn-update ${opData.status}"
+                    onclick="window.location.href='${page}?plantID=${p.plantID}&date=${date}${urlFilter}'">
+                    ${btnLabel}
+                </button>
             </td>
         </tr>`;
     }
 
+    // ---------------- RENDER TABLE ---------------- //
     async function renderTable(date) {
-        if (!allPlants.length) {
-            plantTableBody.innerHTML = `<tr><td colspan="6" class="no-data">No plants found</td></tr>`;
-            return;
-        }
 
-        visiblePlants = allPlants.slice();
-        visiblePlants.forEach((p, i) => p.serialNo = i + 1);
+        if (!allPlants.length) return;
 
-        const placeholders = visiblePlants.map(p => `
-            <tr data-plant="${p.plantID}">
-                <td>${p.serialNo}</td>
-                <td>${p.plantID}</td>
-                <td>${p.plantName}</td>
-                <td>${p.kld}</td>
-                <td>${p.zones}</td>
-                <td><div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div><small>0%</small></td>
-                <td><button class="btn-update pending">...</button></td>
-            </tr>`).join('');
-        plantTableBody.innerHTML = placeholders;
+        plantTableBody.innerHTML = "";
 
-        visiblePlants.forEach(async (p) => {
+        allPlants.forEach((p, index) => {
+            p.serialNo = index + 1;
+
+            plantTableBody.insertAdjacentHTML("beforeend", `
+                <tr data-plant="${p.plantID}">
+                    <td>${p.serialNo}</td>
+                    <td>${p.plantID}</td>
+                    <td>${p.plantName}</td>
+                    <td>${p.kld}</td>
+                    <td>${p.zones}</td>
+                    <td><div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div><small>0%</small></td>
+                    <td><button class="btn-update pending">...</button></td>
+                </tr>
+            `);
+        });
+
+        allPlants.forEach(async p => {
             const opData = await fetchOp(p.plantID, date);
             const row = plantTableBody.querySelector(`tr[data-plant="${p.plantID}"]`);
             if (row) row.outerHTML = makeRowHtml(p, opData);
         });
     }
 
-    async function renderFiltered(filtered, date, initial=false) {
-        if (!filtered.length) {
-            plantTableBody.innerHTML = `<tr><td colspan="6" class="no-data">No plants found</td></tr>`;
+    // ---------------- APPLY FILTER ---------------- //
+    function applyFilter(skipUrlUpdate = false) {
+    if (filterType === "id" && filterValue) {
+        allPlants = originalPlants.filter(p => p.plantID == filterValue);
+
+        if (allPlants.length === 0) {
+            plantTableBody.innerHTML =
+                `<tr><td colspan="7" class="no-data">Plant Not Found</td></tr>`;
             return;
         }
+    }
 
-        visiblePlants = filtered.map((p,i) => { p.serialNo = i+1; return p; });
+    else if (filterType === "zone" && filterValue) {
+        allPlants = originalPlants.filter(p => p.zones == filterValue);
 
-        const placeholders = visiblePlants.map(p => `
-            <tr data-plant="${p.plantID}">
-                <td>${p.serialNo}</td>
-                <td>${p.plantID}</td>
-                <td>${p.plantName}</td>
-                <td>${p.kld}</td>
-                <td>${p.zones}</td>
-                <td><div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div><small>0%</small></td>
-                <td><button class="btn-update pending">...</button></td>
-            </tr>`).join('');
-        plantTableBody.innerHTML = placeholders;
-
-        visiblePlants.forEach(async (p) => {
-            const opData = await fetchOp(p.plantID, date);
-            const row = plantTableBody.querySelector(`tr[data-plant="${p.plantID}"]`);
-            if (row) row.outerHTML = makeRowHtml(p, opData);
-        });
-
-        if (!initial) {
-            const url = new URL(window.location);
-            url.searchParams.set('date', date);
-            if (lastFilterType && lastFilterValue) {
-                url.searchParams.set('filter', lastFilterType);
-                url.searchParams.set('value', lastFilterValue);
-            } else {
-                url.searchParams.delete('filter');
-                url.searchParams.delete('value');
-            }
-            history.replaceState({}, '', url.toString());
+        if (allPlants.length === 0) {
+            plantTableBody.innerHTML =
+                `<tr><td colspan="7" class="no-data">Plants Not Found</td></tr>`;
+            return;
         }
     }
 
-    function searchByID() {
-        const id = document.getElementById('plantIDInput').value.trim();
-        lastFilterType = id ? 'id' : null;
-        lastFilterValue = id || null;
-        const date = reportDateInput.value;
-        const filtered = id ? allPlants.filter(p => String(p.plantID) === String(id)) : allPlants;
-        renderFiltered(filtered, date);
+    else {
+        allPlants = [...originalPlants];
     }
 
-    function searchByZone() {
-        const zone = document.getElementById('zoneInput').value.trim();
-        lastFilterType = zone ? 'zone' : null;
-        lastFilterValue = zone || null;
-        const date = reportDateInput.value;
-        const filtered = zone ? allPlants.filter(p => String(p.zones) === String(zone)) : allPlants;
-        renderFiltered(filtered, date);
+    if (!skipUrlUpdate) updateURL();
+    renderTable(reportDateInput.value);
+}
+
+
+    function updateURL() {
+        let url = `index.html?date=${reportDateInput.value}`;
+        if (filterType && filterValue) url += `&filter=${filterType}&value=${filterValue}`;
+        history.replaceState({}, "", url);
     }
 
-    reportDateInput.addEventListener('change', () => {
-        const d = reportDateInput.value;
-        const url = new URL(window.location);
-        url.searchParams.set('date', d);
-        if (lastFilterType && lastFilterValue) {
-            url.searchParams.set('filter', lastFilterType);
-            url.searchParams.set('value', lastFilterValue);
-        } else {
-            url.searchParams.delete('filter');
-            url.searchParams.delete('value');
-        }
-        history.replaceState({}, '', url.toString());
+    // ---------------- SEARCH EVENTS ---------------- //
+    document.getElementById("searchIdBtn").onclick = () => {
+        filterType = "id";
+        filterValue = document.getElementById("plantIDInput").value.trim();
+        applyFilter();
+    };
 
-        Object.keys(cachedOps).forEach(k => {
-            if (!k.endsWith(`_${d}`)) delete cachedOps[k];
-        });
+    document.getElementById("searchZoneBtn").onclick = () => {
+        filterType = "zone";
+        filterValue = document.getElementById("zoneInput").value.trim();
+        applyFilter();
+    };
 
-        if (lastFilterType === 'id' && lastFilterValue) {
-            const filtered = allPlants.filter(p => String(p.plantID) === String(lastFilterValue));
-            renderFiltered(filtered, d);
-        } else if (lastFilterType === 'zone' && lastFilterValue) {
-            const filtered = allPlants.filter(p => String(p.zones) === String(lastFilterValue));
-            renderFiltered(filtered, d);
-        } else {
-            renderTable(d);
-        }
+    // ENTER key search
+    document.getElementById("plantIDInput").addEventListener("keypress", e => {
+        if (e.key === "Enter") document.getElementById("searchIdBtn").click();
     });
 
-    searchIdBtn.addEventListener('click', searchByID);
-    searchZoneBtn.addEventListener('click', searchByZone);
+    document.getElementById("zoneInput").addEventListener("keypress", e => {
+        if (e.key === "Enter") document.getElementById("searchZoneBtn").click();
+    });
 
-    fetchPlants();
+    // ---------------- RESET ---------------- //
+    document.getElementById("resetBtn").onclick = () => {
+        document.getElementById("plantIDInput").value = "";
+        document.getElementById("zoneInput").value = "";
+        filterType = null;
+        filterValue = null;
+        cachedOps = {};
+        applyFilter();
+    };
 
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        document.getElementById('plantIDInput').value = "";
-        document.getElementById('zoneInput').value = "";
-
-        lastFilterType = null;
-        lastFilterValue = null;
-
-        const url = new URL(window.location);
-        url.searchParams.set('date', reportDateInput.value);
-        url.searchParams.delete('filter');
-        url.searchParams.delete('value');
-        history.replaceState({}, '', url.toString());
-
+    // ---------------- DATE CHANGE ---------------- //
+    reportDateInput.addEventListener("change", () => {
+        cachedOps = {};
+        updateURL();
         renderTable(reportDateInput.value);
     });
 
-    // ENTER → Search by Plant ID
-document.getElementById("plantIDInput")
-        .addEventListener("keypress", function(e) {
-            if (e.key === "Enter") searchByID();
-        });
+    // ---------------- REDIRECT HOME (retain filters) ---------------- //
+    function redirectHome() {
+        updateURL();
+        window.location.href = location.href;
+    }
 
-// ENTER → Search by Zone
-document.getElementById("zoneInput")
-        .addEventListener("keypress", function(e) {
-            if (e.key === "Enter") searchByZone();
-        });
+    // ---------------- SSE AUTO REFRESH ---------------- //
+    function startSSE() {
+        const evt = new EventSource("/api/events/updates");
 
+        evt.onmessage = () => {
+            cachedOps = {};
+            fetchPlants();
+        };
 
-    // ---------------------------------------------------------
-//    LIVE AUTO REFRESH USING SSE
-// ---------------------------------------------------------
+        evt.onerror = () => setTimeout(startSSE, 2000);
+    }
 
-function startSSE() {
-    const evtSource = new EventSource("/api/events/updates");
-
-    evtSource.onmessage = async function(event) {
-    console.log("🔄 Update Received from Server");
-
-    cachedOps = {};   // 🔥 IMPORTANT: Remove stale progress
-
-    showToast("Updated Automatically");
-    await fetchPlants();   // reload entire table smoothly
-};
-
-
-    evtSource.onerror = function(err) {
-        console.log("SSE connection lost. Reconnecting...");
-        setTimeout(startSSE, 2000); // auto-reconnect
-    };
-}
-
-startSSE();
-
-
-// ---------------------------------------------------------
-//    Toast Message (Smooth Notification)
-// ---------------------------------------------------------
-function showToast(msg) {
-    const t = document.createElement("div");
-    t.innerText = msg;
-    t.style.position = "fixed";
-    t.style.bottom = "20px";
-    t.style.right = "20px";
-    t.style.padding = "12px 20px";
-    t.style.background = "#059669";
-    t.style.color = "white";
-    t.style.borderRadius = "6px";
-    t.style.boxShadow = "0 4px 14px rgba(0,0,0,0.2)";
-    t.style.zIndex = "9999";
-    t.style.fontSize = "15px";
-    t.style.opacity = "0";
-    t.style.transition = "opacity .4s ease";
-
-    document.body.appendChild(t);
-    setTimeout(() => t.style.opacity = "1", 50);
-    setTimeout(() => {
-        t.style.opacity = "0";
-        setTimeout(() => t.remove(), 400);
-    }, 1800);
-}
-
+    startSSE();
+    fetchPlants();
 
 </script>
 </body>

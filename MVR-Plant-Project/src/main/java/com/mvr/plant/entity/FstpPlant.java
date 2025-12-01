@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +64,21 @@ public class FstpPlant
 
     @Column(name = "Internet", columnDefinition = "BIT DEFAULT 0")
     private Boolean internet = false;
+
+    @Column(name = "MnitDateOfCompletion")
+    private LocalDate mnitDateOfCompletion;
+
+    @Column(name = "PermanentPowerDateOfCompletion")
+    private LocalDate permanentPowerDateOfCompletion;
+
+    @Column(name = "InternetDateOfCompletion")
+    private LocalDate internetDateOfCompletion;
+
+    @Column(name = "SolarDateOfCompletion")
+    private LocalDate solarDateOfCompletion;
+
+    @Column(name = "SolarPlantCapacity")
+    private Long solarPlantCapacity;
 
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
     @JsonManagedReference

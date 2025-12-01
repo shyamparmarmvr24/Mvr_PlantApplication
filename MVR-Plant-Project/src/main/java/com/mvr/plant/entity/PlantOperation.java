@@ -34,33 +34,74 @@ public class PlantOperation
 
     private LocalDate operationDate;
 
-    private Double sludgeTankLevel;
+    private Double sludgeTankLevelAm;
 
-    private Double sludgeProcessed;
+    private Double sludgeTankLevelPm;
 
     private Double sludgeReceived;
+
+    private Integer noOfTrips;
+
+    private Double sludgeProcessed;
 
     private Double biocharProduced;
 
     private Double plantRunningHrs;
 
-    private Double solarReadingAm;
+    private Boolean solarIntegration;
 
-    private Double solarReadingPm;
+    private Double powerReadingAmImport;
+
+    private Double powerReadingAmExport;
+
+    private Double powerReadingPmImport;
+
+    private Double powerReadingPmExport;
 
     private Double powerReadingAm;
 
     private Double powerReadingPm;
 
-    private Integer noOfTrips;
+    private Double powerConsumed;
+
+    private Double dgReadingAm;
+
+    private Double dgReadingPm;
+
+    private Double dgDiesalPercentageAm;
+
+    private Double dgDiesalPercentagePm;
+
+    private Double dgRunHours;
 
     private Double vehicleReadingAm;
 
     private Double vehicleReadingPm;
 
-    private Boolean dgUsed;
+    private Integer vehicleFuelLevel;
 
-    private Double dgRunHrs;
+    private Double polymerUsage;
+
+    private Double pillets;
+
+    private Double flowMeterReadingAm;
+
+    private Double flowMeterReadingPm;
+
+    private Double cod;
+
+    private Double bod;
+
+    private Double tn;
+
+    private Double temperature;
+
+    private Double tss;
+
+    private Double ph;
+
+    @Column(length = 500)
+    private String remarks;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
