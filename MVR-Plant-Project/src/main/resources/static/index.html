@@ -11,7 +11,8 @@
         * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', sans-serif;
-            margin:0; padding:0;
+            margin:0;
+            padding:0;
             background:#f5f7fa;
             color:#222;
         }
@@ -26,7 +27,6 @@
             background: linear-gradient(90deg,#0f172a,#0ea5e9);
             padding:14px 20px;
             color:#fff;
-            gap:12px;
         }
 
         .logo-left {
@@ -35,20 +35,12 @@
             gap:12px;
             cursor:pointer;
         }
+        .logo-left img { height:28px; }
 
-        .logo-left img {
-            height:28px;
-            width:auto;
-            display:block;
-        }
-
-        .logo-left .brand {
-            font-family: "Times New Roman", Times, serif !important;
+        .brand {
+            font-family:"Times New Roman", serif;
             font-size:25px;
             font-weight:700;
-            letter-spacing:1px;
-            color:#ffffff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.25);
         }
 
         .date-picker { display:flex; align-items:center; gap:8px; }
@@ -66,16 +58,15 @@
         .dashboard-title {
             text-align:center;
             margin:18px auto 6px;
-            max-width:1100px;
             font-size:26px;
             color:#0f172a;
             font-weight:700;
-            font-family: "Times New Roman", Times, serif !important;
+            font-family:"Times New Roman", serif;
         }
 
         .container {
-            max-width:1100px;
-            margin:8px auto 40px;
+            max-width:1250px;
+            margin:10px auto 40px;
             padding:0 16px;
         }
 
@@ -87,8 +78,7 @@
             align-items:center;
         }
 
-        .search-box { flex:1; min-width:180px; display:flex; }
-
+        .search-box { flex:1; min-width:200px; display:flex; }
         .search-box input {
             flex:1;
             padding:10px;
@@ -96,7 +86,6 @@
             border-radius:6px 0 0 6px;
             font-size:15px;
         }
-
         .search-box button {
             padding:10px 16px;
             border:none;
@@ -151,15 +140,17 @@
             text-align:center;
             border-bottom:1px solid #f1f5f9;
             white-space: nowrap;
+            font-size:15px;
         }
 
-        th:nth-child(1), td:nth-child(1) { width: 8%; }
-        th:nth-child(2), td:nth-child(2) { width: 12%; }
-        th:nth-child(3), td:nth-child(3) { width: 22%; }
-        th:nth-child(4), td:nth-child(4) { width: 12%; }
+        th:nth-child(1), td:nth-child(1) { width: 6%; }
+        th:nth-child(2), td:nth-child(2) { width: 10%; }
+        th:nth-child(3), td:nth-child(3) { width: 24%; }
+        th:nth-child(4), td:nth-child(4) { width: 10%; }
         th:nth-child(5), td:nth-child(5) { width: 10%; }
-        th:nth-child(6), td:nth-child(6) { width: 22%; }
-        th:nth-child(7), td:nth-child(7) { width: 14%; }
+        th:nth-child(6), td:nth-child(6) { width: 13%; }
+        th:nth-child(7), td:nth-child(7) { width: 13%; }
+        th:nth-child(8), td:nth-child(8) { width: 14%; }
 
         th {
             background:#0369a1;
@@ -172,35 +163,27 @@
         tr:nth-child(even){ background:#fbfdff; }
         tr:hover { background:#f0f9ff; }
 
-        .progress-bar {
-            width:170px;
-            height:14px;
-            background:#e6eef8;
-            border-radius:8px;
-            overflow:hidden;
-            margin:auto;
+        .btn-status {
+            padding: 10px 16px;
+            border:none;
+            border-radius:6px;
+            font-weight:600;
+            cursor:pointer;
+            width:130px;
+            font-size:14px;
+            text-transform: capitalize;
         }
 
-        .progress-fill { height:100%; width:0; transition:width .25s ease-in-out; }
-        .progress-red{ background:#ef4444; }
-        .progress-yellow{ background:#f59e0b; }
-        .progress-green{ background:#10b981; }
+        .update { background:#ef4444; color:white; }
+        .pending { background:#f59e0b; color:white; }
+        .view { background:#10b981; color:white; }
 
-        .btn-update {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            min-width: 100px;
-            text-align: center;
+        .no-data {
+            text-align:center;
+            padding:18px;
+            color:#6b7280;
+            font-size:16px;
         }
-
-        .btn-update.update { background:#ef4444; color:white; }
-        .btn-update.pending { background:#f59e0b; color:#111; }
-        .btn-update.view { background:#10b981; color:white; }
-
-        .no-data { text-align:center; padding:18px; color:#6b7280; }
 
     </style>
 </head>
@@ -209,7 +192,7 @@
 
 <header>
     <div class="logo-left" onclick="redirectHome()">
-        <img src="https://mvrtech.org/MVR_Company_Logo%20copy.png" alt="MVR Logo" />
+        <img src="https://mvrtech.org/MVR_Company_Logo%20copy.png">
         <div class="brand">MVR TECHNOLOGY</div>
     </div>
 
@@ -235,6 +218,9 @@
         </div>
 
         <button class="addBtn" id="resetBtn" style="background:#6b7280;">Reset</button>
+        <button class="addBtn" onclick="window.location.href='create-plant.html'" style="background:#16a34a;">
+            Add Plant
+        </button>
     </div>
 
     <table>
@@ -245,142 +231,208 @@
             <th>Name</th>
             <th>KLD</th>
             <th>Zone</th>
-            <th>Progress</th>
-            <th>Action</th>
+            <th>Plant Operation</th>
+            <th>Lab Operation</th>
+            <th>Attendance</th>
         </tr>
         </thead>
 
         <tbody id="plantTableBody">
-        <tr><td colspan="7" class="no-data">Loading...</td></tr>
+        <tr><td colspan="8" class="no-data">Loading...</td></tr>
         </tbody>
     </table>
 
 </div>
 
 <script>
+    const plantTableBody = document.getElementById("plantTableBody");
+    const reportDateInput = document.getElementById("reportDate");
 
-    // ----- PROGRESS FIELD LIST ------
-    const backendFields = [
-        "sludgeTankLevelAm","sludgeTankLevelPm","sludgeReceived","noOfTrips","sludgeProcessed",
-        "biocharProduced","plantRunningHrs","solarIntegration",
+    const today = new Date().toISOString().split("T")[0];
+    reportDateInput.max = today;
 
-        "powerReadingAmImport","powerReadingAmExport","powerReadingPmImport","powerReadingPmExport",
-        "powerReadingAm","powerReadingPm",
+    const urlDate = new URLSearchParams(window.location.search).get("date");
+    reportDateInput.value = (urlDate && urlDate <= today) ? urlDate : today;
 
-        "powerConsumed",
-
-        "dgReadingAm","dgReadingPm","dgDiesalPercentageAm","dgDiesalPercentagePm","dgRunHours",
-
-        "vehicleReadingAm","vehicleReadingPm","vehicleFuelLevel",
-
-        "polymerUsage","pillets","flowMeterReadingAm","flowMeterReadingPm","cod","bod","tn","temperature","tss","ph"
-    ];
-
-    function calculateProgress(op) {
-        const total = op.solarIntegration === true ? 31 : 29;
-        let filled = 0;
-
-        backendFields.forEach(f => {
-            if (op.solarIntegration === true &&
-                (f === "powerReadingAm" || f === "powerReadingPm")) return;
-
-            if (op.solarIntegration === false &&
-                (f === "powerReadingAmImport" || f === "powerReadingAmExport" ||
-                 f === "powerReadingPmImport" || f === "powerReadingPmExport")) return;
-
-            if (op[f] !== null && op[f] !== undefined && op[f] !== "") filled++;
-        });
-
-        return Math.min(100, Math.round((filled / total) * 100));
-    }
-
-    // ---------------- PAGE VARIABLES ---------------- //
-   const plantTableBody = document.getElementById("plantTableBody");
-const reportDateInput = document.getElementById("reportDate");
-
-// ---------------- DATE LIMIT (Correct implementation) ---------------- //
-const today = new Date().toISOString().split("T")[0];
-reportDateInput.max = today;
-
-const urlDate = new URLSearchParams(window.location.search).get("date");
-reportDateInput.value = (urlDate && urlDate <= today) ? urlDate : today;
-
-let allPlants = [];
-    let originalPlants = [];   // keeps copy for reset
-    let cachedOps = {};
-
+    let allPlants = [];
+    let originalPlants = [];
     let filterType = null;
     let filterValue = null;
 
-<!--    const today = new Date().toISOString().split("T")[0];-->
-<!--    reportDateInput.value = today;-->
+    // ----------------------- NAVIGATION ----------------------- //
+    function openPlantOperation(id, date, status) {
+        if (status === "view")
+            window.location.href = `view-operation.html?plantID=${id}&date=${date}`;
+        else
+            window.location.href = `update-operation.html?plantID=${id}&date=${date}`;
+    }
 
-    // ---------------- FETCH PLANTS ---------------- //
+    function openLabOperation(id, date, status) {
+        if (status === "view")
+            window.location.href = `view-lab.html?plantID=${id}&date=${date}`;
+        else
+            window.location.href = `update-lab.html?plantID=${id}&date=${date}`;
+    }
+
+    function openAttendance(id, date, status) {
+        // kept for future implementation
+        if (status === "view")
+            window.location.href = `view-attendance.html?plantID=${id}&date=${date}`;
+        else
+            window.location.href = `update-attendance.html?plantID=${id}&date=${date}`;
+    }
+
+    // ============================================================
+    //           SEPARATE STATUS LOGIC FOR EACH TYPE
+    // ============================================================
+
+    // ------------ PLANT OPERATION STATUS ------------ //
+    function calcPlantStatus(op) {
+        if (!op || typeof op !== "object") return "update";
+
+        const solar = op.solarIntegration;
+
+        const baseFields = [
+            "sludgeTankLevelAm",
+            "sludgeTankLevelPm",
+            "sludgeReceived",
+            "noOfTrips",
+            "sludgeProcessed",
+            "biocharProduced",
+            "plantRunningHrs",
+            "solarIntegration",
+            "dgReadingAm",
+            "dgReadingPm",
+            "dgDiesalPercentageAm",
+            "dgDiesalPercentagePm",
+            "vehicleReadingAm",
+            "vehicleReadingPm",
+            "vehicleFuelLevel",
+            "polymerUsage",
+            "pillets"
+        ];
+
+        const solarYesExtra = [
+            "powerReadingAmImport",
+            "powerReadingAmExport",
+            "powerReadingPmImport",
+            "powerReadingPmExport"
+        ];
+
+        const solarNoExtra = [
+            "powerReadingAm",
+            "powerReadingPm"
+        ];
+
+        let fieldsToCheck = [...baseFields];
+
+        if (solar === true) {
+            fieldsToCheck = fieldsToCheck.concat(solarYesExtra);
+        } else if (solar === false) {
+            fieldsToCheck = fieldsToCheck.concat(solarNoExtra);
+        }
+        // if solarIntegration is null -> only base fields considered
+
+        const total = fieldsToCheck.length;
+        let filled = 0;
+
+        fieldsToCheck.forEach(f => {
+            const v = op[f];
+            if (v !== null && v !== undefined && v !== "") filled++;
+        });
+
+        if (filled === 0) return "update";
+        if (filled < total) return "pending";
+        return "view";
+    }
+
+    async function getPlantStatus(plantID, date) {
+        try {
+            const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
+            const text = await res.text();
+
+            if (!text || !text.trim() || text.trim() === "null") return "update";
+
+            const data = JSON.parse(text);
+            return calcPlantStatus(data);
+
+        } catch (e) {
+            return "update";
+        }
+    }
+
+    // ------------ LAB OPERATION STATUS ------------ //
+    const labFieldsForStatus = [
+        "cod",
+        "bod",
+        "th",
+        "temperature",
+        "tss",
+        "ph",
+        "velocity",
+        "cumulativeFlow",
+        "flowMeterReadingAm",
+        "flowMeterReadingPm"
+    ];
+
+    function calcLabStatus(lab) {
+        if (!lab || typeof lab !== "object") return "update";
+
+        const total = labFieldsForStatus.length;
+        let filled = 0;
+
+        labFieldsForStatus.forEach(f => {
+            const v = lab[f];
+            if (v !== null && v !== undefined && v !== "") filled++;
+        });
+
+        if (filled === 0) return "update";
+        if (filled < total) return "pending";
+        return "view";
+    }
+
+    async function getLabStatus(plantID, date) {
+        try {
+            const res = await fetch(`/api/laboperations/plant/${plantID}?date=${date}`);
+            const text = await res.text();
+
+            if (!text || !text.trim() || text.trim() === "null") return "update";
+
+            const data = JSON.parse(text);
+            return calcLabStatus(data);
+
+        } catch (e) {
+            return "update";
+        }
+    }
+
+    // ------------ ATTENDANCE STATUS (placeholder) ------------ //
+    function getAttendanceStatus() {
+        return "update"; // always 'update' for now; button disabled
+    }
+
+    // ----------------------- FETCH PLANTS ----------------------- //
     async function fetchPlants() {
-        plantTableBody.innerHTML = `<tr><td colspan="7" class="no-data">Refreshing...</td></tr>`;
+        plantTableBody.innerHTML = `<tr><td colspan="8" class="no-data">Refreshing...</td></tr>`;
 
         try {
             const res = await fetch("/api/plants");
             allPlants = await res.json();
             originalPlants = [...allPlants];
-
-            // Apply existing filter again after refresh
             applyFilter(true);
-        } catch (e) {
-            plantTableBody.innerHTML =
-                `<tr><td colspan="7" class="no-data">Error loading plants</td></tr>`;
-        }
-    }
-
-    // ---------------- FETCH OP ---------------- //
-    async function fetchOp(plantID, date) {
-        const key = plantID + "_" + date;
-
-        if (cachedOps[key]) return cachedOps[key];
-
-        try {
-            const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
-            const text = await res.text();
-
-            if (!text || !text.trim()) {
-                cachedOps[key] = { progress: 0, status: "update", op: {} };
-                return cachedOps[key];
-            }
-
-            const op = JSON.parse(text);
-            const progress = calculateProgress(op);
-
-            const status = progress === 100 ? "view"
-                        : progress > 0 ? "pending"
-                        : "update";
-
-            cachedOps[key] = { progress, status, op };
-            return cachedOps[key];
-
         } catch {
-            cachedOps[key] = { progress: 0, status: "update", op: {} };
-            return cachedOps[key];
+            plantTableBody.innerHTML = `<tr><td colspan="8" class="no-data">Error loading plants</td></tr>`;
         }
     }
 
-    // ---------------- RENDER ROW ---------------- //
-    function makeRowHtml(p, opData) {
-        const color = opData.progress === 100 ? "progress-green"
-                    : opData.progress > 0 ? "progress-yellow"
-                    : "progress-red";
-
-        const btnLabel = opData.status[0].toUpperCase() + opData.status.slice(1);
-
-        const urlFilter = filterType ? `&filter=${filterType}&value=${filterValue}` : "";
-        const date = reportDateInput.value;
-
-        const page =
-            opData.status === "view"
-                ? "view-operation.html"
-                : "update-operation.html";
+    // ----------------------- RENDER EACH ROW ----------------------- //
+    async function makeRow(p, date) {
+        const plantOpStatus = await getPlantStatus(p.plantID, date);
+        const labOpStatus   = await getLabStatus(p.plantID, date);
+        const empOpStatus   = getAttendanceStatus();
 
         return `
-        <tr data-plant="${p.plantID}">
+        <tr>
             <td>${p.serialNo}</td>
             <td>${p.plantID}</td>
             <td>${p.plantName}</td>
@@ -388,89 +440,67 @@ let allPlants = [];
             <td>${p.zones}</td>
 
             <td>
-                <div class="progress-bar">
-                    <div class="progress-fill ${color}" style="width:${opData.progress}%"></div>
-                </div>
-                <small>${opData.progress}%</small>
+                <button class="btn-status ${plantOpStatus}"
+                    onclick="openPlantOperation(${p.plantID}, '${date}', '${plantOpStatus}')">
+                    ${plantOpStatus}
+                </button>
             </td>
 
             <td>
-                <button class="btn-update ${opData.status}"
-                    onclick="window.location.href='${page}?plantID=${p.plantID}&date=${date}${urlFilter}'">
-                    ${btnLabel}
+                <button class="btn-status ${labOpStatus}"
+                    onclick="openLabOperation(${p.plantID}, '${date}', '${labOpStatus}')">
+                    ${labOpStatus}
+                </button>
+            </td>
+
+            <td>
+                <button class="btn-status ${empOpStatus}" disabled>
+                    coming soon
                 </button>
             </td>
         </tr>`;
     }
 
-    // ---------------- RENDER TABLE ---------------- //
+    // ----------------------- RENDER TABLE ----------------------- //
     async function renderTable(date) {
-
-        if (!allPlants.length) return;
-
         plantTableBody.innerHTML = "";
 
-        allPlants.forEach((p, index) => {
-            p.serialNo = index + 1;
-
-            plantTableBody.insertAdjacentHTML("beforeend", `
-                <tr data-plant="${p.plantID}">
-                    <td>${p.serialNo}</td>
-                    <td>${p.plantID}</td>
-                    <td>${p.plantName}</td>
-                    <td>${p.kld}</td>
-                    <td>${p.zones}</td>
-                    <td><div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div><small>0%</small></td>
-                    <td><button class="btn-update pending">...</button></td>
-                </tr>
-            `);
-        });
-
-        allPlants.forEach(async p => {
-            const opData = await fetchOp(p.plantID, date);
-            const row = plantTableBody.querySelector(`tr[data-plant="${p.plantID}"]`);
-            if (row) row.outerHTML = makeRowHtml(p, opData);
-        });
+        for (let i = 0; i < allPlants.length; i++) {
+            let p = allPlants[i];
+            p.serialNo = i + 1;
+            const rowHtml = await makeRow(p, date);
+            plantTableBody.insertAdjacentHTML("beforeend", rowHtml);
+        }
     }
 
-    // ---------------- APPLY FILTER ---------------- //
+    // ----------------------- FILTER ----------------------- //
     function applyFilter(skipUrlUpdate = false) {
-    if (filterType === "id" && filterValue) {
-        allPlants = originalPlants.filter(p => p.plantID == filterValue);
+        if (filterType === "id" && filterValue) {
+            allPlants = originalPlants.filter(p => p.plantID == filterValue);
+        } else if (filterType === "zone" && filterValue) {
+            allPlants = originalPlants.filter(p => p.zones == filterValue);
+        } else {
+            allPlants = [...originalPlants];
+        }
 
-        if (allPlants.length === 0) {
-            plantTableBody.innerHTML =
-                `<tr><td colspan="7" class="no-data">Plant Not Found</td></tr>`;
+        if (!allPlants.length) {
+            plantTableBody.innerHTML = `<tr><td colspan="8" class="no-data">No Data Found</td></tr>`;
             return;
         }
+
+        if (!skipUrlUpdate) updateURL();
+
+        renderTable(reportDateInput.value);
     }
-
-    else if (filterType === "zone" && filterValue) {
-        allPlants = originalPlants.filter(p => p.zones == filterValue);
-
-        if (allPlants.length === 0) {
-            plantTableBody.innerHTML =
-                `<tr><td colspan="7" class="no-data">Plants Not Found</td></tr>`;
-            return;
-        }
-    }
-
-    else {
-        allPlants = [...originalPlants];
-    }
-
-    if (!skipUrlUpdate) updateURL();
-    renderTable(reportDateInput.value);
-}
-
 
     function updateURL() {
         let url = `index.html?date=${reportDateInput.value}`;
-        if (filterType && filterValue) url += `&filter=${filterType}&value=${filterValue}`;
+        if (filterType && filterValue)
+            url += `&filter=${filterType}&value=${filterValue}`;
         history.replaceState({}, "", url);
     }
 
-    // ---------------- SEARCH EVENTS ---------------- //
+    // ----------------------- SEARCH ----------------------- //
     document.getElementById("searchIdBtn").onclick = () => {
         filterType = "id";
         filterValue = document.getElementById("plantIDInput").value.trim();
@@ -483,7 +513,6 @@ let allPlants = [];
         applyFilter();
     };
 
-    // ENTER key search
     document.getElementById("plantIDInput").addEventListener("keypress", e => {
         if (e.key === "Enter") document.getElementById("searchIdBtn").click();
     });
@@ -492,44 +521,36 @@ let allPlants = [];
         if (e.key === "Enter") document.getElementById("searchZoneBtn").click();
     });
 
-    // ---------------- RESET ---------------- //
+    // ----------------------- RESET ----------------------- //
     document.getElementById("resetBtn").onclick = () => {
         document.getElementById("plantIDInput").value = "";
         document.getElementById("zoneInput").value = "";
         filterType = null;
         filterValue = null;
-        cachedOps = {};
         applyFilter();
     };
 
-    // ---------------- DATE CHANGE ---------------- //
+    // ----------------------- DATE CHANGE ----------------------- //
     reportDateInput.addEventListener("change", () => {
-        cachedOps = {};
         updateURL();
         renderTable(reportDateInput.value);
     });
 
-    // ---------------- REDIRECT HOME (retain filters) ---------------- //
     function redirectHome() {
         updateURL();
         window.location.href = location.href;
     }
 
-    // ---------------- SSE AUTO REFRESH ---------------- //
+    // ----------------------- SSE AUTO REFRESH ----------------------- //
     function startSSE() {
         const evt = new EventSource("/api/events/updates");
-
-        evt.onmessage = () => {
-            cachedOps = {};
-            fetchPlants();
-        };
-
+        evt.onmessage = () => fetchPlants();
         evt.onerror = () => setTimeout(startSSE, 2000);
     }
 
     startSSE();
     fetchPlants();
-
 </script>
+
 </body>
 </html>

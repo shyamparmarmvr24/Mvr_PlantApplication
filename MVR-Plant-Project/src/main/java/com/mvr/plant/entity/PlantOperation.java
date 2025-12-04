@@ -84,22 +84,6 @@ public class PlantOperation
 
     private Double pillets;
 
-    private Double flowMeterReadingAm;
-
-    private Double flowMeterReadingPm;
-
-    private Double cod;
-
-    private Double bod;
-
-    private Double tn;
-
-    private Double temperature;
-
-    private Double tss;
-
-    private Double ph;
-
     @Column(length = 500)
     private String remarks;
 

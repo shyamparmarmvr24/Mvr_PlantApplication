@@ -65,7 +65,8 @@
         }
 
         input[type="text"],
-        input[type="number"]{
+        input[type="number"],
+        input[type="date"]{
             width:95%;
             padding:10px;
             border:1px solid #bbb;
@@ -79,6 +80,7 @@
             gap:20px;
             align-items:center;
         }
+
         .yesno label{
             font-weight:600;
             color:#2d4b3f;
@@ -185,7 +187,7 @@
             </td>
         </tr>
 
-        <!-- YES/NO merged inside table -->
+        <!-- YES/NO for 4 booleans -->
         <tr>
             <td>MNIT</td>
             <td class="yesno">
@@ -218,6 +220,45 @@
             </td>
         </tr>
 
+        <!-- NEW FIELDS START -->
+        <tr><th colspan="2">Project Milestones</th></tr>
+
+        <tr><td>MNIT Completion Date</td><td><input type="date" id="mnitDateOfCompletion"></td></tr>
+        <tr><td>Permanent Power Completion Date</td><td><input type="date" id="permanentPowerDateOfCompletion"></td></tr>
+        <tr><td>Internet Completion Date</td><td><input type="date" id="internetDateOfCompletion"></td></tr>
+        <tr><td>Solar Completion Date</td><td><input type="date" id="solarDateOfCompletion"></td></tr>
+
+        <tr><td>Solar Plant Capacity</td><td><input type="number" id="solarPlantCapacity"></td></tr>
+
+        <tr><td>Construction Started</td><td><input type="date" id="constructionStartedDate"></td></tr>
+        <tr><td>Civil Work Completed</td><td><input type="date" id="civilWorkCompletedDate"></td></tr>
+        <tr><td>Machinery Assemble</td><td><input type="date" id="machinaryAssembleDate"></td></tr>
+
+        <tr><td>COD & BOD Sensor Date</td><td><input type="date" id="codAndBodSenserDate"></td></tr>
+        <tr><td>IP Phone Date</td><td><input type="date" id="ipPhoneDate"></td></tr>
+        <tr><td>Camera Config Date</td><td><input type="date" id="cameraConfigurationDate"></td></tr>
+
+        <tr>
+            <td>Tabs</td>
+            <td class="yesno">
+                <label><input type="radio" name="tabs" value="1"> Yes</label>
+                <label><input type="radio" name="tabs" value="0" checked> No</label>
+            </td>
+        </tr>
+
+        <tr><td>Tabs Received Date</td><td><input type="date" id="tabsReceivedDate"></td></tr>
+
+        <tr>
+            <td>GPS</td>
+            <td class="yesno">
+                <label><input type="radio" name="gps" value="1"> Yes</label>
+                <label><input type="radio" name="gps" value="0" checked> No</label>
+            </td>
+        </tr>
+
+        <tr><td>GPS Date</td><td><input type="date" id="gpsDate"></td></tr>
+        <!-- NEW FIELDS END -->
+
     </table>
 
     <button class="addBtn" onclick="createPlant()">Add Plant</button>
@@ -227,9 +268,9 @@
 </div>
 
 <script>
+
     async function createPlant() {
 
-        // Required fields
         const required = ["plantID","plantName","stateCode","district","kld","wardNo","pinCode","zones"];
         let valid = true;
 
@@ -246,58 +287,67 @@
 
         function getRadio(name){
             let r = document.querySelector(`input[name="${name}"]:checked`);
-            return r ? Number(r.value) : 0;
+            return r ? (r.value === "1") : false;
         }
 
         const plant = {
-            plantID: Number(document.getElementById("plantID").value),
-            plantName: document.getElementById("plantName").value,
-            stateCode: document.getElementById("stateCode").value,
-            district: document.getElementById("district").value,
-            kld: Number(document.getElementById("kld").value),
-            wardNo: Number(document.getElementById("wardNo").value),
-            pinCode: Number(document.getElementById("pinCode").value),
-            zones: Number(document.getElementById("zones").value),
+            plantID: Number(plantID.value),
+            plantName: plantName.value,
+            stateCode: stateCode.value,
+            district: district.value,
+            kld: Number(kld.value),
+            wardNo: Number(wardNo.value),
+            pinCode: Number(pinCode.value),
+            zones: Number(zones.value),
+
             mnit: getRadio("mnit"),
             permanentPower: getRadio("permanentPower"),
             solar: getRadio("solar"),
-            internet: getRadio("internet")
+            internet: getRadio("internet"),
+
+            mnitDateOfCompletion: mnitDateOfCompletion.value || null,
+            permanentPowerDateOfCompletion: permanentPowerDateOfCompletion.value || null,
+            internetDateOfCompletion: internetDateOfCompletion.value || null,
+            solarDateOfCompletion: solarDateOfCompletion.value || null,
+
+            solarPlantCapacity: solarPlantCapacity.value || null,
+
+            constructionStartedDate: constructionStartedDate.value || null,
+            civilWorkCompletedDate: civilWorkCompletedDate.value || null,
+            machinaryAssembleDate: machinaryAssembleDate.value || null,
+
+            codAndBodSenserDate: codAndBodSenserDate.value || null,
+            ipPhoneDate: ipPhoneDate.value || null,
+            cameraConfigurationDate: cameraConfigurationDate.value || null,
+
+            tabs: getRadio("tabs"),
+            tabsReceivedDate: tabsReceivedDate.value || null,
+
+            gps: getRadio("gps"),
+            gpsDate: gpsDate.value || null
         };
 
         try {
             const res = await fetch("/api/plants", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
                 body: JSON.stringify(plant)
             });
 
             if (!res.ok) {
-                let errorMessage = "Unknown error occurred";
-
-                try {
-                    const text = await res.text();
-                    try {
-                        const json = JSON.parse(text);
-                        errorMessage = json.message || errorMessage;
-                    } catch {
-                        errorMessage = text;
-                    }
-                } catch {}
-
-                document.getElementById("msg").innerText = "Error: " + errorMessage;
-                document.getElementById("msg").style.color = "red";
+                document.getElementById("msg").innerText = "Error adding plant";
+                document.getElementById("msg").style.color="red";
                 return;
             }
 
             document.getElementById("msg").innerText = "Plant added successfully!";
-            document.getElementById("msg").style.color = "#27ae60";
-
-            document.querySelectorAll("input").forEach(i => i.value = "");
+            document.getElementById("msg").style.color="#27ae60";
 
         } catch (err) {
             console.log(err);
         }
     }
+
 </script>
 
 </body>

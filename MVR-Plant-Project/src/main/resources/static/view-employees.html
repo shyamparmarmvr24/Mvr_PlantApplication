@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Employees List - MVR TECHNOLOGY</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0f172a, #0ea5e9);
+            padding: 15px 20px;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 25px auto;
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #0369a1;
+            color: white;
+            padding: 12px;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        td {
+            text-align: center;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        tr:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-create {
+            padding: 10px 14px;
+            background: #10b981;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>Employees List</header>
+
+<div class="container">
+
+    <a class="btn-create" id="addEmployeeBtn">+ Add New Employee</a>
+
+    <table>
+        <thead>
+        <tr>
+            <th>EID</th>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Mobile</th>
+            <th>Alternate</th>
+            <th>Address</th>
+            <th>DOB</th>
+            <th>Joining</th>
+        </tr>
+        </thead>
+
+        <tbody id="empTableBody">
+        <tr><td colspan="8">Loading...</td></tr>
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+    const plantID = new URLSearchParams(window.location.search).get("plantID");
+
+    document.getElementById("addEmployeeBtn").href =
+        `create-employee.html?plantID=${plantID}`;
+
+    async function loadEmployees() {
+        const res = await fetch(`/api/plantemployees/plant/${plantID}`);
+        const employees = await res.json();
+
+        const tbody = document.getElementById("empTableBody");
+        tbody.innerHTML = "";
+
+        if (employees.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8">No employees found</td></tr>`;
+            return;
+        }
+
+        employees.forEach(emp => {
+            tbody.insertAdjacentHTML("beforeend", `
+                <tr>
+                    <td>${emp.employeeId}</td>
+                    <td>${emp.employeeName}</td>
+                    <td>${emp.designation}</td>
+                    <td>${emp.mobileNo}</td>
+                    <td>${emp.alternateMobNo ?? "-"}</td>
+                    <td>${emp.address}</td>
+                    <td>${emp.dateOfBirth}</td>
+                    <td>${emp.dateOfJoining}</td>
+                </tr>
+            `);
+        });
+    }
+
+    loadEmployees();
+</script>
+
+</body>
+</html>

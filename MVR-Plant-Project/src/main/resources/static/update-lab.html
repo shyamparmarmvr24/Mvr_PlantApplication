@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
+    <title>Update Laboratory Operation</title>
+
+    <style>
+        body {
+            font-family:'Segoe UI',sans-serif;
+            background:#f5f7fa;
+            margin:0; padding:0;
+            display:flex;
+            justify-content:center;
+        }
+        .card {
+            background:white;
+            padding:28px;
+            border-radius:12px;
+            box-shadow:0 10px 25px rgba(0,0,0,0.08);
+            max-width:900px;
+            width:100%;
+            margin:20px;
+        }
+        h2 { text-align:center; color:#0369a1; margin-bottom:8px; }
+        .top-info { text-align:center; font-weight:700; margin-bottom:14px; }
+
+        table {
+            width:100%;
+            border-collapse:collapse;
+            margin-top:8px;
+        }
+        table th, table td {
+            border:1px solid #e6eef6;
+            padding:12px;
+        }
+        table th {
+            background:#0369a1;
+            color:white;
+            text-align:left;
+            width:260px;
+            font-size:15px;
+        }
+
+        .input-box {
+            width:100%;
+            padding:8px 10px;
+            border-radius:6px;
+            border:1px solid #ccc;
+            font-size:15px;
+        }
+
+        .buttons { text-align:center; margin-top:18px; }
+        .btn {
+            padding:10px 18px;
+            margin:0 8px;
+            border:none;
+            border-radius:6px;
+            font-size:15px;
+            cursor:pointer;
+        }
+        .btn-save { background:#059669; color:white; }
+        .btn-back { background:#94a3b8; color:white; }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <h2>Update Laboratory Operation</h2>
+
+    <div class="top-info" id="infoBox"></div>
+
+    <table>
+        <thead>
+        <tr><th>Field</th><th>Value</th></tr>
+        </thead>
+        <tbody id="fieldsBody"></tbody>
+    </table>
+
+    <div class="buttons">
+        <button class="btn btn-save" id="saveBtn">Save</button>
+        <button class="btn btn-back" id="backBtn">Back</button>
+    </div>
+
+</div>
+
+<script>
+
+    // -------------------------------------------
+    // URL PARAMETERS
+    // -------------------------------------------
+    const params = new URLSearchParams(window.location.search);
+    const plantID = params.get("plantID");
+    const date = params.get("date");
+
+    document.getElementById("infoBox").innerHTML =
+        `Date: <span style="color:#f97316">${date}</span>
+         &nbsp; | &nbsp;
+         Plant ID: <span style="color:#059669">${plantID}</span>`;
+
+    document.getElementById("backBtn").onclick = () => {
+        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+    };
+
+    // -------------------------------------------
+    // FIELDS — EXACT MATCH WITH BACKEND
+    // -------------------------------------------
+    const fields = [
+        {id:"cod", label:"COD"},
+        {id:"bod", label:"BOD"},
+        {id:"th", label:"TH"},
+        {id:"temperature", label:"Temperature"},
+        {id:"tss", label:"TSS"},
+        {id:"ph", label:"PH"},
+        {id:"velocity", label:"Velocity"},
+        {id:"cumulativeFlow", label:"Cumulative Flow"},
+        {id:"flowMeterReadingAm", label:"Flow Meter Reading AM"},
+        {id:"flowMeterReadingPm", label:"Flow Meter Reading PM"}
+    ];
+
+    let currentLab = {};
+    const fieldsBody = document.getElementById("fieldsBody");
+
+    // -------------------------------------------
+    // LOAD EXISTING LAB DATA
+    // -------------------------------------------
+    async function loadOperation() {
+        const res = await fetch(`/api/laboperations/plant/${plantID}?date=${date}`);
+        const text = await res.text();
+        currentLab = text ? JSON.parse(text) : {};
+
+        renderFields();
+    }
+
+    // -------------------------------------------
+    // RENDER INPUT FIELDS
+    // -------------------------------------------
+    function renderFields() {
+        fieldsBody.innerHTML = "";
+
+        fields.forEach(field => {
+            let tr = document.createElement("tr");
+
+            let labelTd = document.createElement("td");
+            labelTd.textContent = field.label;
+
+            let valTd = document.createElement("td");
+
+            let input = document.createElement("input");
+            input.className = "input-box";
+            input.id = field.id;
+            input.value = currentLab[field.id] ?? "";
+
+            valTd.appendChild(input);
+            tr.appendChild(labelTd);
+            tr.appendChild(valTd);
+
+            fieldsBody.appendChild(tr);
+        });
+    }
+
+    // -------------------------------------------
+    // SAVE LAB UPDATE
+    // -------------------------------------------
+    document.getElementById("saveBtn").onclick = async () => {
+        let data = {};
+
+        fields.forEach(f => {
+            const input = document.getElementById(f.id);
+            data[f.id] = input.value === "" ? null : input.value;
+        });
+
+        await fetch(`/api/laboperations/${plantID}?date=${date}`, {
+            method:"PUT",
+            headers: { "Content-Type":"application/json" },
+            body: JSON.stringify(data)
+        });
+
+        alert("Laboratory Operation Updated Successfully!");
+        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+    };
+
+    loadOperation();
+
+</script>
+</body>
+</html>
