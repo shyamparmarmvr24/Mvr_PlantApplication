@@ -80,7 +80,49 @@ public class FstpPlant
     @Column(name = "SolarPlantCapacity")
     private Long solarPlantCapacity;
 
+    @Column(name = "ConstructionStartedDate")
+    private LocalDate constructionStartedDate;
+
+    @Column(name = "CivilWorkCompletedDate")
+    private LocalDate civilWorkCompletedDate;
+
+    @Column(name = "MachinaryAssembleDate")
+    private LocalDate machinaryAssembleDate;
+
+    @Column(name = "CodAndBodSenserDate")
+    private LocalDate codAndBodSenserDate;
+
+    @Column(name = "IpPhoneDate")
+    private LocalDate ipPhoneDate;
+
+    @Column(name = "CameraConfigurationDate")
+    private LocalDate cameraConfigurationDate;
+
+    @Column(name = "Tabs")
+    private Boolean tabs;
+
+    @Column(name = "TabsReceivedDate")
+    private LocalDate tabsReceivedDate;
+
+    @Column(name = "Gps")
+    private Boolean gps;
+
+    @Column(name = "GpsDate")
+    private LocalDate gpsDate;
+
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<PlantOperation> operations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<LaboratoryOperation> labOperations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<PlantEmployee> plantEmployees = new ArrayList<>();
+
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<VehicleInformation> vehicleInfo = new ArrayList<>();
 }

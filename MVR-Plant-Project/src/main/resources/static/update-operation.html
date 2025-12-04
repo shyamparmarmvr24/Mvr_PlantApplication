@@ -43,13 +43,12 @@
             font-size:15px;
         }
 
-        /* ★ NEW FIX — FULL-WIDTH INPUTS INSIDE TABLE */
         .input-box, textarea {
             width:100%;
-            box-sizing:border-box;
             padding:8px 10px;
             border-radius:6px;
             border:1px solid #ccc;
+            box-sizing:border-box;
             font-size:15px;
         }
 
@@ -59,9 +58,8 @@
         }
 
         input:disabled, textarea:disabled {
-            background:#f1f5f9;
+            background:#eef1f5;
             color:#6b7280;
-            cursor:not-allowed;
         }
 
         .buttons { text-align:center; margin-top:18px; }
@@ -97,7 +95,6 @@
         <button class="btn btn-save" id="saveBtn">Save</button>
         <button class="btn btn-back" id="backBtn">Back</button>
     </div>
-
 </div>
 
 <script>
@@ -111,18 +108,17 @@
          &nbsp; | &nbsp;
          Plant ID: <span style="color:#059669">${plantID}</span>`;
 
-    document.getElementById("backBtn").addEventListener("click", () => {
+    document.getElementById("backBtn").onclick = () =>
         window.location.href = `index.html?date=${encodeURIComponent(date)}`;
-    });
 
-    // ----------------------------------------
-    // FIELD ORDER FOLLOWING ENTITY EXACTLY
-    // ----------------------------------------
+    //--------------------------------------------------------
+    // EXACT FIELD ORDER AS BACKEND (ALL INCLUDED)
+    //--------------------------------------------------------
     const fields = [
         {id:"sludgeTankLevelAm", label:"Sludge Tank Level AM"},
         {id:"sludgeTankLevelPm", label:"Sludge Tank Level PM"},
         {id:"sludgeReceived", label:"Sludge Received"},
-        {id:"noOfTrips", label:"Number of Trips"},
+        {id:"noOfTrips", label:"No Of Trips"},
         {id:"sludgeProcessed", label:"Sludge Processed"},
         {id:"biocharProduced", label:"Biochar Produced"},
         {id:"plantRunningHrs", label:"Plant Running Hours"},
@@ -141,8 +137,8 @@
 
         {id:"dgReadingAm", label:"DG Reading AM"},
         {id:"dgReadingPm", label:"DG Reading PM"},
-        {id:"dgDiesalPercentageAm", label:"DG Diesel Percentage AM"},
-        {id:"dgDiesalPercentagePm", label:"DG Diesel Percentage PM"},
+        {id:"dgDiesalPercentageAm", label:"DG Diesel % AM"},
+        {id:"dgDiesalPercentagePm", label:"DG Diesel % PM"},
 
         {id:"vehicleReadingAm", label:"Vehicle Reading AM"},
         {id:"vehicleReadingPm", label:"Vehicle Reading PM"},
@@ -150,15 +146,6 @@
 
         {id:"polymerUsage", label:"Polymer Usage"},
         {id:"pillets", label:"Pellets"},
-        {id:"flowMeterReadingAm", label:"Flow Meter Reading AM"},
-        {id:"flowMeterReadingPm", label:"Flow Meter Reading PM"},
-
-        {id:"cod", label:"COD"},
-        {id:"bod", label:"BOD"},
-        {id:"tn", label:"TN"},
-        {id:"temperature", label:"Temperature"},
-        {id:"tss", label:"TSS"},
-        {id:"ph", label:"PH"},
 
         {id:"remarks", label:"Remarks", type:"textarea"}
     ];
@@ -166,6 +153,9 @@
     let currentOp = {};
     const fieldsBody = document.getElementById("fieldsBody");
 
+    //--------------------------------------------------------
+    // LOAD EXISTING OPERATION
+    //--------------------------------------------------------
     async function loadOperation() {
         const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
         const text = await res.text();
@@ -174,51 +164,57 @@
         renderFields();
     }
 
+    //--------------------------------------------------------
+    // RENDER INPUT FIELDS
+    //--------------------------------------------------------
     function renderFields() {
+
         fieldsBody.innerHTML = "";
 
-        fields.forEach(field => {
+        fields.forEach(f => {
+
             const tr = document.createElement("tr");
             const labelTd = document.createElement("td");
-            labelTd.textContent = field.label;
+            labelTd.textContent = f.label;
 
-            const valTd = document.createElement("td");
+            const valueTd = document.createElement("td");
 
-            if (field.type === "radio") {
-                valTd.innerHTML = `
+            // RADIO BUTTONS (solar Integration)
+            if (f.type === "radio") {
+
+                valueTd.innerHTML = `
                     <label><input type="radio" name="solarIntegration" value="true"> Yes</label>
                     &nbsp;&nbsp;
                     <label><input type="radio" name="solarIntegration" value="false"> No</label>
                 `;
 
-                const yes = valTd.querySelector('input[value="true"]');
-                const no = valTd.querySelector('input[value="false"]');
+                const yes = valueTd.querySelector('input[value="true"]');
+                const no = valueTd.querySelector('input[value="false"]');
 
                 if (currentOp.solarIntegration === true) yes.checked = true;
-                if (currentOp.solarIntegration === false) no.checked = true;
+                else if (currentOp.solarIntegration === false) no.checked = true;
 
                 yes.addEventListener("change", applySolarLogic);
                 no.addEventListener("change", applySolarLogic);
+            }
 
-            } else if (field.type === "textarea") {
+            else if (f.type === "textarea") {
                 const ta = document.createElement("textarea");
-                ta.id = field.id;
-                ta.value = currentOp[field.id] ?? "";
-                valTd.appendChild(ta);
+                ta.id = f.id;
+                ta.value = currentOp[f.id] ?? "";
+                valueTd.appendChild(ta);
+            }
 
-            } else {
+            else {
                 const input = document.createElement("input");
                 input.className = "input-box";
-                input.id = field.id;
-
-                if (currentOp[field.id] !== undefined && currentOp[field.id] !== null)
-                    input.value = currentOp[field.id];
-
-                valTd.appendChild(input);
+                input.id = f.id;
+                input.value = currentOp[f.id] ?? "";
+                valueTd.appendChild(input);
             }
 
             tr.appendChild(labelTd);
-            tr.appendChild(valTd);
+            tr.appendChild(valueTd);
             fieldsBody.appendChild(tr);
         });
 
@@ -227,56 +223,66 @@
         enableEnterNavigation();
     }
 
+    //--------------------------------------------------------
+    // DISABLE ALL POWER-FIELDS INITIALLY
+    //--------------------------------------------------------
     function disableAllPowerFields() {
         [
             "powerReadingAmImport","powerReadingAmExport",
             "powerReadingPmImport","powerReadingPmExport",
             "powerReadingAm","powerReadingPm"
         ].forEach(id => {
-            const input = document.getElementById(id);
-            if (input) input.disabled = true;
+            const el = document.getElementById(id);
+            if (el) el.disabled = true;
         });
     }
 
+    //--------------------------------------------------------
+    // SOLAR LOGIC
+    //--------------------------------------------------------
     function applySolarLogic() {
-        const yes = document.querySelector('input[name="solarIntegration"][value="true"]');
-        const no = document.querySelector('input[name="solarIntegration"][value="false"]');
 
-        const isYes = yes?.checked;
-        const isNo = no?.checked;
+        const yes = document.querySelector('input[name="solarIntegration"][value="true"]');
+        const no  = document.querySelector('input[name="solarIntegration"][value="false"]');
 
         const importExport = [
             "powerReadingAmImport","powerReadingAmExport",
             "powerReadingPmImport","powerReadingPmExport"
         ];
+
         const ampm = ["powerReadingAm","powerReadingPm"];
 
-        if (isYes) {
+        if (yes && yes.checked) {
             importExport.forEach(id => document.getElementById(id).disabled = false);
             ampm.forEach(id => document.getElementById(id).disabled = true);
-        } else if (isNo) {
+        }
+
+        if (no && no.checked) {
             ampm.forEach(id => document.getElementById(id).disabled = false);
             importExport.forEach(id => document.getElementById(id).disabled = true);
         }
     }
 
-    document.getElementById("saveBtn").addEventListener("click", async () => {
+    //--------------------------------------------------------
+    // SAVE OPERATION
+    //--------------------------------------------------------
+    document.getElementById("saveBtn").onclick = async () => {
+
         const data = {};
 
         fields.forEach(f => {
+
             if (f.type === "radio") {
                 const sel = document.querySelector('input[name="solarIntegration"]:checked');
-                data["solarIntegration"] = sel ? sel.value === "true" : null;
-            } else if (f.type === "textarea") {
+                data[f.id] = sel ? sel.value === "true" : null;
+            }
+            else if (f.type === "textarea") {
                 data[f.id] = document.getElementById(f.id).value || null;
-            } else {
-                const inp = document.getElementById(f.id);
-                if (!inp) return;
-
-                if (inp.disabled)
-                    data[f.id] = null;
-                else
-                    data[f.id] = inp.value === "" ? null : inp.value;
+            }
+            else {
+                const el = document.getElementById(f.id);
+                data[f.id] = el.disabled ? null :
+                             (el.value === "" ? null : el.value);
             }
         });
 
@@ -286,17 +292,20 @@
             body: JSON.stringify(data)
         });
 
-        alert("Updated successfully!");
+        alert("Plant Operation Updated Successfully!");
         window.location.href = `index.html?date=${encodeURIComponent(date)}`;
-    });
+    };
 
+    //--------------------------------------------------------
+    // ENTER KEY NAVIGATION
+    //--------------------------------------------------------
     function enableEnterNavigation() {
-        const inputs = Array.from(document.querySelectorAll("input, textarea"));
-        inputs.forEach((input, index) => {
-            input.addEventListener("keydown", e => {
+        const all = Array.from(document.querySelectorAll("input, textarea"));
+        all.forEach((el, index) => {
+            el.addEventListener("keydown", e => {
                 if (e.key === "Enter") {
                     e.preventDefault();
-                    const next = inputs[index + 1];
+                    const next = all[index + 1];
                     if (next) next.focus();
                 }
             });

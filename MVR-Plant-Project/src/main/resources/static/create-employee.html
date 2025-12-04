@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create Employee - MVR TECHNOLOGY</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: #f5f7fa;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0f172a, #0ea5e9);
+            padding: 15px 20px;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 10px;
+            padding: 28px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #0f172a;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: #0ea5e9;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 17px;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: #0284c7;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 15px;
+            text-align: center;
+            width: 100%;
+            padding: 12px;
+            background: #6b7280;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>Create Employee</header>
+
+<div class="container">
+
+    <h2>Add New Employee</h2>
+
+    <form id="empForm">
+
+        <div class="form-group">
+            <label>Employee ID *</label>
+            <input type="number" id="employeeId" required>
+        </div>
+
+        <div class="form-group">
+            <label>Employee Name *</label>
+            <input type="text" id="employeeName" required>
+        </div>
+
+        <div class="form-group">
+            <label>Designation *</label>
+            <input type="text" id="designation" required>
+        </div>
+
+        <div class="form-group">
+            <label>Mobile Number *</label>
+            <input type="number" id="mobileNo" required>
+        </div>
+
+        <div class="form-group">
+            <label>Alternate Number</label>
+            <input type="number" id="alternateMobNo">
+        </div>
+
+        <div class="form-group">
+            <label>Address *</label>
+            <input type="text" id="address" required>
+        </div>
+
+        <div class="form-group">
+            <label>Date of Birth *</label>
+            <input type="date" id="dateOfBirth" required>
+        </div>
+
+        <div class="form-group">
+            <label>Date of Joining *</label>
+            <input type="date" id="dateOfJoining" required>
+        </div>
+
+        <button class="btn-submit" type="submit">Create Employee</button>
+
+        <a class="back-btn" onclick="history.back()">Back</a>
+    </form>
+
+</div>
+
+<script>
+    const plantID = new URLSearchParams(window.location.search).get("plantID");
+
+    document.getElementById("empForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const data = {
+            employeeId: document.getElementById("employeeId").value,
+            employeeName: document.getElementById("employeeName").value,
+            designation: document.getElementById("designation").value,
+            mobileNo: document.getElementById("mobileNo").value,
+            alternateMobNo: document.getElementById("alternateMobNo").value,
+            address: document.getElementById("address").value,
+            dateOfBirth: document.getElementById("dateOfBirth").value,
+            dateOfJoining: document.getElementById("dateOfJoining").value
+        };
+
+        const res = await fetch(`/api/plantemployees/create/${plantID}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            alert("Employee created successfully!");
+            window.location.href = `view-employees.html?plantID=${plantID}`;
+        } else {
+            alert("Failed to create employee!");
+        }
+    });
+</script>
+
+</body>
+</html>

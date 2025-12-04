@@ -75,15 +75,7 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         if (plantOp.getVehicleReadingPm() != null) count++;
         if (plantOp.getVehicleFuelLevel() != null) count++;
         if (plantOp.getPolymerUsage() != null) count++;
-        if (plantOp.getPillets() != null) count++;
-        if (plantOp.getFlowMeterReadingAm() != null) count++;
-        if (plantOp.getFlowMeterReadingPm() != null) count++;
-        if (plantOp.getCod() != null) count++;
-        if (plantOp.getBod()!= null) count++;
-        if (plantOp.getTn()!= null) count++;
-        if (plantOp.getTemperature()!= null) count++;
-        if (plantOp.getTss()!= null) count++;
-        if (plantOp.getPh()!= null) count++; //31
+        if (plantOp.getPillets() != null) count++;  //23
 
 
         existing.setSludgeTankLevelAm(plantOp.getSludgeTankLevelAm());
@@ -127,16 +119,7 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         existing.setVehicleFuelLevel(plantOp.getVehicleFuelLevel());
         existing.setPolymerUsage(plantOp.getPolymerUsage());
         existing.setPillets(plantOp.getPillets());
-        existing.setFlowMeterReadingAm(plantOp.getFlowMeterReadingAm());
-        existing.setFlowMeterReadingPm(plantOp.getFlowMeterReadingPm());
         existing.setRemarks(plantOp.getRemarks());
-        existing.setCod(plantOp.getCod());
-        existing.setBod(plantOp.getBod());
-        existing.setTn(plantOp.getTn());
-        existing.setTemperature(plantOp.getTemperature());
-        existing.setTss(plantOp.getTss());
-        existing.setPh(plantOp.getPh());
-
        //save the update on db
        operationRepo.save(existing);
 

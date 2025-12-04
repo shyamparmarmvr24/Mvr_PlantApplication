@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MvrPlantProjectApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MvrPlantProjectApplication.class, args);
+	public static void main(String[] args) {SpringApplication.run(MvrPlantProjectApplication.class, args);
 	}
 
 }
