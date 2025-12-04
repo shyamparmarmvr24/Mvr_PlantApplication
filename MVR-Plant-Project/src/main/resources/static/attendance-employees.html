@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Plant Employees - MVR TECHNOLOGY</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+
+    <style>
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0f172a, #0ea5e9);
+            padding: 15px 20px;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 25px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .top-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            transition: 0.25s;
+        }
+
+        .back-btn { background: #6b7280; }
+        .back-btn:hover { background: #4b5563; }
+
+        .update-btn { background: #16a34a; }
+        .update-btn:hover { background: #15803d; }
+
+        .view-btn { background: #0284c7; }
+        .view-btn:hover { background: #0369a1; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #0369a1;
+            color: white;
+            padding: 12px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        tr:nth-child(even) { background: #f9fafb; }
+        tr:hover { background: #eef6ff; }
+
+        /* Clean text colors only */
+        .present { color: #059669; font-weight: 600; }
+        .absent { color: #dc2626; font-weight: 600; }
+        .pending { color: #d97706; font-weight: 600; }
+    </style>
+</head>
+
+<body>
+
+<header>Plant Employees - Attendance</header>
+
+<div class="container">
+
+    <div class="top-buttons">
+        <button class="btn back-btn" onclick="window.location.href='index.html'">⬅ Back</button>
+
+        <button class="btn view-btn" id="viewEmployeesBtn">View Employees</button>
+
+        <button class="btn update-btn" id="updateBtn">Update Attendance</button>
+        <button class="btn view-btn" style="background:#2563eb;" id="pdfBtn">Download PDF</button>
+
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Attendance AM</th>
+            <th>Attendance PM</th>
+        </tr>
+        </thead>
+
+        <tbody id="empTableBody">
+        <tr><td colspan="5">Loading...</td></tr>
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const plantID = params.get("plantID");
+    const date = params.get("date");
+
+    const tbody = document.getElementById("empTableBody");
+
+    document.getElementById("updateBtn").onclick = function() {
+        window.location.href = `update-attendance.html?plantID=${plantID}&date=${date}`;
+    };
+
+    document.getElementById("viewEmployeesBtn").onclick = function() {
+        window.location.href = `view-employees.html?plantID=${plantID}`;
+    };
+
+    function statusBadge(value) {
+        if (value === true) return `<span class="present">Present</span>`;
+        if (value === false) return `<span class="absent">Absent</span>`;
+        return `<span class="pending">Pending</span>`;
+    }
+
+    async function loadEmployees() {
+        const res = await fetch(`/api/plantemployees/plant/${plantID}`);
+        const employees = await res.json();
+
+        tbody.innerHTML = "";
+
+        if (employees.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5">No employees found</td></tr>`;
+            return;
+        }
+
+        for (const emp of employees) {
+
+            let attendance = null;
+
+            try {
+                const resOp = await fetch(`/api/employee-operations/${emp.employeeId}/date/${date}`);
+                if (resOp.ok) attendance = await resOp.json();
+            } catch (e) {}
+
+            const am = attendance ? attendance.attendanceAm : null;
+            const pm = attendance ? attendance.attendancePm : null;
+
+            tbody.insertAdjacentHTML("beforeend", `
+                <tr>
+                    <td>${emp.employeeId}</td>
+                    <td>${emp.employeeName}</td>
+                    <td>${emp.designation}</td>
+                    <td>${statusBadge(am)}</td>
+                    <td>${statusBadge(pm)}</td>
+                </tr>
+            `);
+        }
+    }
+
+    // PDF DOWNLOAD BUTTON
+document.getElementById("pdfBtn").onclick = async () => {
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+    // Title
+    doc.setFontSize(18);
+    doc.setTextColor(30, 60, 140);
+    doc.text("Employee Attendance Report", 40, 40);
+
+    // Subtitle
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Plant ID: ${plantID}     Date: ${date}`, 40, 60);
+
+    // Extract Table Data
+    const rows = [];
+    document.querySelectorAll("#empTableBody tr").forEach(tr => {
+        const td = tr.querySelectorAll("td");
+        if (td.length === 5) {
+            rows.push([
+                td[0].innerText,
+                td[1].innerText,
+                td[2].innerText,
+                td[3].innerText.replace(/<\/?[^>]+(>|$)/g, ""),  // Remove HTML tags
+                td[4].innerText.replace(/<\/?[^>]+(>|$)/g, "")
+            ]);
+        }
+    });
+
+    // Build Table
+    doc.autoTable({
+        head: [["Employee ID", "Name", "Designation", "Attendance AM", "Attendance PM"]],
+        body: rows,
+        startY: 90,
+        theme: "grid",
+        headStyles: { fillColor: [3, 105, 161], textColor: 255 },
+        styles: { fontSize: 10, cellPadding: 4 },
+        columnStyles: {
+            0: { cellWidth: 70 },
+            1: { cellWidth: 120 },
+            2: { cellWidth: 120 },
+            3: { cellWidth: 100 },
+            4: { cellWidth: 100 }
+        }
+    });
+
+    doc.save(`Employees_Attendance_${plantID}_${date}.pdf`);
+};
+
+
+    loadEmployees();
+</script>
+
+</body>
+</html>

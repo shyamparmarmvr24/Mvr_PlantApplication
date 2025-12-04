@@ -66,6 +66,9 @@ public class VehichleRepoMgmtImpl implements IVehicleRepoImpl
         if (updated.getInsuranceExpiryDate() != null)
             existing.setInsuranceExpiryDate(updated.getInsuranceExpiryDate());
 
+        if (updated.getGpsStatus() != null)
+            existing.setGpsStatus(updated.getGpsStatus());
+
         return vehicleRepo.save(existing);
     }
 }

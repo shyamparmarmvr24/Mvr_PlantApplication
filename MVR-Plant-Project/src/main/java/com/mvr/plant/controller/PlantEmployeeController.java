@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/plantemployees")
@@ -15,11 +17,15 @@ public class PlantEmployeeController
     @Autowired
     private IPlantEmployeeService employeeService;
 
+    @Autowired
+    private SseController sseController;
+
     //creating employee
     @PostMapping("/create/{plantId}")
     public ResponseEntity<PlantEmployee> createEmployee(@PathVariable Long plantId, @RequestBody PlantEmployee employee)
     {
         PlantEmployee savedEmployee = employeeService.createEmployee(plantId, employee);
+        sseController.broadcastUpdate();
         return ResponseEntity.ok(savedEmployee);
     }
 
@@ -32,16 +38,23 @@ public class PlantEmployeeController
         return ResponseEntity.ok(employees);
     }
 
-    // UPDATE employee details
     @PutMapping("/update/{plantId}/{employeeId}")
-    public ResponseEntity<String> updateEmployee(
+    public ResponseEntity<Map<String, String>> updateEmployee(
             @PathVariable Long plantId,
             @PathVariable Integer employeeId,
             @RequestBody PlantEmployee employee
     ) {
         String message = employeeService.updateOperationById(plantId, employeeId, employee);
-        return ResponseEntity.ok(message);
+
+
+
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", message);
+        sseController.broadcastUpdate();
+        return ResponseEntity.ok(response);
     }
+
 
 
 }

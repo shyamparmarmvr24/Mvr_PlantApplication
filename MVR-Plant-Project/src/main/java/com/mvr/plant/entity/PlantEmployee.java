@@ -44,7 +44,6 @@ public class PlantEmployee
     @Column(nullable = false,length = 100)
     private String address;
 
-    @Column(nullable = false)
     private LocalDate dateOfBirth;
 
     @Column(nullable = false)

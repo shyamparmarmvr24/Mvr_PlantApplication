@@ -18,8 +18,8 @@ public interface IPlantEmployeeRepo extends JpaRepository<PlantEmployee,Integer>
     @Query("SELECT p FROM FstpPlant p WHERE p.plantID = :plantID")
     Optional<FstpPlant> findPlantByPlantID(@Param("plantID") Long plantID);
 
-    @Query("SELECT p FROM PlantEmployee p WHERE p.plant.plantID = :plantID AND p.employeeId = :employeeId")
-    Optional<PlantEmployee> findEmployeeByPlantAndEmployeeId(@Param("plantID") Long plantID, @Param("employeeId") Integer employeeId);
+//    @Query("SELECT p FROM PlantEmployee p WHERE p.plant.plantID = :plantID AND p.employeeId = :employeeId")
+//    Optional<PlantEmployee> findEmployeeByPlantAndEmployeeId(@Param("plantID") Long plantID, @Param("employeeId") Integer employeeId);
 
     @Query("SELECT o FROM PlantEmployee o WHERE o.plant.plantID = :plantId AND o.employeeId = :employeeId")
     Optional<PlantEmployee> getEmployeeByPlantIdAndEmployeeId(

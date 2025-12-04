@@ -13,9 +13,9 @@ public class PlantMgmtRepoImpl implements IPlantMgmtRepo
     private IPlantRepository plantRepo;
 
     @Override
-    public String insertPlantDetails(FstpPlant plant)
+    public FstpPlant insertPlantDetails(FstpPlant plant)
     {
-        return "Plant Information Successfully Saved Having Id "+plantRepo.save(plant).getPlantID();
+        return plantRepo.save(plant);
     }
 
     @Override
@@ -30,14 +30,28 @@ public class PlantMgmtRepoImpl implements IPlantMgmtRepo
         return plantRepo.findPlantByPlantID(id).orElseThrow(()->new IllegalStateException("Invalid Plant Id"));
     }
 
-    @Override
-    public String updatePlantDetails(Long id, FstpPlant plant)
-    {
-        FstpPlant existingPlant = plantRepo.findById(id).orElseThrow(() -> new IllegalStateException("Invalid Plant Id"));
-        BeanUtils.copyProperties(plant, existingPlant, "plantID","serialNo");
+//    @Override
+//    public String updatePlantDetails(Long id, FstpPlant plant)
+//    {
+//        FstpPlant existingPlant = plantRepo.findById(id).orElseThrow(() -> new IllegalStateException("Invalid Plant Id"));
+//        BeanUtils.copyProperties(plant, existingPlant, "plantID","serialNo");
+//        plantRepo.save(existingPlant);
+//        return "Plant Details Is Updated Successfully Having Id "+id;
+//    }
+      @Override
+      public String updatePlantDetails(Long id, FstpPlant plant)
+      {
+        FstpPlant existingPlant = plantRepo.findPlantByPlantID(id)
+            .orElseThrow(() -> new IllegalStateException("Invalid Plant Id"));
+
+        // Copy all except serialNo + plantID
+        BeanUtils.copyProperties(plant, existingPlant, "serialNo", "plantID");
+
         plantRepo.save(existingPlant);
-        return "Plant Details Is Updated Successfully Having Id "+id;
-    }
+
+        return "Plant Details Is Updated Successfully Having Id " + id;
+      }
+
 
     @Override
     public List<FstpPlant> getPlantsByZone(Integer zone)

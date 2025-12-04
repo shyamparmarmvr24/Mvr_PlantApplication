@@ -14,55 +14,43 @@ import java.util.List;
 @Table(name = "FSTP_PLANT")
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class FstpPlant
 {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "plant_seq")
-    @SequenceGenerator(
-            name = "plant_seq",
-            sequenceName = "PlantSeq",
-            allocationSize = 1,
-            initialValue = 1
-    )
-    @Column(name = "SerialNo")
-    private Long serialNo;
-
-    @NonNull
     @Column(name = "PlantID",nullable = false, unique = true)
     private Long plantID;
-    @NonNull
-    @Column(name = "PlantName",length = 50)
+
+    @Column(name = "PlantName",nullable = false,length = 50)
     private String plantName;
-    @NonNull
+
     @Column(name = "StateCode",length = 10)
     private String stateCode;
-    @NonNull
+
     @Column(name = "District",length = 50)
     private String district;
-    @NonNull
-    @Column(name = "KLD")
+
+    @Column(name = "KLD",nullable = false)
     private Long kld;
-    @NonNull
+
     @Column(name = "WardNo")
     private Integer wardNo;
-    @NonNull
+
     @Column(name = "PinCode")
     private Long pinCode;
-    @NonNull
-    @Column(name = "Zones")
+
+    @Column(name = "Zones",nullable = false)
     private Integer zones;
 
-    @Column(name = "MNIT", columnDefinition = "BIT DEFAULT 0")
+    @Column(name = "MNIT", columnDefinition = "BIT DEFAULT 0",nullable = false)
     private Boolean mnit = false;
 
-    @Column(name = "PermanentPower", columnDefinition = "BIT DEFAULT 0")
+    @Column(name = "PermanentPower", columnDefinition = "BIT DEFAULT 0",nullable = false)
     private Boolean permanentPower = false;
 
-    @Column(name = "Solar", columnDefinition = "BIT DEFAULT 0")
+    @Column(name = "Solar", columnDefinition = "BIT DEFAULT 0",nullable = false)
     private Boolean solar = false;
 
-    @Column(name = "Internet", columnDefinition = "BIT DEFAULT 0")
+    @Column(name = "Internet", columnDefinition = "BIT DEFAULT 0",nullable = false)
     private Boolean internet = false;
 
     @Column(name = "MnitDateOfCompletion")
@@ -109,6 +97,12 @@ public class FstpPlant
 
     @Column(name = "GpsDate")
     private LocalDate gpsDate;
+
+    @Column(name = "NoOfVehicle")
+    private Integer noOfVehicle;
+
+    @Column(name = "NoOfEmployees")
+    private Integer noOfEmployees;
 
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
     @JsonManagedReference

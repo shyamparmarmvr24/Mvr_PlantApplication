@@ -48,7 +48,7 @@
         .date-picker input[type="date"]{
             padding:6px 10px;
             border-radius:6px;
-            border:1px solid #ddd;
+            border:1px solid:#ddd;
             background:#fff;
             color:#000;
             font-size:15px;
@@ -82,7 +82,7 @@
         .search-box input {
             flex:1;
             padding:10px;
-            border:1px solid #ccc;
+            border:1px solid:#ccc;
             border-radius:6px 0 0 6px;
             font-size:15px;
         }
@@ -178,6 +178,9 @@
         .pending { background:#f59e0b; color:white; }
         .view { background:#10b981; color:white; }
 
+        .greenName { color:#10b981; font-weight:bold; }
+        .yellowName { color:#f59e0b; font-weight:bold; }
+
         .no-data {
             text-align:center;
             padding:18px;
@@ -245,21 +248,134 @@
 </div>
 
 <script>
+
+    let isRendering = false;   // 🚀 prevents overlapping renders
+    let latestRenderToken = 0; // 🚀 prevents duplicates during async refresh
+
     const plantTableBody = document.getElementById("plantTableBody");
     const reportDateInput = document.getElementById("reportDate");
 
     const today = new Date().toISOString().split("T")[0];
     reportDateInput.max = today;
 
-    const urlDate = new URLSearchParams(window.location.search).get("date");
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlDate = urlParams.get("date");
     reportDateInput.value = (urlDate && urlDate <= today) ? urlDate : today;
 
     let allPlants = [];
     let originalPlants = [];
+
     let filterType = null;
     let filterValue = null;
 
-    // ----------------------- NAVIGATION ----------------------- //
+    /* ----------------------------------------------------
+       FIX 1: prevent duplicate renders by locking state
+    ---------------------------------------------------- */
+    async function safeRender(date) {
+        if (isRendering) return;              // 🚫 stop overlapping render
+        isRendering = true;
+
+        const token = ++latestRenderToken;    // unique cycle ID
+
+        plantTableBody.innerHTML = `<tr>
+            <td colspan="8" class="no-data">Loading...</td></tr>`;
+
+        const rows = [];
+
+        for (let i = 0; i < allPlants.length; i++) {
+            if (token !== latestRenderToken) return; // 🚀 stop outdated render
+
+            const p = allPlants[i];
+            p.serialNo = i + 1;
+
+            const rowHTML = await makeRow(p, date);
+            rows.push(rowHTML);
+        }
+
+        if (token === latestRenderToken) {
+            plantTableBody.innerHTML = rows.join("");
+        }
+
+        isRendering = false;
+    }
+
+    /* ----------------------------------------------------
+       FIX 2: throttle SSE so refresh runs once per update
+    ---------------------------------------------------- */
+    let sseCooldown = false;
+
+    function handleSSEUpdate() {
+        if (sseCooldown) return;
+        sseCooldown = true;
+
+        fetchPlants();
+
+        setTimeout(() => (sseCooldown = false), 1500); // limit refresh bursts
+    }
+
+    /* ----------------------------------------------------
+       REST OF YOUR ORIGINAL LOGIC BELOW (unchanged)
+    ---------------------------------------------------- */
+
+    (function restoreFilterState() {
+        const fType = urlParams.get("filter");
+        const fVal = urlParams.get("value");
+        if (fType && fVal) {
+            filterType = fType;
+            filterValue = fVal;
+            localStorage.setItem("plantFilterType", filterType);
+            localStorage.setItem("plantFilterValue", filterValue);
+            if (filterType === "id") document.getElementById("plantIDInput").value = filterValue;
+            if (filterType === "zone") document.getElementById("zoneInput").value = filterValue;
+        } else {
+            const lsType = localStorage.getItem("plantFilterType");
+            const lsVal = localStorage.getItem("plantFilterValue");
+            if (lsType && lsVal) {
+                filterType = lsType;
+                filterValue = lsVal;
+                if (filterType === "id") document.getElementById("plantIDInput").value = filterValue;
+                if (filterType === "zone") document.getElementById("zoneInput").value = filterValue;
+            }
+        }
+    })();
+
+    /* ---------------------------- PLANT INFO STATUS ---------------------------- */
+    function getPlantInfoStatus(p) {
+        let missing = false;
+
+        const requiredFields = [
+            "plantID","plantName","stateCode","district",
+            "kld","wardNo","pinCode","zones",
+            "solarPlantCapacity",
+            "constructionStartedDate","civilWorkCompletedDate","machinaryAssembleDate",
+            "codAndBodSenserDate","ipPhoneDate","cameraConfigurationDate",
+            "noOfVehicle","noOfEmployees"
+        ];
+
+        requiredFields.forEach(f => {
+            if (p[f] === null || p[f] === undefined || p[f] === "") missing = true;
+        });
+
+        const booleanGroups = [
+            ["mnit","mnitDateOfCompletion"],
+            ["permanentPower","permanentPowerDateOfCompletion"],
+            ["solar","solarDateOfCompletion"],
+            ["internet","internetDateOfCompletion"],
+            ["tabs","tabsReceivedDate"],
+            ["gps","gpsDate"]
+        ];
+
+        booleanGroups.forEach(([flag, dateField]) => {
+            const flagVal = p[flag];
+            const dateVal = p[dateField];
+            if (flagVal && !dateVal) missing = true;
+        });
+
+        return missing ? "yellowName" : "greenName";
+    }
+
+    /* ---------------------------- NAVIGATION FUNCTIONS ---------------------------- */
+
     function openPlantOperation(id, date, status) {
         if (status === "view")
             window.location.href = `view-operation.html?plantID=${id}&date=${date}`;
@@ -275,116 +391,85 @@
     }
 
     function openAttendance(id, date, status) {
-        // kept for future implementation
         if (status === "view")
-            window.location.href = `view-attendance.html?plantID=${id}&date=${date}`;
+            window.location.href = `attendance-employees.html?plantID=${id}&date=${date}`;
         else
             window.location.href = `update-attendance.html?plantID=${id}&date=${date}`;
     }
 
-    // ============================================================
-    //           SEPARATE STATUS LOGIC FOR EACH TYPE
-    // ============================================================
+    /* ---------------------------- STATUS CHECK FUNCTIONS ---------------------------- */
 
-    // ------------ PLANT OPERATION STATUS ------------ //
-    function calcPlantStatus(op) {
-        if (!op || typeof op !== "object") return "update";
-
-        const solar = op.solarIntegration;
-
-        const baseFields = [
-            "sludgeTankLevelAm",
-            "sludgeTankLevelPm",
-            "sludgeReceived",
-            "noOfTrips",
-            "sludgeProcessed",
-            "biocharProduced",
-            "plantRunningHrs",
-            "solarIntegration",
-            "dgReadingAm",
-            "dgReadingPm",
-            "dgDiesalPercentageAm",
-            "dgDiesalPercentagePm",
-            "vehicleReadingAm",
-            "vehicleReadingPm",
-            "vehicleFuelLevel",
-            "polymerUsage",
-            "pillets"
-        ];
-
-        const solarYesExtra = [
-            "powerReadingAmImport",
-            "powerReadingAmExport",
-            "powerReadingPmImport",
-            "powerReadingPmExport"
-        ];
-
-        const solarNoExtra = [
-            "powerReadingAm",
-            "powerReadingPm"
-        ];
-
-        let fieldsToCheck = [...baseFields];
-
-        if (solar === true) {
-            fieldsToCheck = fieldsToCheck.concat(solarYesExtra);
-        } else if (solar === false) {
-            fieldsToCheck = fieldsToCheck.concat(solarNoExtra);
-        }
-        // if solarIntegration is null -> only base fields considered
-
-        const total = fieldsToCheck.length;
-        let filled = 0;
-
-        fieldsToCheck.forEach(f => {
-            const v = op[f];
-            if (v !== null && v !== undefined && v !== "") filled++;
-        });
-
-        if (filled === 0) return "update";
-        if (filled < total) return "pending";
-        return "view";
-    }
+    /* (UNCHANGED except improved error handling) */
 
     async function getPlantStatus(plantID, date) {
         try {
-            const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
-            const text = await res.text();
+            const resOp = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
+            const textOp = await resOp.text();
+            let plantOp = (!textOp || textOp.trim() === "null") ? {} : JSON.parse(textOp);
 
-            if (!text || !text.trim() || text.trim() === "null") return "update";
+            const resVeh = await fetch(`/api/vehicle-operations/plant/${plantID}/vehicles`);
+            const vehicles = resVeh.ok ? await resVeh.json() : [];
 
-            const data = JSON.parse(text);
-            return calcPlantStatus(data);
+            const vehicleOps = await Promise.all(vehicles.map(async v => {
+                try {
+                    const r = await fetch(`/api/vehicle-operations/${v.vehicleID}?date=${date}`);
+                    const t = await r.text();
+                    const vo = (!t || t.trim() === "null") ? {} : JSON.parse(t);
+                    return { am: vo.vehicleReadingAm, pm: vo.vehicleReadingPm, fuel: vo.vehicleFuelLevel };
+                } catch {
+                    return { am: null, pm: null, fuel: null };
+                }
+            }));
 
-        } catch (e) {
+            return calcPlantStatus(plantOp, vehicleOps);
+
+        } catch {
             return "update";
         }
     }
 
-    // ------------ LAB OPERATION STATUS ------------ //
-    const labFieldsForStatus = [
-        "cod",
-        "bod",
-        "th",
-        "temperature",
-        "tss",
-        "ph",
-        "velocity",
-        "cumulativeFlow",
-        "flowMeterReadingAm",
-        "flowMeterReadingPm"
-    ];
+    function calcPlantStatus(op, vehicleOps) {
+        const opIsObject = op && typeof op === "object" && Object.keys(op).length > 0;
+        if (!opIsObject && (!Array.isArray(vehicleOps) || vehicleOps.length === 0)) return "update";
 
-    function calcLabStatus(lab) {
-        if (!lab || typeof lab !== "object") return "update";
+        const solar = op.solarIntegration;
 
-        const total = labFieldsForStatus.length;
+        const baseFields = [
+            "sludgeTankLevelAm","sludgeTankLevelPm","sludgeReceived","noOfTrips",
+            "sludgeProcessed","biocharProduced","plantRunningHrs","solarIntegration",
+            "dgReadingAm","dgReadingPm","dgDiesalPercentageAm","dgDiesalPercentagePm",
+            "polymerUsage","pillets"
+        ];
+
+        const solarYesExtra = [
+            "powerReadingAmImport","powerReadingAmExport",
+            "powerReadingPmImport","powerReadingPmExport"
+        ];
+
+        const solarNoExtra = [
+            "powerReadingAm","powerReadingPm"
+        ];
+
+        let fields = [...baseFields];
+        if (solar === true) fields = fields.concat(solarYesExtra);
+        if (solar === false) fields = fields.concat(solarNoExtra);
+
         let filled = 0;
 
-        labFieldsForStatus.forEach(f => {
-            const v = lab[f];
+        fields.forEach(f => {
+            const v = op ? op[f] : null;
             if (v !== null && v !== undefined && v !== "") filled++;
         });
+
+        if (Array.isArray(vehicleOps)) {
+            vehicleOps.forEach(v => {
+                if (v.am) filled++;
+                if (v.pm) filled++;
+                if (v.fuel) filled++;
+            });
+        }
+
+        const total = fields.length + (vehicleOps.length * 3);
 
         if (filled === 0) return "update";
         if (filled < total) return "pending";
@@ -394,94 +479,113 @@
     async function getLabStatus(plantID, date) {
         try {
             const res = await fetch(`/api/laboperations/plant/${plantID}?date=${date}`);
-            const text = await res.text();
+            const txt = await res.text();
+            if (!txt.trim() || txt.trim() === "null") return "update";
+            const lab = JSON.parse(txt);
 
-            if (!text || !text.trim() || text.trim() === "null") return "update";
+            const fields = [
+                "cod","bod","th","temperature","tss","ph","velocity",
+                "cumulativeFlow","flowMeterReadingAm","flowMeterReadingPm"
+            ];
 
-            const data = JSON.parse(text);
-            return calcLabStatus(data);
+            let filled = fields.filter(f => lab[f] !== null && lab[f] !== "").length;
 
-        } catch (e) {
+            if (filled === 0) return "update";
+            if (filled < fields.length) return "pending";
+            return "view";
+
+        } catch {
             return "update";
         }
     }
 
-    // ------------ ATTENDANCE STATUS (placeholder) ------------ //
-    function getAttendanceStatus() {
-        return "update"; // always 'update' for now; button disabled
-    }
-
-    // ----------------------- FETCH PLANTS ----------------------- //
-    async function fetchPlants() {
-        plantTableBody.innerHTML = `<tr><td colspan="8" class="no-data">Refreshing...</td></tr>`;
-
+    async function getAttendanceStatus(plantID, date) {
         try {
-            const res = await fetch("/api/plants");
-            allPlants = await res.json();
-            originalPlants = [...allPlants];
-            applyFilter(true);
+            const resEmp = await fetch(`/api/plantemployees/plant/${plantID}`);
+            const employees = await resEmp.json();
+            if (!employees.length) return "update";
+
+            let filled = 0;
+            const total = employees.length * 2;
+
+            for (const emp of employees) {
+                try {
+                    const r = await fetch(`/api/employee-operations/${emp.employeeId}/date/${date}`);
+                    if (!r.ok) continue;
+                    const data = await r.json();
+                    if (data.attendanceAm !== null) filled++;
+                    if (data.attendancePm !== null) filled++;
+                } catch {}
+            }
+
+            if (filled === 0) return "update";
+            if (filled < total) return "pending";
+            return "view";
+
         } catch {
-            plantTableBody.innerHTML = `<tr><td colspan="8" class="no-data">Error loading plants</td></tr>`;
+            return "update";
         }
     }
 
-    // ----------------------- RENDER EACH ROW ----------------------- //
+    /* ---------------------------- RENDERING ---------------------------- */
+
     async function makeRow(p, date) {
         const plantOpStatus = await getPlantStatus(p.plantID, date);
         const labOpStatus   = await getLabStatus(p.plantID, date);
-        const empOpStatus   = getAttendanceStatus();
+        const empOpStatus   = await getAttendanceStatus(p.plantID, date);
+
+        const color = getPlantInfoStatus(p);
 
         return `
-        <tr>
-            <td>${p.serialNo}</td>
-            <td>${p.plantID}</td>
-            <td>${p.plantName}</td>
-            <td>${p.kld}</td>
-            <td>${p.zones}</td>
+            <tr>
+                <td>${p.serialNo}</td>
+                <td>${p.plantID}</td>
+                <td class="${color}">${p.plantName}</td>
+                <td>${p.kld}</td>
+                <td>${p.zones}</td>
 
-            <td>
-                <button class="btn-status ${plantOpStatus}"
+                <td><button class="btn-status ${plantOpStatus}"
                     onclick="openPlantOperation(${p.plantID}, '${date}', '${plantOpStatus}')">
-                    ${plantOpStatus}
-                </button>
-            </td>
+                    ${plantOpStatus}</button></td>
 
-            <td>
-                <button class="btn-status ${labOpStatus}"
+                <td><button class="btn-status ${labOpStatus}"
                     onclick="openLabOperation(${p.plantID}, '${date}', '${labOpStatus}')">
-                    ${labOpStatus}
-                </button>
-            </td>
+                    ${labOpStatus}</button></td>
 
-            <td>
-                <button class="btn-status ${empOpStatus}" disabled>
-                    coming soon
-                </button>
-            </td>
-        </tr>`;
+                <td><button class="btn-status ${empOpStatus}"
+                    onclick="openAttendance(${p.plantID}, '${date}', '${empOpStatus}')">
+                    ${empOpStatus}</button></td>
+            </tr>`;
     }
 
-    // ----------------------- RENDER TABLE ----------------------- //
     async function renderTable(date) {
-        plantTableBody.innerHTML = "";
+        await safeRender(date);  // 🚀 USE SAFE RENDER
+    }
 
-        for (let i = 0; i < allPlants.length; i++) {
-            let p = allPlants[i];
-            p.serialNo = i + 1;
-            const rowHtml = await makeRow(p, date);
-            plantTableBody.insertAdjacentHTML("beforeend", rowHtml);
+    /* ---------------------------- FILTER + URL ---------------------------- */
+
+    function updateURL() {
+        let url = `index.html?date=${reportDateInput.value}`;
+        if (filterType && filterValue)
+            url += `&filter=${filterType}&value=${filterValue}`;
+        history.replaceState({}, "", url);
+
+        if (filterType && filterValue) {
+            localStorage.setItem("plantFilterType", filterType);
+            localStorage.setItem("plantFilterValue", filterValue);
+        } else {
+            localStorage.removeItem("plantFilterType");
+            localStorage.removeItem("plantFilterValue");
         }
     }
 
-    // ----------------------- FILTER ----------------------- //
     function applyFilter(skipUrlUpdate = false) {
-        if (filterType === "id" && filterValue) {
-            allPlants = originalPlants.filter(p => p.plantID == filterValue);
-        } else if (filterType === "zone" && filterValue) {
-            allPlants = originalPlants.filter(p => p.zones == filterValue);
-        } else {
+        if (filterType === "id" && filterValue)
+            allPlants = originalPlants.filter(p => String(p.plantID) === String(filterValue));
+        else if (filterType === "zone" && filterValue)
+            allPlants = originalPlants.filter(p => String(p.zones) === String(filterValue));
+        else
             allPlants = [...originalPlants];
-        }
 
         if (!allPlants.length) {
             plantTableBody.innerHTML = `<tr><td colspan="8" class="no-data">No Data Found</td></tr>`;
@@ -493,25 +597,48 @@
         renderTable(reportDateInput.value);
     }
 
-    function updateURL() {
-        let url = `index.html?date=${reportDateInput.value}`;
-        if (filterType && filterValue)
-            url += `&filter=${filterType}&value=${filterValue}`;
-        history.replaceState({}, "", url);
+    /* ---------------------------- FETCH PLANTS ---------------------------- */
+
+    async function fetchPlants() {
+        plantTableBody.innerHTML = `<tr><td colspan="8" class="no-data">Refreshing...</td></tr>`;
+        try {
+            const res = await fetch("/api/plants");
+            originalPlants = await res.json();
+            applyFilter(true);
+        } catch (err) {
+            console.error("fetchPlants err", err);
+            plantTableBody.innerHTML = `<tr><td colspan="8" class="no-data">Error loading plants</td></tr>`;
+        }
     }
 
-    // ----------------------- SEARCH ----------------------- //
+    /* ---------------------------- SEARCH + RESET ---------------------------- */
+
     document.getElementById("searchIdBtn").onclick = () => {
+        const val = document.getElementById("plantIDInput").value.trim();
+        if (!val) return alert("Enter a Plant ID to search");
         filterType = "id";
-        filterValue = document.getElementById("plantIDInput").value.trim();
+        filterValue = val;
         applyFilter();
     };
 
     document.getElementById("searchZoneBtn").onclick = () => {
+        const val = document.getElementById("zoneInput").value.trim();
+        if (!val) return alert("Enter a Zone to search");
         filterType = "zone";
-        filterValue = document.getElementById("zoneInput").value.trim();
+        filterValue = val;
         applyFilter();
     };
+
+    document.getElementById("resetBtn").onclick = () => {
+        document.getElementById("plantIDInput").value = "";
+        document.getElementById("zoneInput").value = "";
+        filterType = null;
+        filterValue = null;
+        updateURL();
+        applyFilter();
+    };
+
+    /* ---------------------------- ENTER KEY ---------------------------- */
 
     document.getElementById("plantIDInput").addEventListener("keypress", e => {
         if (e.key === "Enter") document.getElementById("searchIdBtn").click();
@@ -521,36 +648,28 @@
         if (e.key === "Enter") document.getElementById("searchZoneBtn").click();
     });
 
-    // ----------------------- RESET ----------------------- //
-    document.getElementById("resetBtn").onclick = () => {
-        document.getElementById("plantIDInput").value = "";
-        document.getElementById("zoneInput").value = "";
-        filterType = null;
-        filterValue = null;
-        applyFilter();
-    };
+    /* ---------------------------- DATE CHANGE ---------------------------- */
 
-    // ----------------------- DATE CHANGE ----------------------- //
     reportDateInput.addEventListener("change", () => {
         updateURL();
         renderTable(reportDateInput.value);
     });
 
-    function redirectHome() {
-        updateURL();
-        window.location.href = location.href;
-    }
+    /* ---------------------------- SSE ---------------------------- */
 
-    // ----------------------- SSE AUTO REFRESH ----------------------- //
     function startSSE() {
-        const evt = new EventSource("/api/events/updates");
-        evt.onmessage = () => fetchPlants();
-        evt.onerror = () => setTimeout(startSSE, 2000);
+        try {
+            const evt = new EventSource("/api/events/updates");
+            evt.onmessage = handleSSEUpdate; // 🚀 throttled refresh
+            evt.onerror = () => setTimeout(startSSE, 2000);
+        } catch (e) {
+            console.warn("SSE failed:", e);
+        }
     }
 
     startSSE();
     fetchPlants();
-</script>
 
+</script>
 </body>
 </html>

@@ -15,11 +15,15 @@ public class FstpPlantController
     @Autowired
     private IPlantService plantService;
 
+    @Autowired
+    private SseController sseController;
+
     // Create a new plant
     @PostMapping
-    public ResponseEntity<String> createPlant(@RequestBody FstpPlant plant)
+    public ResponseEntity<FstpPlant> createPlant(@RequestBody FstpPlant plant)
     {
-        String result = plantService.insertPlantDetails(plant);
+        FstpPlant result = plantService.insertPlantDetails(plant);
+        sseController.broadcastUpdate();
         return ResponseEntity.ok(result);
     }
 
@@ -41,6 +45,7 @@ public class FstpPlantController
     @PutMapping("/{id}")
     public ResponseEntity<String> updatePlant(@PathVariable Long id, @RequestBody FstpPlant plant) {
         String result = plantService.updatePlantDetails(id, plant);
+        sseController.broadcastUpdate();
         return ResponseEntity.ok(result);
     }
 

@@ -13,38 +13,39 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "Plant_Employee_Operation_Table")
+@Table(name = "Vehicle_Operation_Table")
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlantEmployeeOperation
+public class VehicleOperation
 {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "employee_op_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vehicle_op_seq")
     @SequenceGenerator(
-            name = "employee_op_seq",
-            sequenceName = "EmployeeOpSeq",
+            name = "vehicle_op_seq",
+            sequenceName = "VehicleOpSeq",
             allocationSize = 1,
-            initialValue = 1
+            initialValue = 100
     )
-    private Long operationId;
+    private Long vehicleOpID;
 
     @ManyToOne
-    @JoinColumn(name = "employeeId", referencedColumnName = "employeeId")
+    @JoinColumn(name = "vehicleID", referencedColumnName = "vehicleID")
     @JsonBackReference
-    private PlantEmployee employee;
-
-    private Boolean attendanceAm;
-
-    private Boolean attendancePm;
+    private VehicleInformation vehicle;
 
     private LocalDate operationDate;
 
+    private Double vehicleReadingAm;
+
+    private Double vehicleReadingPm;
+
+    private Double vehicleFuelLevel;
+
     @CreatedDate
-    @Column(nullable = false, updatable = false, name = "Created_Date")
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "Updated_Date")
     private LocalDateTime updatedAt;
 
 
@@ -58,6 +59,5 @@ public class PlantEmployeeOperation
     void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
 
 }

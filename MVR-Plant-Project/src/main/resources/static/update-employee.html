@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Update Employee - MVR TECHNOLOGY</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #0369a1;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 15px;
+            margin-top: 12px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-top: 5px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            color: white;
+            margin-top: 20px;
+        }
+
+        .save-btn {
+            background: #10b981;
+            width: 120px;
+        }
+
+        .back-btn {
+            background: #6b7280;
+            width: 120px;
+            margin-left: 10px;
+        }
+
+        .btn-row {
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Update Employee</h2>
+
+    <!-- FIELDS -->
+    <label>Employee ID</label>
+    <input id="employeeId" type="number" disabled>
+
+    <label>Name</label>
+    <input id="name" type="text">
+
+    <label>Designation</label>
+    <input id="designation" type="text">
+
+    <label>Mobile Number</label>
+    <input id="mobile" type="number">
+
+    <label>Alternate Mobile</label>
+    <input id="altMobile" type="number">
+
+    <label>Address</label>
+    <input id="address" type="text">
+
+    <label>Date of Birth</label>
+    <input id="dob" type="date">
+
+    <label>Date of Joining</label>
+    <input id="join" type="date">
+
+    <div class="btn-row">
+        <button class="save-btn" onclick="updateEmployee()">Save</button>
+        <button class="back-btn" onclick="window.history.back()">Back</button>
+    </div>
+
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const plantID = params.get("plantID");
+    const empID = params.get("employeeId");
+
+    const fields = {
+        employeeId: document.getElementById("employeeId"),
+        name: document.getElementById("name"),
+        designation: document.getElementById("designation"),
+        mobile: document.getElementById("mobile"),
+        altMobile: document.getElementById("altMobile"),
+        address: document.getElementById("address"),
+        dob: document.getElementById("dob"),
+        join: document.getElementById("join"),
+    };
+
+    // ------------------------ LOAD EMPLOYEE DATA ------------------------
+    async function loadEmployee() {
+        const res = await fetch(`/api/plantemployees/plant/${plantID}`);
+        const list = await res.json();
+
+        const emp = list.find(e => String(e.employeeId) === String(empID));
+        if (!emp) {
+            alert("Employee not found!");
+            return;
+        }
+
+        fields.employeeId.value = emp.employeeId;
+        fields.name.value = emp.employeeName;
+        fields.designation.value = emp.designation;
+        fields.mobile.value = emp.mobileNo;
+        fields.altMobile.value = emp.alternateMobNo ?? "";
+        fields.address.value = emp.address;
+        fields.dob.value = emp.dateOfBirth ?? "";
+        fields.join.value = emp.dateOfJoining ?? "";
+    }
+
+    loadEmployee();
+
+    // ------------------------ UPDATE EMPLOYEE ------------------------
+    async function updateEmployee() {
+
+    const payload = {
+        employeeName: fields.name.value,
+        designation: fields.designation.value,
+        mobileNo: Number(fields.mobile.value),
+        alternateMobNo: fields.altMobile.value ? Number(fields.altMobile.value) : null,
+        address: fields.address.value,
+        dateOfBirth: fields.dob.value || null,
+        dateOfJoining: fields.join.value
+    };
+
+    const res = await fetch(`/api/plantemployees/update/${plantID}/${empID}`, {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+        alert("Update failed. Please try again.");
+        return;
+    }
+
+    const data = await res.json();
+    alert(data.message);
+
+    window.location.href = `view-employees.html?plantID=${plantID}`;
+}
+
+</script>
+
+</body>
+</html>

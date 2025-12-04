@@ -74,12 +74,6 @@ public class PlantOperation
 
     private Double dgRunHours;
 
-    private Double vehicleReadingAm;
-
-    private Double vehicleReadingPm;
-
-    private Integer vehicleFuelLevel;
-
     private Double polymerUsage;
 
     private Double pillets;

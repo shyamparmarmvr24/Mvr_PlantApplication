@@ -71,9 +71,6 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         if (plantOp.getDgReadingPm() != null) count++;
         if (plantOp.getDgDiesalPercentageAm() != null) count++;
         if (plantOp.getDgDiesalPercentagePm() != null) count++;
-        if (plantOp.getVehicleReadingAm() != null) count++;
-        if (plantOp.getVehicleReadingPm() != null) count++;
-        if (plantOp.getVehicleFuelLevel() != null) count++;
         if (plantOp.getPolymerUsage() != null) count++;
         if (plantOp.getPillets() != null) count++;  //23
 
@@ -114,9 +111,6 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         {
             existing.setDgRunHours(0.0);
         }
-        existing.setVehicleReadingAm(plantOp.getVehicleReadingAm());
-        existing.setVehicleReadingPm(plantOp.getVehicleReadingPm());
-        existing.setVehicleFuelLevel(plantOp.getVehicleFuelLevel());
         existing.setPolymerUsage(plantOp.getPolymerUsage());
         existing.setPillets(plantOp.getPillets());
         existing.setRemarks(plantOp.getRemarks());

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
     <title>View Laboratory Operation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
 
     <style>
         body {
@@ -124,121 +127,118 @@
     <div class="buttons">
         <button class="btn btn-update" id="updateBtn">Update</button>
         <button class="btn btn-back" id="backBtn">Back</button>
+        <button class="btn" style="background:#2563eb;" id="pdfBtn">Download PDF</button>
+
     </div>
 
 </div>
 
 <script>
 
-    // -----------------------------------------------------
-    // READ PARAMETERS
-    // -----------------------------------------------------
-    const params = new URLSearchParams(window.location.search);
-    const plantID = params.get('plantID');
-    const date = params.get('date');
+const params = new URLSearchParams(window.location.search);
+const plantID = params.get('plantID');
+const date = params.get('date');
 
-    document.getElementById("infoBox").innerHTML =
-        `Date: <span style="color:#f97316">${date}</span> &nbsp; | &nbsp;
-         Plant ID: <span style="color:#059669">${plantID}</span>`;
+document.getElementById("infoBox").innerHTML =
+    `Date: <span style="color:#f97316">${date}</span> &nbsp; | &nbsp;
+     Plant ID: <span style="color:#059669">${plantID}</span>`;
 
-    document.getElementById("backBtn").onclick = () => {
-        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
-    };
+document.getElementById("backBtn").onclick = () =>
+    window.location.href = `index.html?date=${encodeURIComponent(date)}`;
 
-    // -----------------------------------------------------
-    // LAB FIELDS — EXACT BACKEND ORDER
-    // -----------------------------------------------------
-    const fields = [
-        "cod",
-        "bod",
-        "th",
-        "temperature",
-        "tss",
-        "ph",
-        "velocity",
-        "cumulativeFlow",
-        "flowMeterReadingAm",
-        "flowMeterReadingPm"
-    ];
+const fields = [
+    "cod", "bod", "th", "temperature", "tss", "ph",
+    "velocity", "cumulativeFlow", "flowMeterReadingAm", "flowMeterReadingPm"
+];
 
-    // -----------------------------------------------------
-    // PROGRESS CALCULATION
-    // -----------------------------------------------------
-    function calculateProgress(lab) {
-        let total = fields.length;
-        let filled = 0;
+const units = {
+    cod:"mg/L", bod:"mg/L", th:"mg/L", temperature:"°C", tss:"mg/L",
+    ph:"", velocity:"m/s", cumulativeFlow:"liters",
+    flowMeterReadingAm:"liters", flowMeterReadingPm:"liters"
+};
 
-        fields.forEach(f => {
-            if (lab[f] !== null && lab[f] !== undefined && lab[f] !== "")
-                filled++;
-        });
+function formatValue(field, value) {
+    if (!value && value !== 0) return "-";
+    return units[field] ? `${value} ${units[field]}` : value;
+}
 
-        return Math.round((filled / total) * 100);
-    }
+function calculateProgress(lab) {
+    let filled = 0;
+    fields.forEach(f => { if (lab[f] !== null && lab[f] !== "") filled++; });
+    return Math.round((filled / fields.length) * 100);
+}
 
-    function applyProgressBar(progress) {
-        const fill = document.getElementById("progressFill");
+function applyProgressBar(progress) {
+    const bar = document.getElementById("progressFill");
+    bar.className = progress === 100 ? "progress-fill progress-green"
+                  : progress > 0 ? "progress-fill progress-yellow"
+                                 : "progress-fill progress-red";
+    bar.style.width = progress + "%";
+    document.getElementById("progressText").textContent = progress + "% Completed";
+}
 
-        const color =
-            progress === 100 ? "progress-green" :
-            progress > 0     ? "progress-yellow" :
-                               "progress-red";
+async function loadOperation() {
+    const res = await fetch(`/api/laboperations/plant/${plantID}?date=${date}`);
+    const raw = await res.text();
 
-        fill.className = `progress-fill ${color}`;
-        fill.style.width = progress + "%";
+    let lab = {};
+    if (raw.trim()) lab = JSON.parse(raw);
 
-        document.getElementById("progressText").textContent = progress + "% Completed";
-    }
+    renderTable(lab);
+    applyProgressBar(calculateProgress(lab));
 
-    // -----------------------------------------------------
-    // LOAD LAB DATA
-    // -----------------------------------------------------
-    async function loadOperation() {
-        const res = await fetch(`/api/laboperations/plant/${plantID}?date=${date}`);
-        const text = await res.text();
+    document.getElementById("updateBtn").onclick = () =>
+        window.location.href = `update-lab.html?plantID=${plantID}&date=${encodeURIComponent(date)}`;
+}
 
-        let lab = {};
-        if (text && text.trim()) lab = JSON.parse(text);
+function renderTable(lab) {
+    const body = document.getElementById("fieldsBody");
+    body.innerHTML = "";
 
-        renderTable(lab);
+    fields.forEach(f => {
+        let label = f.replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase());
+        body.innerHTML += `<tr><td>${label}</td><td>${formatValue(f, lab[f])}</td></tr>`;
+    });
+}
 
-        const progress = calculateProgress(lab);
-        applyProgressBar(progress);
+document.getElementById("pdfBtn").onclick = () => {
 
-        document.getElementById("updateBtn").onclick = () =>
-            window.location.href = `update-lab.html?plantID=${plantID}&date=${encodeURIComponent(date)}`;
-    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:"pt", format:"a4" });
 
-    function renderTable(lab) {
-        const body = document.getElementById("fieldsBody");
-        body.innerHTML = "";
+    doc.setFontSize(18);
+    doc.text("Laboratory Operation Report", 40, 40);
 
-        fields.forEach(f => {
+    doc.setFontSize(12);
+    doc.text(`Date: ${date} | Plant ID: ${plantID}`, 40, 60);
 
-            const label = f.replace(/([A-Z])/g, " $1")
-                           .replace(/^./, c => c.toUpperCase());
+    const rows = [];
+    document.querySelectorAll("#fieldsBody tr").forEach(tr => {
+        let cols = tr.querySelectorAll("td");
+        rows.push([cols[0].innerText, cols[1].innerText]);
+    });
 
-            const value = lab[f] ?? "-";
+    doc.autoTable({
+        head:[["Field","Value"]],
+        body:rows,
+        startY:90,
+        theme:"grid",
+        headStyles:{fillColor:[3,105,161]}
+    });
 
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${label}</td><td>${value}</td>`;
-            body.appendChild(tr);
-        });
-    }
+    doc.save(`Lab_${plantID}_${date}.pdf`);
+};
 
-    // -----------------------------------------------------
-    // SSE AUTO-REFRESH
-    // -----------------------------------------------------
-    function startSSE() {
-        const evt = new EventSource("/api/events/updates");
-        evt.onmessage = () => loadOperation();
-        evt.onerror = () => setTimeout(startSSE, 2000);
-    }
+function startSSE() {
+    const evt = new EventSource("/api/events/updates");
+    evt.onmessage = loadOperation;
+}
 
-    startSSE();
-    loadOperation();
+startSSE();
+loadOperation();
 
 </script>
+
 
 </body>
 </html>

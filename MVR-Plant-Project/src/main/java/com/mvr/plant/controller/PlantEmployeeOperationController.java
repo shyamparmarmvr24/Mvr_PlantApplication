@@ -17,15 +17,18 @@ public class PlantEmployeeOperationController
     @Autowired
     private IPlantEmployeeOperationService employeeOpService;
 
+    @Autowired
+    private SseController sseController;
 
-     // CREATE or UPDATE attendance for employee (AM/PM)
+
+    // CREATE or UPDATE attendance for employee (AM/PM)
 
     @PostMapping("/update/{plantId}/{employeeId}")
     public ResponseEntity<Map<String, Integer>> updateOperation(@PathVariable Long plantId, @PathVariable Integer employeeId, @RequestBody PlantEmployeeOperation empOp)
     {
         Map<String, Integer> response = employeeOpService
                 .updatePlantEmployeeOperation(plantId, employeeId, empOp);
-
+        sseController.broadcastUpdate();
         return ResponseEntity.ok(response);
     }
 

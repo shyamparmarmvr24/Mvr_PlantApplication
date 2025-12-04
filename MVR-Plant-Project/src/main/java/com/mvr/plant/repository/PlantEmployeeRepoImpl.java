@@ -44,7 +44,7 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
         // Find existing employee for this plant + employee ID
         PlantEmployee existing = empRepo
                 .getEmployeeByPlantIdAndEmployeeId(plantId, empId)
-                .orElseThrow(() -> new IllegalStateException("Plant Employee Not Found"));
+                .orElseThrow(() -> new IllegalStateException("Employee Not Found For This Plant"));
 
         // ✅ Update allowed fields
         existing.setEmployeeName(employee.getEmployeeName());

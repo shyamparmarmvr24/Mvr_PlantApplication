@@ -62,6 +62,13 @@
             color:#6b7280;
         }
 
+        .vehicle-title {
+            margin-top:18px;
+            font-size:17px;
+            font-weight:700;
+            color:#0f172a;
+        }
+
         .buttons { text-align:center; margin-top:18px; }
         .btn {
             padding:10px 18px;
@@ -91,6 +98,10 @@
         <tbody id="fieldsBody"></tbody>
     </table>
 
+    <!-- Vehicle operations input section (dynamic blocks per vehicle) -->
+    <h2 style="margin-top:22px;">Vehicle Operations</h2>
+    <div id="vehicleSection"></div>
+
     <div class="buttons">
         <button class="btn btn-save" id="saveBtn">Save</button>
         <button class="btn btn-back" id="backBtn">Back</button>
@@ -113,6 +124,7 @@
 
     //--------------------------------------------------------
     // EXACT FIELD ORDER AS BACKEND (ALL INCLUDED)
+    // vehicleReadingAm/vehicleReadingPm/vehicleFuelLevel removed from this list
     //--------------------------------------------------------
     const fields = [
         {id:"sludgeTankLevelAm", label:"Sludge Tank Level AM"},
@@ -140,9 +152,7 @@
         {id:"dgDiesalPercentageAm", label:"DG Diesel % AM"},
         {id:"dgDiesalPercentagePm", label:"DG Diesel % PM"},
 
-        {id:"vehicleReadingAm", label:"Vehicle Reading AM"},
-        {id:"vehicleReadingPm", label:"Vehicle Reading PM"},
-        {id:"vehicleFuelLevel", label:"Vehicle Fuel Level"},
+        // vehicle fields are handled separately below
 
         {id:"polymerUsage", label:"Polymer Usage"},
         {id:"pillets", label:"Pellets"},
@@ -154,18 +164,18 @@
     const fieldsBody = document.getElementById("fieldsBody");
 
     //--------------------------------------------------------
-    // LOAD EXISTING OPERATION
+    // LOAD EXISTING OPERATION (PLANT)
     //--------------------------------------------------------
     async function loadOperation() {
         const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
         const text = await res.text();
-        currentOp = text ? JSON.parse(text) : {};
+        currentOp = text && text.trim() ? JSON.parse(text) : {};
 
         renderFields();
     }
 
     //--------------------------------------------------------
-    // RENDER INPUT FIELDS
+    // RENDER INPUT FIELDS (PLANT)
     //--------------------------------------------------------
     function renderFields() {
 
@@ -220,7 +230,7 @@
 
         disableAllPowerFields();
         applySolarLogic();
-        enableEnterNavigation();
+        enableEnterNavigation(); // bind enter navigation for plant fields
     }
 
     //--------------------------------------------------------
@@ -253,66 +263,217 @@
         const ampm = ["powerReadingAm","powerReadingPm"];
 
         if (yes && yes.checked) {
-            importExport.forEach(id => document.getElementById(id).disabled = false);
-            ampm.forEach(id => document.getElementById(id).disabled = true);
+            importExport.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = false; });
+            ampm.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = true; });
         }
 
         if (no && no.checked) {
-            ampm.forEach(id => document.getElementById(id).disabled = false);
-            importExport.forEach(id => document.getElementById(id).disabled = true);
+            ampm.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = false; });
+            importExport.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = true; });
         }
     }
 
-    //--------------------------------------------------------
-    // SAVE OPERATION
-    //--------------------------------------------------------
-    document.getElementById("saveBtn").onclick = async () => {
+    //------------------------------------------------------------
+    // LOAD VEHICLE INPUT BLOCKS (dynamic per vehicle)
+    //------------------------------------------------------------
+    async function loadVehicleInputs() {
 
-        const data = {};
+        const container = document.getElementById("vehicleSection");
+        container.innerHTML = "";
 
-        fields.forEach(f => {
-
-            if (f.type === "radio") {
-                const sel = document.querySelector('input[name="solarIntegration"]:checked');
-                data[f.id] = sel ? sel.value === "true" : null;
+        try {
+            const vehRes = await fetch(`/api/vehicle-operations/plant/${plantID}/vehicles`);
+            if (!vehRes.ok) {
+                container.innerHTML = `<div style="color:#6b7280; padding:10px;">No vehicles found</div>`;
+                return;
             }
-            else if (f.type === "textarea") {
-                data[f.id] = document.getElementById(f.id).value || null;
-            }
-            else {
-                const el = document.getElementById(f.id);
-                data[f.id] = el.disabled ? null :
-                             (el.value === "" ? null : el.value);
-            }
-        });
+            const vehicles = await vehRes.json();
 
-        await fetch(`/api/operations/${plantID}?date=${date}`, {
-            method:"PUT",
-            headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify(data)
-        });
+            for (const v of vehicles) {
 
-        alert("Plant Operation Updated Successfully!");
-        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
-    };
-
-    //--------------------------------------------------------
-    // ENTER KEY NAVIGATION
-    //--------------------------------------------------------
-    function enableEnterNavigation() {
-        const all = Array.from(document.querySelectorAll("input, textarea"));
-        all.forEach((el, index) => {
-            el.addEventListener("keydown", e => {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    const next = all[index + 1];
-                    if (next) next.focus();
+                let op = {};
+                try {
+                    const opRes = await fetch(`/api/vehicle-operations/${v.vehicleID}?date=${date}`);
+                    const txt = await opRes.text();
+                    if (txt.trim()) op = JSON.parse(txt);
+                } catch (e) {
+                    op = {};
                 }
-            });
-        });
+
+                container.innerHTML += `
+                    <div class="vehicle-title">${v.vehicleNumber} - ${v.vehicleModelName}</div>
+
+                    <table>
+                        <tr>
+                            <th>Vehicle Reading AM</th>
+                            <td><input id="am_${v.vehicleID}" class="input-box" value="${op.vehicleReadingAm ?? ""}"></td>
+                        </tr>
+                        <tr>
+                            <th>Vehicle Reading PM</th>
+                            <td><input id="pm_${v.vehicleID}" class="input-box" value="${op.vehicleReadingPm ?? ""}"></td>
+                        </tr>
+                        <tr>
+                            <th>Vehicle Fuel Level</th>
+                            <td><input id="fuel_${v.vehicleID}" class="input-box" value="${op.vehicleFuelLevel ?? ""}"></td>
+                        </tr>
+                    </table>
+                `;
+            }
+        } catch (e) {
+            container.innerHTML = `<div style="color:#6b7280; padding:10px;">Error loading vehicles</div>`;
+        }
+
+        // re-bind enter-key navigation to include vehicle inputs too
+        enableEnterNavigation();
     }
 
-    loadOperation();
+    //------------------------------------------------------------
+    // SAVE OPERATION (plant + all vehicles)
+    //------------------------------------------------------------
+    document.getElementById("saveBtn").onclick = async () => {
+
+    // -------------------------------
+    // 1️⃣ FRONTEND VALIDATION (fix for , and :)
+    // -------------------------------
+    function invalidNumber(val) {
+        if (val === null || val === "") return false; // empty allowed
+        // Allow only: digits, optional decimal .
+        return !/^\d+(\.\d+)?$/.test(val);
+    }
+
+    // Validate PLANT fields
+    for (const f of fields) {
+        if (f.type === "radio" || f.type === "textarea") continue;
+        const el = document.getElementById(f.id);
+        if (!el || el.disabled) continue;
+        const v = el.value.trim();
+        if (invalidNumber(v)) {
+            alert(`Invalid value in: ${f.label}\nUse only numbers (0-9) and dot (.)`);
+            el.focus();
+            return; // ❌ STOP SUBMIT
+        }
+    }
+
+    // Validate VEHICLE fields
+    const vehInputs = document.querySelectorAll("#vehicleSection input");
+    for (const input of vehInputs) {
+        const v = input.value.trim();
+        if (invalidNumber(v)) {
+            alert("Invalid value in Vehicle fields. Use only numbers and dot (.)");
+            input.focus();
+            return; // ❌ STOP SUBMIT
+        }
+    }
+
+    // -------------------------------
+    // 2️⃣ COLLECT PLANT DATA
+    // -------------------------------
+    const data = {};
+
+    fields.forEach(f => {
+        if (f.type === "radio") {
+            const sel = document.querySelector('input[name="solarIntegration"]:checked');
+            data[f.id] = sel ? sel.value === "true" : null;
+        }
+        else if (f.type === "textarea") {
+            data[f.id] = document.getElementById(f.id).value || null;
+        }
+        else {
+            const el = document.getElementById(f.id);
+            if (!el || el.disabled) data[f.id] = null;
+            else data[f.id] = el.value === "" ? null : el.value;
+        }
+    });
+
+    data.operationDate = date;
+
+    // -------------------------------
+    // 3️⃣ SEND PLANT OPERATION SAVE
+    // -------------------------------
+    let plantRes;
+    try {
+        plantRes = await fetch(`/api/operations/${plantID}?date=${encodeURIComponent(date)}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+    } catch (e) {
+        alert("Network error while saving plant operation.");
+        return;
+    }
+
+    if (!plantRes.ok) {
+        const errText = await plantRes.text();
+        alert("❌ ERROR saving plant operation:\n" + errText);
+        return; // ❌ STOP – DO NOT REDIRECT
+    }
+
+    // -------------------------------
+    // 4️⃣ SAVE VEHICLE OPERATIONS
+    // -------------------------------
+    try {
+        const vehRes = await fetch(`/api/vehicle-operations/plant/${plantID}/vehicles`);
+        if (vehRes.ok) {
+            const vehicles = await vehRes.json();
+
+            for (const v of vehicles) {
+                const payload = {
+                    operationDate: date,
+                    vehicleReadingAm: document.getElementById(`am_${v.vehicleID}`).value || null,
+                    vehicleReadingPm: document.getElementById(`pm_${v.vehicleID}`).value || null,
+                    vehicleFuelLevel: document.getElementById(`fuel_${v.vehicleID}`).value || null
+                };
+
+                const vr = await fetch(`/api/vehicle-operations/${plantID}/${v.vehicleID}?date=${encodeURIComponent(date)}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!vr.ok) {
+                    const t = await vr.text();
+                    alert(`❌ ERROR saving vehicle ${v.vehicleNumber}:\n${t}`);
+                    return; // ❌ STOP – DO NOT REDIRECT
+                }
+            }
+        }
+    } catch (e) {
+        alert("❌ Vehicle save failed. No changes were saved for vehicles.");
+        return;
+    }
+
+    // -------------------------------
+    // 5️⃣ SUCCESS
+    // -------------------------------
+    alert("✔ Operation updated successfully!");
+    window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+};
+
+
+    //--------------------------------------------------------
+    // ENTER KEY NAVIGATION (across plant + vehicle inputs)
+    //--------------------------------------------------------
+    function enableEnterNavigation() {
+        // select only inputs and textareas visible on page
+        const all = Array.from(document.querySelectorAll("input:not([type=radio]), textarea")).filter(el => el.offsetParent !== null);
+        all.forEach((el, index) => {
+            el.removeEventListener("keydown", enterNavHandler);
+            el.addEventListener("keydown", enterNavHandler);
+        });
+
+        function enterNavHandler(e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                const visible = Array.from(document.querySelectorAll("input:not([type=radio]), textarea")).filter(el => el.offsetParent !== null);
+                const idx = visible.indexOf(e.target);
+                const next = visible[idx + 1];
+                if (next) next.focus();
+            }
+        }
+    }
+
+    // initial load
+    loadOperation().then(loadVehicleInputs);
 
 </script>
 </body>

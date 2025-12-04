@@ -34,7 +34,7 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
         // If no existing operation → CREATE NEW ONE
         if (exist == null) {
             // First fetch the parent plant
-            PlantEmployee plantEmp = empRepo.findEmployeeByPlantAndEmployeeId(plantId,empId)
+            PlantEmployee plantEmp = empRepo.getEmployeeByPlantIdAndEmployeeId(plantId,empId)
                     .orElseThrow(() -> new IllegalStateException("Employee Not Found"));
 
             // Set parent reference and save new operation (for that date)
@@ -65,7 +65,7 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
     @Override
     public PlantEmployeeOperation getEmployeeOperationByEmpIdAndDate(Integer empId, LocalDate date)
     {
-        return empOpRepo.getEmployeeOperationByEmployeeIdAndDate(empId,date).orElseThrow(()->new IllegalStateException("Plant Operation Not Found"));
+        return empOpRepo.getEmployeeOperationByEmployeeIdAndDate(empId,date).orElseThrow(()->new IllegalStateException("Employee Operation Not Found For Date"));
     }
 
     @Override

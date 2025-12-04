@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
     <title>View Operation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+
 
     <style>
         body {
@@ -77,6 +82,13 @@
         .progress-yellow { background:#f59e0b; }
         .progress-red { background:#ef4444; }
 
+        .vehicle-title {
+            margin-top:18px;
+            font-size:17px;
+            font-weight:700;
+            color:#0f172a;
+        }
+
         .buttons {
             margin-top:20px;
             text-align:center;
@@ -94,6 +106,28 @@
 
         .btn-update { background:#059669; }
         .btn-back { background:#6b7280; }
+
+        /* Prevent table rows from splitting across PDF pages */
+table, tr, td, th {
+    page-break-inside: avoid !important;
+}
+
+/* Keep the whole card together unless it's too long */
+.card {
+    page-break-inside: avoid !important;
+}
+
+/* Page break BEFORE vehicle section if too long */
+.vehicle-section {
+    page-break-before: always;
+}
+
+/* Make PDF look tighter */
+.pdf-scale {
+    transform: scale(0.85);
+    transform-origin: top left;
+}
+
     </style>
 </head>
 
@@ -118,9 +152,14 @@
         <tbody id="fieldsBody"></tbody>
     </table>
 
+    <!-- Vehicle operations section (dynamic, repeated blocks per vehicle) -->
+    <h2 style="margin-top:22px;">Vehicle Operations</h2>
+    <div id="vehicleOps"></div>
+
     <div class="buttons">
         <button class="btn btn-update" id="updateBtn">Update</button>
         <button class="btn btn-back" id="backBtn">Back</button>
+        <button class="btn" style="background:#2563eb;" id="pdfBtn">Download PDF</button>
     </div>
 
 </div>
@@ -139,6 +178,7 @@
         window.location.href = `index.html?date=${encodeURIComponent(date)}`;
 
     // ---------------------- FIELD ORDER ----------------------
+    // Note: vehicleReadingAm/vehicleReadingPm/vehicleFuelLevel REMOVED from this list
     const fields = [
         "operationDate",
         "sludgeTankLevelAm",
@@ -159,66 +199,124 @@
         "powerReadingPm",
 
         "powerConsumed",
-
         "dgReadingAm",
         "dgReadingPm",
         "dgDiesalPercentageAm",
         "dgDiesalPercentagePm",
+
         "dgRunHours",
 
-        "vehicleReadingAm",
-        "vehicleReadingPm",
-        "vehicleFuelLevel",
+        // vehicle fields removed here intentionally
 
         "polymerUsage",
         "pillets",
+
         "remarks"
-    ];
-
-    // FIELDS INCLUDED IN PROGRESS CALCULATION
-    const backendFields = [
-        "sludgeTankLevelAm","sludgeTankLevelPm","sludgeReceived","noOfTrips","sludgeProcessed",
-        "biocharProduced","plantRunningHrs","solarIntegration",
-
-        "powerReadingAmImport","powerReadingAmExport",
-        "powerReadingPmImport","powerReadingPmExport",
-
-        "powerReadingAm","powerReadingPm",
-
-        "dgReadingAm","dgReadingPm",
-        "dgDiesalPercentageAm","dgDiesalPercentagePm",
-        "dgRunHours",
-
-        "vehicleReadingAm","vehicleReadingPm","vehicleFuelLevel",
-
-        "polymerUsage","pillets"
     ];
 
     const fieldsBody = document.getElementById("fieldsBody");
 
-    // ---------------------- PROGRESS CALC ----------------------
+    // ---------------------- UNITS MAP ----------------------
+    const units = {
+        sludgeTankLevelAm: "liters",
+        sludgeTankLevelPm: "liters",
+        sludgeReceived: "liters",
+        sludgeProcessed: "liters",
+        biocharProduced: "kgs",
+        noOfTrips: "",
+        plantRunningHrs: "",
+        powerReadingAmImport: "kwh",
+        powerReadingAmExport: "kwh",
+        powerReadingPmImport: "kwh",
+        powerReadingPmExport: "kwh",
+        powerReadingAm: "kwh",
+        powerReadingPm: "kwh",
+        powerConsumed: "kwh",
+        dgReadingAm: "",
+        dgReadingPm: "",
+        dgRunHours: "",
+        dgDiesalPercentageAm: "%",
+        dgDiesalPercentagePm: "%",
+        // vehicleReadingAm/vehicleReadingPm/vehicleFuelLevel removed from units map usage
+        polymerUsage: "grams",
+        pillets: "kgs",
+        remarks: ""
+    };
+
+    // ---------------------- TIME FORMATTER ----------------------
+    function formatTimeDecimal(value) {
+        if (value === null || value === undefined || value === "" || isNaN(value)) return "-";
+
+        const hours = Math.floor(value);
+        const minutes = Math.round((value - hours) * 100);
+
+        let parts = [];
+        if (hours > 0) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
+        if (minutes > 0) parts.push(`${minutes} minutes`);
+
+        return parts.join(" ");
+    }
+
+    // ---------------------- VALUE FORMATTER ----------------------
+    function formatValue(field, value) {
+
+        if (value === null || value === "" || value === undefined)
+            return "-";
+
+        if (field === "solarIntegration")
+            return value ? "Yes" : "No";
+
+        if (["plantRunningHrs", "dgReadingAm", "dgReadingPm", "dgRunHours"].includes(field))
+            return formatTimeDecimal(parseFloat(value));
+
+        if (units[field] === "%")
+            return `${value} %`;
+
+        if (units[field])
+            return `${value} ${units[field]}`;
+
+        return value;
+    }
+
+    // ---------------------- PROGRESS FIELDS (EXCLUDES VEHICLE FIELDS) ----------------------
+    // removed vehicleReadingAm/vehicleReadingPm/vehicleFuelLevel from baseProgressFields
+    const baseProgressFields = [
+        "sludgeTankLevelAm","sludgeTankLevelPm","sludgeReceived","noOfTrips",
+        "sludgeProcessed","biocharProduced","plantRunningHrs","solarIntegration",
+        "dgReadingAm","dgReadingPm","dgDiesalPercentageAm","dgDiesalPercentagePm",
+        "polymerUsage","pillets"
+    ];
+
     function calculateProgress(op) {
-        const total = op.solarIntegration === true ? 23 : 21;
+
+        let fieldsToCheck = [...baseProgressFields];
+
+        // Solar Yes → use IMPORT/EXPORT fields
+        if (op.solarIntegration === true) {
+            fieldsToCheck.push(
+                "powerReadingAmImport",
+                "powerReadingAmExport",
+                "powerReadingPmImport",
+                "powerReadingPmExport"
+            );
+        }
+        // Solar No → use normal AM/PM fields
+        else {
+            fieldsToCheck.push(
+                "powerReadingAm",
+                "powerReadingPm"
+            );
+        }
+
+        // Count filled plant fields
         let filled = 0;
-
-        backendFields.forEach(f => {
-
-            if (op.solarIntegration === true &&
-                (f === "powerReadingAm" || f === "powerReadingPm"))
-                return;
-
-            if (op.solarIntegration === false &&
-                (
-                    f === "powerReadingAmImport" || f === "powerReadingAmExport" ||
-                    f === "powerReadingPmImport" || f === "powerReadingPmExport"
-                ))
-                return;
-
+        fieldsToCheck.forEach(f => {
             if (op[f] !== null && op[f] !== "" && op[f] !== undefined)
                 filled++;
         });
 
-        return Math.round((filled / total) * 100);
+        const total = fieldsToCheck.length;
+        return total === 0 ? 0 : Math.round((filled / total) * 100);
     }
 
     function applyProgressBar(progress) {
@@ -230,14 +328,11 @@
                                "progress-fill progress-red";
 
         bar.style.width = progress + "%";
-
-        document.getElementById("progressText").textContent =
-            progress + "% Completed";
+        document.getElementById("progressText").textContent = progress + "% Completed";
     }
 
     // ---------------------- LOAD OPERATION ----------------------
     async function loadOperation() {
-
         const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
         const text = await res.text();
 
@@ -247,18 +342,9 @@
         fieldsBody.innerHTML = "";
 
         fields.forEach(f => {
-
             let label = f.replace(/([A-Z])/g, " $1")
                          .replace(/^./, c => c.toUpperCase());
-
-            let value = op[f];
-
-            if (f === "solarIntegration") {
-                value = value === true ? "Yes" :
-                        value === false ? "No" : "-";
-            }
-
-            value = (value === null || value === undefined || value === "") ? "-" : value;
+            let value = formatValue(f, op[f]);
 
             const tr = document.createElement("tr");
             tr.innerHTML = `<td>${label}</td><td>${value}</td>`;
@@ -268,20 +354,149 @@
         const progress = calculateProgress(op);
         applyProgressBar(progress);
 
+        // load vehicles after plant fields are rendered
+        loadVehicleOps();
+
+        // update button binding (keeps same redirection logic)
         document.getElementById("updateBtn").onclick = () =>
             window.location.href =
                 `update-operation.html?plantID=${plantID}&date=${encodeURIComponent(date)}`;
     }
 
-    // ---------------------- SSE AUTO REFRESH ----------------------
-    function startSSE() {
-        const evt = new EventSource("/api/events/updates");
-        evt.onmessage = () => loadOperation();
-        evt.onerror = () => setTimeout(startSSE, 2000);
+    // ---------------------- LOAD VEHICLE OPERATIONS ----------------------
+    async function loadVehicleOps() {
+
+        const container = document.getElementById("vehicleOps");
+        container.innerHTML = "";
+
+        try {
+            const vehRes = await fetch(`/api/vehicle-operations/plant/${plantID}/vehicles`);
+            if (!vehRes.ok) {
+                container.innerHTML = `<div style="color:#6b7280; padding:10px;">No vehicles found</div>`;
+                return;
+            }
+            const vehicles = await vehRes.json();
+
+            for (const v of vehicles) {
+                // fetch operation for this vehicle
+                let op = {};
+                try {
+                    const opRes = await fetch(`/api/vehicle-operations/${v.vehicleID}?date=${date}`);
+                    const text = await opRes.text();
+                    if (text.trim()) op = JSON.parse(text);
+                } catch (e) {
+                    op = {};
+                }
+
+                container.innerHTML += `
+                    <div class="vehicle-title">${v.vehicleNumber} - ${v.vehicleModelName}</div>
+
+                    <table>
+                        <tr><th>Vehicle Reading AM</th><td>${op.vehicleReadingAm ?? "-"}</td></tr>
+                        <tr><th>Vehicle Reading PM</th><td>${op.vehicleReadingPm ?? "-"}</td></tr>
+                        <tr><th>Fuel Level</th><td>${op.vehicleFuelLevel ?? "-"}</td></tr>
+                    </table>
+                `;
+            }
+
+        } catch (e) {
+            container.innerHTML = `<div style="color:#6b7280; padding:10px;">Error loading vehicles</div>`;
+        }
     }
 
-    startSSE();
+    // ---------------------- SSE AUTO REFRESH ----------------------
+    function startSSE() {
+        try {
+            const evt = new EventSource("/api/events/updates");
+            evt.onmessage = () => loadOperation();
+            evt.onerror = () => setTimeout(startSSE, 2000);
+        } catch (e) {
+            // ignore SSE if not available
+        }
+    }
+
+document.getElementById("pdfBtn").onclick = () => {
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+
+    const title = `Operation Details`;
+    const info = `Date: ${date}    |    Plant ID: ${plantID}`;
+
+    // Title
+    doc.setFontSize(18);
+    doc.setTextColor(30, 80, 160);
+    doc.text(title, 40, 40);
+
+    // Subtitle
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(info, 40, 60);
+
+    // ----------------------------
+    // Extract TABLE DATA
+    // ----------------------------
+    const rows = [];
+    document.querySelectorAll("#fieldsBody tr").forEach(tr => {
+        const cols = tr.querySelectorAll("td");
+        rows.push([cols[0].innerText, cols[1].innerText]);
+    });
+
+    // ----------------------------
+    // Add Table to PDF
+    // ----------------------------
+    doc.autoTable({
+        head: [["Field", "Value"]],
+        body: rows,
+        startY: 90,
+        theme: 'grid',
+        headStyles: { fillColor: [3, 105, 161], halign: "left" },
+        styles: { fontSize: 10, cellPadding: 5 },
+        columnStyles: {
+            0: { cellWidth: 180 },
+            1: { cellWidth: 330 }
+        }
+    });
+
+    // ----------------------------
+    // Vehicle Operations Section
+    // ----------------------------
+    let y = doc.lastAutoTable.finalY + 30;
+
+    doc.setFontSize(15);
+    doc.text("Vehicle Operations", 40, y);
+    y += 10;
+
+    const vehicleBlocks = document.querySelectorAll("#vehicleOps table");
+    const vehicleTitles = document.querySelectorAll(".vehicle-title");
+
+    vehicleBlocks.forEach((table, index) => {
+        const rowsVeh = [];
+
+        table.querySelectorAll("tr").forEach(tr => {
+            const td = tr.querySelectorAll("td");
+            rowsVeh.push([tr.querySelector("th").innerText, td[0].innerText]);
+        });
+
+        doc.autoTable({
+            head: [[vehicleTitles[index].innerText, ""]],
+            body: rowsVeh,
+            startY: doc.lastAutoTable.finalY + 10,
+            theme: 'grid',
+            headStyles: { fillColor: [15, 23, 42], halign: "left" },
+            styles: { fontSize: 10, cellPadding: 5 },
+            columnStyles: { 0: { cellWidth: 200 }, 1: { cellWidth: 300 } }
+        });
+    });
+
+    doc.save(`Plant_${plantID}_Operation_${date}.pdf`);
+};
+
+
+
+startSSE();
     loadOperation();
+
 
 </script>
 

@@ -14,7 +14,7 @@ public class PlantServiceImpl implements IPlantService
     private IPlantMgmtRepo plantRepo;
 
     @Override
-    public String insertPlantDetails(FstpPlant plant) {
+    public FstpPlant insertPlantDetails(FstpPlant plant) {
         return plantRepo.insertPlantDetails(plant);
     }
 

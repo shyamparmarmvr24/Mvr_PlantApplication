@@ -15,8 +15,11 @@ public class VehicleController
     @Autowired
     private IVehicleService vehicleService;
 
+    @Autowired
+    private SseController sseController;
 
-     //CREATE VEHICLE FOR PLANT
+
+    //CREATE VEHICLE FOR PLANT
 
     @PostMapping("/create/{plantId}")
     public ResponseEntity<VehicleInformation> createVehicle(
@@ -24,6 +27,7 @@ public class VehicleController
             @RequestBody VehicleInformation vehicle
     ) {
         VehicleInformation saved = vehicleService.createVehicle(plantId, vehicle);
+        sseController.broadcastUpdate();
         return ResponseEntity.ok(saved);
     }
 
@@ -48,6 +52,7 @@ public class VehicleController
             @RequestBody VehicleInformation updatedVehicle
     ) {
         VehicleInformation updated = vehicleService.updateVehicle(plantId, vehicleId, updatedVehicle);
+        sseController.broadcastUpdate();
         return ResponseEntity.ok(updated);
     }
 }

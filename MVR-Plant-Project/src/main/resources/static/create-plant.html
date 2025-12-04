@@ -1,352 +1,1221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
-    <title>Add New Plant</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Create Plant & Vehicles - MVR TECHNOLOGY</title>
 
     <style>
-        body{
-            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background:#e8fdf3;
-            margin:0;
-            padding:0;
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: #f5f7fa;
+            color: #0f172a;
+        }
+        header {
+            background: linear-gradient(90deg, #0f172a, #0ea5e9);
+            padding: 14px 20px;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 1px;
         }
 
-        header{
-            background:#27ae60;
-            color:white;
-            padding:22px;
-            text-align:center;
-            font-size:28px;
-            font-weight:700;
-            letter-spacing:1px;
-            box-shadow:0 2px 8px rgba(0,0,0,0.2);
+        .container {
+            max-width: 900px;
+            margin: 30px auto 40px;
+            background: white;
+            border-radius: 12px;
+            padding: 24px 26px 28px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
         }
 
-        .container{
-            max-width:900px;
-            margin:40px auto;
-            background:white;
-            padding:20px 30px 35px;
-            border-radius:12px;
-            box-shadow:0 6px 25px rgba(0,0,0,0.15);
+        h2 { text-align: center; margin-top: 0; margin-bottom: 18px; color: #0f172a; }
+
+        .steps-indicator { display: flex; justify-content: space-between; margin-bottom: 18px; }
+        .step-pill {
+            flex: 1; text-align:center; padding: 8px 10px; font-size:13px; border-radius:999px;
+            background:#e5e7eb; color:#4b5563; margin-right:6px;
         }
+        .step-pill:last-child { margin-right:0; }
+        .step-pill.active { background:#0ea5e9; color:white; font-weight:600; }
+        .step-pill.done { background:#16a34a; color:white; }
 
-        table{
-            width:100%;
-            border-collapse:collapse;
-            background:#f3fff9;
-            border-radius:12px;
-            overflow:hidden;
+        .step { display: none; }
+        .step.active { display: block; }
+
+        .form-row { display:flex; gap:16px; margin-bottom:14px; flex-wrap:wrap; }
+        .form-group { flex:1; min-width:220px; }
+        label { display:block; font-weight:600; margin-bottom:4px; font-size:14px; }
+        input, select { width:100%; padding:9px 10px; border-radius:6px; border:1px solid #d1d5db; font-size:14px; }
+        input:disabled, select:disabled { background:#f3f4f6; cursor:not-allowed; }
+        .note { font-size:12px; color:#6b7280; margin-top:2px; }
+        .buttons { margin-top:20px; display:flex; justify-content:space-between; }
+        .btn { padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-size:14px; font-weight:600; }
+        .btn-next { background:#0ea5e9; color:white; }
+        .btn-next:hover { background:#0284c7; }
+        .btn-prev { background:#6b7280; color:white; }
+        .btn-prev:hover { background:#4b5563; }
+        .btn-submit { background:#16a34a; color:white; }
+        .btn-submit:hover { background:#15803d; }
+
+        .vehicle-card, .employee-card { border:1px solid #e5e7eb; border-radius:10px; padding:14px 16px 10px; margin-bottom:14px; background:#f9fafb; }
+        .vehicle-title, .employee-title { font-weight:600; margin-bottom:10px; color:#0f172a; }
+        .section-title { font-size:16px; font-weight:600; margin:10px 0 6px; color:#111827; }
+        .divider { height:1px; background:#e5e7eb; margin:12px 0 16px; }
+        .error-msg { color:#b91c1c; font-size:13px; margin-top:4px; white-space:pre-line; }
+        .success-msg { color:#15803d; font-size:14px; margin-top:8px; text-align:center; }
+
+        .req { color: red; font-weight: bold; margin-left:6px; }
+
+        @media (max-width: 600px) {
+            .form-row { flex-direction: column; }
         }
-
-        th{
-            background:#27ae60;
-            padding:15px;
-            color:white;
-            text-transform:uppercase;
-            font-size:17px;
-            letter-spacing:1px;
-            text-align:center;
-        }
-
-        td{
-            padding:14px 15px;
-            border-bottom:1px solid #caeede;
-            font-size:16px;
-            font-weight:500;
-            color:#2d4b3f;
-        }
-
-        tr:last-child td{
-            border-bottom:none;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="date"]{
-            width:95%;
-            padding:10px;
-            border:1px solid #bbb;
-            border-radius:6px;
-            font-size:15px;
-            background:white;
-        }
-
-        .yesno{
-            display:flex;
-            gap:20px;
-            align-items:center;
-        }
-
-        .yesno label{
-            font-weight:600;
-            color:#2d4b3f;
-        }
-
-        button{
-            padding:12px 25px;
-            border:none;
-            border-radius:8px;
-            font-size:17px;
-            color:white;
-            cursor:pointer;
-            margin-top:20px;
-        }
-
-        .addBtn{ background:#27ae60; }
-        .addBtn:hover{ background:#1e8f4e; }
-
-        .back-btn{
-            background:#95a5a6;
-            margin-left:10px;
-        }
-        .back-btn:hover{ background:#7f8c8d; }
-
-        .success{
-            margin-top:15px;
-            font-weight:700;
-            font-size:17px;
-        }
-
-        .error { color: red; font-size: 14px; margin-left: 10px; }
     </style>
 </head>
+
 <body>
 
-<header>Add New Plant</header>
+<header>Create FSTP Plant & Vehicles</header>
 
 <div class="container">
 
-    <table>
-        <tr><th colspan="2">Plant Information</th></tr>
+    <h2>New Plant Wizard</h2>
 
-        <tr>
-            <td>Plant ID</td>
-            <td>
-                <input type="number" id="plantID">
-                <span class="error" id="err_plantID"></span>
-            </td>
-        </tr>
+    <!-- Step Pills -->
+    <div class="steps-indicator">
+        <div class="step-pill active" id="pill-1">1. Basic Details</div>
+        <div class="step-pill" id="pill-2">2. Power & Network</div>
+        <div class="step-pill" id="pill-3">3. Devices & Counts</div>
+        <div class="step-pill" id="pill-4">4. Vehicle Details</div>
+        <div class="step-pill" id="pill-5">5. Employee Information</div>
+    </div>
 
-        <tr>
-            <td>Plant Name</td>
-            <td>
-                <input type="text" id="plantName">
-                <span class="error" id="err_plantName"></span>
-            </td>
-        </tr>
+    <div id="formError" class="error-msg" style="display:none;"></div>
+    <div id="formSuccess" class="success-msg" style="display:none;"></div>
 
-        <tr>
-            <td>State Code</td>
-            <td>
-                <input type="text" id="stateCode">
-                <span class="error" id="err_stateCode"></span>
-            </td>
-        </tr>
+    <form id="plantWizardForm" autocomplete="off">
 
-        <tr>
-            <td>District</td>
-            <td>
-                <input type="text" id="district">
-                <span class="error" id="err_district"></span>
-            </td>
-        </tr>
+        <!-- STEP 1: BASIC PLANT DETAILS -->
+        <div class="step active" id="step-1">
+            <div class="section-title">Plant Basic Information</div>
+            <div class="divider"></div>
 
-        <tr>
-            <td>KLD</td>
-            <td>
-                <input type="number" id="kld">
-                <span class="error" id="err_kld"></span>
-            </td>
-        </tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="plantID">Plant ID <span class="req">*</span></label>
+                    <input type="number" id="plantID" required />
+                    <div class="note">Enter existing Plant ID to load & edit details.</div>
+                </div>
+                <div class="form-group">
+                    <label for="plantName">Plant Name <span class="req">*</span></label>
+                    <input type="text" id="plantName" required />
+                </div>
+            </div>
 
-        <tr>
-            <td>Ward No</td>
-            <td>
-                <input type="number" id="wardNo">
-                <span class="error" id="err_wardNo"></span>
-            </td>
-        </tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="stateCode">State Code</label>
+                    <input type="text" id="stateCode" />
+                </div>
+                <div class="form-group">
+                    <label for="district">District</label>
+                    <input type="text" id="district" />
+                </div>
+            </div>
 
-        <tr>
-            <td>Pin Code</td>
-            <td>
-                <input type="number" id="pinCode">
-                <span class="error" id="err_pinCode"></span>
-            </td>
-        </tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="kld">KLD <span class="req">*</span></label>
+                    <input type="number" id="kld" required />
+                </div>
+                <div class="form-group">
+                    <label for="wardNo">Ward No</label>
+                    <input type="number" id="wardNo" />
+                </div>
+            </div>
 
-        <tr>
-            <td>Zones</td>
-            <td>
-                <input type="number" id="zones">
-                <span class="error" id="err_zones"></span>
-            </td>
-        </tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="pinCode">Pin Code</label>
+                    <input type="number" id="pinCode" />
+                </div>
+                <div class="form-group">
+                    <label for="zones">Zone <span class="req">*</span></label>
+                    <input type="number" id="zones" required />
+                </div>
+            </div>
 
-        <!-- YES/NO for 4 booleans -->
-        <tr>
-            <td>MNIT</td>
-            <td class="yesno">
-                <label><input type="radio" name="mnit" value="1"> Yes</label>
-                <label><input type="radio" name="mnit" value="0" checked> No</label>
-            </td>
-        </tr>
+            <div class="section-title">MNIT & Construction</div>
+            <div class="divider"></div>
 
-        <tr>
-            <td>Permanent Power</td>
-            <td class="yesno">
-                <label><input type="radio" name="permanentPower" value="1"> Yes</label>
-                <label><input type="radio" name="permanentPower" value="0" checked> No</label>
-            </td>
-        </tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="mnit">MNIT <span class="req">*</span></label>
+                    <select id="mnit" required>
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="mnitDate">MNIT Completion Date</label>
+                    <input type="date" id="mnitDate" disabled />
+                    <div class="note">Future dates not allowed</div>
+                </div>
+            </div>
 
-        <tr>
-            <td>Solar</td>
-            <td class="yesno">
-                <label><input type="radio" name="solar" value="1"> Yes</label>
-                <label><input type="radio" name="solar" value="0" checked> No</label>
-            </td>
-        </tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="constructionStartedDate">Construction Started</label>
+                    <input type="date" id="constructionStartedDate" />
+                </div>
+                <div class="form-group">
+                    <label for="civilWorkCompletedDate">Civil Work Completed</label>
+                    <input type="date" id="civilWorkCompletedDate" />
+                </div>
+            </div>
 
-        <tr>
-            <td>Internet</td>
-            <td class="yesno">
-                <label><input type="radio" name="internet" value="1"> Yes</label>
-                <label><input type="radio" name="internet" value="0" checked> No</label>
-            </td>
-        </tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="machinaryAssembleDate">Machinery Assemble</label>
+                    <input type="date" id="machinaryAssembleDate" />
+                </div>
+            </div>
 
-        <!-- NEW FIELDS START -->
-        <tr><th colspan="2">Project Milestones</th></tr>
+            <div class="buttons">
+                <button type="button" class="btn btn-prev" onclick="window.location.href='index.html'">◂ Back</button>
+                <button type="button" class="btn btn-next" onclick="goToStep(2)">Next ▸</button>
+            </div>
+        </div>
 
-        <tr><td>MNIT Completion Date</td><td><input type="date" id="mnitDateOfCompletion"></td></tr>
-        <tr><td>Permanent Power Completion Date</td><td><input type="date" id="permanentPowerDateOfCompletion"></td></tr>
-        <tr><td>Internet Completion Date</td><td><input type="date" id="internetDateOfCompletion"></td></tr>
-        <tr><td>Solar Completion Date</td><td><input type="date" id="solarDateOfCompletion"></td></tr>
+        <!-- STEP 2: POWER / SOLAR / INTERNET -->
+        <div class="step" id="step-2">
+            <div class="section-title">Power & Solar</div>
+            <div class="divider"></div>
 
-        <tr><td>Solar Plant Capacity</td><td><input type="number" id="solarPlantCapacity"></td></tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="permanentPower">Permanent Power <span class="req">*</span></label>
+                    <select id="permanentPower" required>
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="permanentPowerDate">Permanent Power Completion Date</label>
+                    <input type="date" id="permanentPowerDate" disabled />
+                    <div class="note">Future dates not allowed</div>
+                </div>
+            </div>
 
-        <tr><td>Construction Started</td><td><input type="date" id="constructionStartedDate"></td></tr>
-        <tr><td>Civil Work Completed</td><td><input type="date" id="civilWorkCompletedDate"></td></tr>
-        <tr><td>Machinery Assemble</td><td><input type="date" id="machinaryAssembleDate"></td></tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="solar">Solar <span class="req">*</span></label>
+                    <select id="solar" required>
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="solarDate">Solar Completion Date</label>
+                    <input type="date" id="solarDate" disabled />
+                    <div class="note">Future dates not allowed</div>
+                </div>
+            </div>
 
-        <tr><td>COD & BOD Sensor Date</td><td><input type="date" id="codAndBodSenserDate"></td></tr>
-        <tr><td>IP Phone Date</td><td><input type="date" id="ipPhoneDate"></td></tr>
-        <tr><td>Camera Config Date</td><td><input type="date" id="cameraConfigurationDate"></td></tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="internet">Internet <span class="req">*</span></label>
+                    <select id="internet" required>
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="internetDate">Internet Completion Date</label>
+                    <input type="date" id="internetDate" disabled />
+                    <div class="note">Future dates not allowed</div>
+                </div>
+            </div>
 
-        <tr>
-            <td>Tabs</td>
-            <td class="yesno">
-                <label><input type="radio" name="tabs" value="1"> Yes</label>
-                <label><input type="radio" name="tabs" value="0" checked> No</label>
-            </td>
-        </tr>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="solarPlantCapacity">Solar Plant Capacity (kW)</label>
+                    <input type="number" id="solarPlantCapacity" />
+                </div>
+            </div>
 
-        <tr><td>Tabs Received Date</td><td><input type="date" id="tabsReceivedDate"></td></tr>
+            <div class="buttons">
+                <button type="button" class="btn btn-prev" onclick="goToStep(1)">◂ Back</button>
+                <button type="button" class="btn btn-next" onclick="goToStep(3)">Next ▸</button>
+            </div>
+        </div>
 
-        <tr>
-            <td>GPS</td>
-            <td class="yesno">
-                <label><input type="radio" name="gps" value="1"> Yes</label>
-                <label><input type="radio" name="gps" value="0" checked> No</label>
-            </td>
-        </tr>
+        <!-- STEP 3: DEVICES & NO OF VEHICLES / EMPLOYEES -->
+        <div class="step" id="step-3">
+            <div class="section-title">Devices & Sensors</div>
+            <div class="divider"></div>
 
-        <tr><td>GPS Date</td><td><input type="date" id="gpsDate"></td></tr>
-        <!-- NEW FIELDS END -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ipPhoneDate">IP Phone Date</label>
+                    <input type="date" id="ipPhoneDate" />
+                </div>
+                <div class="form-group">
+                    <label for="cameraConfigurationDate">Camera Config Date</label>
+                    <input type="date" id="cameraConfigurationDate" />
+                </div>
+            </div>
 
-    </table>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tabs">Tabs</label>
+                    <select id="tabs">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tabsReceivedDate">Tabs Received Date</label>
+                    <input type="date" id="tabsReceivedDate" disabled />
+                    <div class="note">Future dates not allowed</div>
+                </div>
+            </div>
 
-    <button class="addBtn" onclick="createPlant()">Add Plant</button>
-    <button class="back-btn" onclick="location.href='index.html'">Back to Home</button>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="gps">GPS</label>
+                    <select id="gps">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gpsDate">GPS Date</label>
+                    <input type="date" id="gpsDate" disabled />
+                    <div class="note">Future dates not allowed</div>
+                </div>
+            </div>
 
-    <p class="success" id="msg"></p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="codAndBodSenserDate">COD & BOD Sensor Date</label>
+                    <input type="date" id="codAndBodSenserDate" />
+                    <div class="note">Future dates not allowed</div>
+                </div>
+                <div class="form-group">
+                    <label for="noOfVehicle">Number of Vehicles</label>
+                    <input type="number" id="noOfVehicle" min="0" value="0" />
+                    <div class="note">Enter 0 if there are no vehicles</div>
+                </div>
+                <div class="form-group">
+                    <label for="noOfEmployees">Number of Employees</label>
+                    <input type="number" id="noOfEmployees" min="0" value="0" />
+                    <div class="note">Enter 0 if there are no employees</div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-prev" onclick="goToStep(2)">◂ Back</button>
+                <button type="button" class="btn btn-next" onclick="prepareVehiclesAndGoToStep4()">Next ▸</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: VEHICLE DETAILS -->
+        <div class="step" id="step-4">
+            <div class="section-title">Vehicle Information</div>
+            <div class="divider"></div>
+
+            <div id="vehicleFormsContainer"></div>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-prev" onclick="goToStep(3)">◂ Back</button>
+                <button type="button" class="btn btn-next" onclick="prepareEmployeesAndGoToStep5()">Next ▸</button>
+            </div>
+        </div>
+
+        <!-- STEP 5: EMPLOYEE DETAILS -->
+        <div class="step" id="step-5">
+            <div class="section-title">Employee Information</div>
+            <div class="divider"></div>
+
+            <div id="employeeFormsContainerStep5"></div>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-prev" onclick="goToStep(4)">◂ Back</button>
+                <button type="button" class="btn btn-submit" onclick="submitPlantAndVehicles()">Submit All</button>
+            </div>
+        </div>
+
+    </form>
 </div>
 
 <script>
+    // ----------------------- GLOBALS -----------------------
+    let currentStep = 1;
+    let existingPlantData = null;
+    let existingVehiclesData = [];
+    let existingEmployeesData = [];
+    let isEditMode = false;
 
-    async function createPlant() {
+    const DRAFT_KEY = "plantWizardDraft_v1";
+    let latestDraftCache = null; // keep last saved draft in memory for vehicles/employees restore
 
-        const required = ["plantID","plantName","stateCode","district","kld","wardNo","pinCode","zones"];
-        let valid = true;
+    const today = new Date().toISOString().split("T")[0];
 
-        document.querySelectorAll(".error").forEach(e => e.innerText = "");
+    // ----------------------- STEP NAVIGATION -----------------------
+    function updateStepPills() {
+        for (let i = 1; i <= 5; i++) {
+            const pill = document.getElementById("pill-" + i);
+            pill.classList.remove("active", "done");
+            if (i < currentStep) pill.classList.add("done");
+            if (i === currentStep) pill.classList.add("active");
+        }
+    }
 
-        required.forEach(id => {
-            if (!document.getElementById(id).value.trim()) {
-                document.getElementById("err_" + id).innerText = "Required";
-                valid = false;
+    function goToStep(step) {
+        if (step > currentStep && !validateCurrentStep()) {
+            return;
+        }
+        document.getElementById("formError").style.display = "none";
+
+        document.getElementById("step-" + currentStep).classList.remove("active");
+        currentStep = step;
+        document.getElementById("step-" + currentStep).classList.add("active");
+        updateStepPills();
+    }
+
+    // ----------------------- DATE LIMITS -----------------------
+    function setMaxDate(id) {
+        const el = document.getElementById(id);
+        if (el) el.max = today;
+    }
+
+    [
+        "mnitDate",
+        "constructionStartedDate",
+        "civilWorkCompletedDate",
+        "machinaryAssembleDate",
+        "permanentPowerDate",
+        "solarDate",
+        "internetDate",
+        "ipPhoneDate",
+        "cameraConfigurationDate",
+        "tabsReceivedDate",
+        "gpsDate",
+        "codAndBodSenserDate"
+    ].forEach(setMaxDate);
+
+    // ----------------------- YES/NO → ENABLE/DISABLE DATES -----------------------
+    function setupToggleWithDate(selectId, dateId) {
+        const sel = document.getElementById(selectId);
+        const dateInput = document.getElementById(dateId);
+
+        function refresh() {
+            if (!sel) return;
+            if (sel.value === "yes") {
+                dateInput.disabled = false;
+            } else {
+                dateInput.disabled = true;
+                dateInput.value = "";
             }
-        });
-
-        if (!valid) return;
-
-        function getRadio(name){
-            let r = document.querySelector(`input[name="${name}"]:checked`);
-            return r ? (r.value === "1") : false;
         }
 
-        const plant = {
-            plantID: Number(plantID.value),
-            plantName: plantName.value,
-            stateCode: stateCode.value,
-            district: district.value,
-            kld: Number(kld.value),
-            wardNo: Number(wardNo.value),
-            pinCode: Number(pinCode.value),
-            zones: Number(zones.value),
+        sel.addEventListener("change", refresh);
+        refresh();
+    }
 
-            mnit: getRadio("mnit"),
-            permanentPower: getRadio("permanentPower"),
-            solar: getRadio("solar"),
-            internet: getRadio("internet"),
+    setupToggleWithDate("mnit", "mnitDate");
+    setupToggleWithDate("permanentPower", "permanentPowerDate");
+    setupToggleWithDate("solar", "solarDate");
+    setupToggleWithDate("internet", "internetDate");
+    setupToggleWithDate("tabs", "tabsReceivedDate");
+    setupToggleWithDate("gps", "gpsDate");
 
-            mnitDateOfCompletion: mnitDateOfCompletion.value || null,
-            permanentPowerDateOfCompletion: permanentPowerDateOfCompletion.value || null,
-            internetDateOfCompletion: internetDateOfCompletion.value || null,
-            solarDateOfCompletion: solarDateOfCompletion.value || null,
+    // ----------------------- GPS DISABLE WHEN 0 VEHICLES -----------------------
+    function refreshGpsAvailability() {
+        const noOfVehicleVal = document.getElementById("noOfVehicle").value;
+        const noOfVehicle = parseInt(noOfVehicleVal || "0", 10);
+        const gpsSel = document.getElementById("gps");
+        const gpsDate = document.getElementById("gpsDate");
 
-            solarPlantCapacity: solarPlantCapacity.value || null,
+        if (isNaN(noOfVehicle) || noOfVehicle === 0) {
+            if (gpsSel) { gpsSel.value = "no"; gpsSel.disabled = true; }
+            if (gpsDate) { gpsDate.value = ""; gpsDate.disabled = true; }
+        } else {
+            if (gpsSel) gpsSel.disabled = false;
+            if (gpsSel) gpsSel.dispatchEvent(new Event("change"));
+        }
+    }
 
-            constructionStartedDate: constructionStartedDate.value || null,
-            civilWorkCompletedDate: civilWorkCompletedDate.value || null,
-            machinaryAssembleDate: machinaryAssembleDate.value || null,
+    const noOfVehicleEl = document.getElementById("noOfVehicle");
+    if (noOfVehicleEl) noOfVehicleEl.addEventListener("input", refreshGpsAvailability);
+    refreshGpsAvailability();
 
-            codAndBodSenserDate: codAndBodSenserDate.value || null,
-            ipPhoneDate: ipPhoneDate.value || null,
-            cameraConfigurationDate: cameraConfigurationDate.value || null,
+    // ----------------------- ENTER KEY → NEXT FIELD -----------------------
+    document.addEventListener("keydown", function (e) {
+        if (e.key !== "Enter") return;
+        const target = e.target;
+        if (target.tagName !== "INPUT" && target.tagName !== "SELECT") return;
 
-            tabs: getRadio("tabs"),
-            tabsReceivedDate: tabsReceivedDate.value || null,
+        e.preventDefault();
 
-            gps: getRadio("gps"),
-            gpsDate: gpsDate.value || null
-        };
+        const focusables = Array.from(
+            document.querySelectorAll(
+                "input:not([type=hidden]):not([disabled]), select:not([disabled])"
+            )
+        ).filter(el => el.offsetParent !== null);
+
+        const idx = focusables.indexOf(target);
+        if (idx > -1 && idx < focusables.length - 1) {
+            focusables[idx + 1].focus();
+        }
+    });
+
+    // ----------------------- ERROR / SUCCESS HELPERS -----------------------
+    function showError(msg) {
+        const errBox = document.getElementById("formError");
+        errBox.textContent = msg;
+        errBox.style.display = "block";
+        document.getElementById("formSuccess").style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showSuccess(msg) {
+        const box = document.getElementById("formSuccess");
+        box.textContent = msg;
+        box.style.display = "block";
+        document.getElementById("formError").style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function extractErrorMessage(res) {
+        let text;
+        try {
+            text = await res.text();
+        } catch {
+            return `Server error (${res.status}). Please try again.`;
+        }
+
+        if (!text) return `Server error (${res.status}). Please try again.`;
 
         try {
-            const res = await fetch("/api/plants", {
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body: JSON.stringify(plant)
-            });
+            const json = JSON.parse(text);
+            // From GlobalExceptionHandler
+            if (json.errors && typeof json.errors === "object") {
+                const fieldMsgs = Object.entries(json.errors)
+                    .map(([field, msg]) => `• ${field}: ${msg}`)
+                    .join("\n");
+                return `${json.message || "Validation error"}\n${fieldMsgs}`;
+            }
+            if (json.message) return json.message;
+            return text;
+        } catch {
+            return text;
+        }
+    }
 
-            if (!res.ok) {
-                document.getElementById("msg").innerText = "Error adding plant";
-                document.getElementById("msg").style.color="red";
+    // ----------------------- VALIDATION FOR EACH STEP -----------------------
+    function validateCurrentStep() {
+        const step = currentStep;
+
+        if (step === 1) {
+            const requiredIds = ["plantID", "plantName", "kld", "zones", "mnit", "permanentPower", "solar", "internet"];
+            for (const id of requiredIds) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+                if (!el.value || el.value.toString().trim() === "") {
+                    showError("Please fill all required fields in Basic Details.");
+                    el.focus();
+                    return false;
+                }
+            }
+        }
+
+        if (step === 3) {
+            const noOfVehicle = document.getElementById("noOfVehicle").value;
+            if (noOfVehicle === "" || parseInt(noOfVehicle, 10) < 0) {
+                showError("Please enter a valid number of vehicles (0 or more).");
+                document.getElementById("noOfVehicle").focus();
+                return false;
+            }
+
+            const noOfEmployees = document.getElementById("noOfEmployees").value;
+            if (noOfEmployees === "" || parseInt(noOfEmployees, 10) < 0) {
+                showError("Please enter a valid number of employees (0 or more).");
+                document.getElementById("noOfEmployees").focus();
+                return false;
+            }
+        }
+
+        if (step === 4) {
+            const noOfVehicle = parseInt(document.getElementById("noOfVehicle").value || "0", 10);
+            if (noOfVehicle > 0) {
+                for (let i = 1; i <= noOfVehicle; i++) {
+                    const model = document.getElementById(`veh_${i}_model`);
+                    const number = document.getElementById(`veh_${i}_number`);
+                    const chassis = document.getElementById(`veh_${i}_chassis`);
+                    const regDate = document.getElementById(`veh_${i}_regDate`);
+
+                    if (!model || !number || !chassis || !regDate) {
+                        showError(`Vehicle ${i} inputs are missing on the page.`);
+                        return false;
+                    }
+
+                    if (!model.value.trim() || !number.value.trim() || !chassis.value.trim() || !regDate.value) {
+                        showError(`Please fill all mandatory fields for Vehicle ${i}.`);
+                        model.focus();
+                        return false;
+                    }
+                }
+            }
+        }
+
+        if (step === 5) {
+            const noOfEmployees = parseInt(document.getElementById("noOfEmployees").value || "0", 10);
+            if (noOfEmployees > 0) {
+                for (let i = 1; i <= noOfEmployees; i++) {
+                    const idEl = document.getElementById(`emp_${i}_id`);
+                    const nameEl = document.getElementById(`emp_${i}_name`);
+                    const desEl = document.getElementById(`emp_${i}_designation`);
+                    const mobEl = document.getElementById(`emp_${i}_mobile`);
+                    const addrEl = document.getElementById(`emp_${i}_address`);
+                    const dobEl = document.getElementById(`emp_${i}_dob`);
+                    const dojEl = document.getElementById(`emp_${i}_doj`);
+
+                    if (!idEl || !nameEl || !desEl || !mobEl || !addrEl || !dobEl || !dojEl) {
+                        showError(`Employee ${i} inputs are missing on the page.`);
+                        return false;
+                    }
+
+                    if (!idEl.value || !nameEl.value.trim() || !desEl.value.trim() ||
+                        !mobEl.value || !addrEl.value.trim() || !dobEl.value || !dojEl.value) {
+                        showError(`Please fill all mandatory fields for Employee ${i}.`);
+                        idEl.focus();
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // ----------------------- LOAD EXISTING PLANT BY ID -----------------------
+    async function loadPlantById(plantId) {
+        if (!plantId) return;
+
+        try {
+            const plantRes = await fetch(`/api/plants/${plantId}`);
+            if (!plantRes.ok) {
+                existingPlantData = null;
+                existingVehiclesData = [];
+                existingEmployeesData = [];
+                isEditMode = false;
                 return;
             }
 
-            document.getElementById("msg").innerText = "Plant added successfully!";
-            document.getElementById("msg").style.color="#27ae60";
+            const plantData = await plantRes.json();
+            existingPlantData = plantData;
+            isEditMode = true;
+
+            document.getElementById("plantName").value = plantData.plantName || "";
+            document.getElementById("stateCode").value = plantData.stateCode || "";
+            document.getElementById("district").value = plantData.district || "";
+            document.getElementById("kld").value = plantData.kld ?? "";
+            document.getElementById("wardNo").value = plantData.wardNo ?? "";
+            document.getElementById("pinCode").value = plantData.pinCode ?? "";
+            document.getElementById("zones").value = plantData.zones ?? "";
+
+            const setYesNo = (id, value) => {
+                const sel = document.getElementById(id);
+                if (!sel) return;
+                sel.value = value ? "yes" : "no";
+                sel.dispatchEvent(new Event("change"));
+            };
+
+            setYesNo("mnit", plantData.mnit);
+            if (plantData.mnitDateOfCompletion) {
+                document.getElementById("mnitDate").value = plantData.mnitDateOfCompletion;
+            }
+
+            setYesNo("permanentPower", plantData.permanentPower);
+            if (plantData.permanentPowerDateOfCompletion) {
+                document.getElementById("permanentPowerDate").value = plantData.permanentPowerDateOfCompletion;
+            }
+
+            setYesNo("solar", plantData.solar);
+            if (plantData.solarDateOfCompletion) {
+                document.getElementById("solarDate").value = plantData.solarDateOfCompletion;
+            }
+
+            setYesNo("internet", plantData.internet);
+            if (plantData.internetDateOfCompletion) {
+                document.getElementById("internetDate").value = plantData.internetDateOfCompletion;
+            }
+
+            document.getElementById("solarPlantCapacity").value = plantData.solarPlantCapacity ?? "";
+
+            document.getElementById("constructionStartedDate").value = plantData.constructionStartedDate || "";
+            document.getElementById("civilWorkCompletedDate").value = plantData.civilWorkCompletedDate || "";
+            document.getElementById("machinaryAssembleDate").value = plantData.machinaryAssembleDate || "";
+
+            document.getElementById("codAndBodSenserDate").value = plantData.codAndBodSenserDate || "";
+            document.getElementById("ipPhoneDate").value = plantData.ipPhoneDate || "";
+            document.getElementById("cameraConfigurationDate").value = plantData.cameraConfigurationDate || "";
+
+            setYesNo("tabs", plantData.tabs);
+            if (plantData.tabsReceivedDate) {
+                document.getElementById("tabsReceivedDate").value = plantData.tabsReceivedDate;
+            }
+
+            setYesNo("gps", plantData.gps);
+            if (plantData.gpsDate) {
+                document.getElementById("gpsDate").value = plantData.gpsDate;
+            }
+
+            const noOfVehicle = plantData.noOfVehicle ?? 0;
+            const noOfEmployees = plantData.noOfEmployees ?? 0;
+
+            document.getElementById("noOfVehicle").value = noOfVehicle;
+            document.getElementById("noOfEmployees").value = noOfEmployees;
+            refreshGpsAvailability();
+
+            try {
+                const vehRes = await fetch(`/api/vehiclesinformation/plant/${plantId}`);
+                if (vehRes.ok) {
+                    existingVehiclesData = await vehRes.json();
+                    if (!plantData.noOfVehicle && existingVehiclesData.length > 0) {
+                        document.getElementById("noOfVehicle").value = existingVehiclesData.length;
+                        refreshGpsAvailability();
+                    }
+                }
+            } catch (e) {
+                console.error("Error fetching vehicles for plant", e);
+            }
+
+            try {
+                const empRes = await fetch(`/api/plantemployees/plant/${plantId}`);
+                if (empRes.ok) {
+                    existingEmployeesData = await empRes.json();
+                    if (!plantData.noOfEmployees && existingEmployeesData.length > 0) {
+                        document.getElementById("noOfEmployees").value = existingEmployeesData.length;
+                    }
+                }
+            } catch (e) {
+                console.error("Error fetching employees for plant", e);
+            }
+
+            showSuccess("Existing plant data loaded. You can edit and submit to update.");
 
         } catch (err) {
-            console.log(err);
+            console.error("Error loading plant by ID", err);
+            showError("Failed to load existing plant details. Please try again.");
         }
     }
+
+    document.getElementById("plantID").addEventListener("blur", function () {
+        const plantIdVal = this.value;
+        if (plantIdVal) {
+            loadPlantById(plantIdVal);
+        }
+    });
+
+    // ----------------------- VEHICLE / EMPLOYEE FORMS -----------------------
+    async function prepareVehiclesAndGoToStep4() {
+    if (!validateCurrentStep()) return;
+
+    const vehicleContainer = document.getElementById("vehicleFormsContainer");
+    vehicleContainer.innerHTML = "";
+
+    let count = parseInt(document.getElementById("noOfVehicle").value || "0", 10);
+
+    // if editing → override count with actual existing vehicles
+    if (isEditMode && existingVehiclesData.length > 0) {
+        if (count < existingVehiclesData.length) {
+            count = existingVehiclesData.length;
+            document.getElementById("noOfVehicle").value = count;
+        }
+    }
+
+    for (let i = 1; i <= count; i++) {
+        const card = document.createElement("div");
+        card.className = "vehicle-card";
+        card.innerHTML = `
+            <div class="vehicle-title">Vehicle ${i}</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Model Name *</label>
+                    <input type="text" id="veh_${i}_model">
+                </div>
+                <div class="form-group">
+                    <label>Vehicle Number *</label>
+                    <input type="text" id="veh_${i}_number">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Chassis Number *</label>
+                    <input type="text" id="veh_${i}_chassis">
+                </div>
+                <div class="form-group">
+                    <label>Date of Registration *</label>
+                    <input type="date" id="veh_${i}_regDate" max="${today}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Insurance Date</label>
+                    <input type="date" id="veh_${i}_insDate" max="${today}">
+                </div>
+                <div class="form-group">
+                    <label>Insurance Expiry Date</label>
+                    <input type="date" id="veh_${i}_insExpDate">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>GPS Status</label>
+                    <select id="veh_${i}_gpsStatus">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+            </div>
+        `;
+        vehicleContainer.appendChild(card);
+    }
+
+    // fill existing vehicles
+    existingVehiclesData.forEach((v, idx) => {
+        const i = idx + 1;
+        document.getElementById(`veh_${i}_model`).value = v.vehicleModelName || "";
+        document.getElementById(`veh_${i}_number`).value = v.vehicleNumber || "";
+        document.getElementById(`veh_${i}_chassis`).value = v.vehicleChassisNo || "";
+        document.getElementById(`veh_${i}_regDate`).value = v.dateOfRegistration || "";
+        document.getElementById(`veh_${i}_insDate`).value = v.insuranceDate || "";
+        document.getElementById(`veh_${i}_insExpDate`).value = v.insuranceExpiryDate || "";
+        document.getElementById(`veh_${i}_gpsStatus`).value = v.gpsStatus ? "yes" : "no";
+    });
+
+    goToStep(4);
+}
+
+    function prepareEmployeesAndGoToStep5() {
+    if (!validateCurrentStep()) return;
+
+    let count = parseInt(document.getElementById("noOfEmployees").value || "0", 10);
+    const employeeContainer = document.getElementById("employeeFormsContainerStep5");
+    employeeContainer.innerHTML = "";
+
+    // 🔥 FIX 1: Ensure form shows ALL existing employees
+    if (isEditMode && existingEmployeesData.length > 0) {
+        if (count < existingEmployeesData.length) {
+            count = existingEmployeesData.length;
+            document.getElementById("noOfEmployees").value = count;
+        }
+    }
+
+    if (count <= 0 || isNaN(count)) {
+        employeeContainer.innerHTML = "<div class='note'>No employees entered. You can submit directly.</div>";
+        goToStep(5);
+        return;
+    }
+
+    // Generate employee forms
+    for (let i = 1; i <= count; i++) {
+        const card = document.createElement("div");
+        card.className = "employee-card";
+        card.innerHTML = `
+            <div class="employee-title">Employee ${i}</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Employee ID <span class="req">*</span></label>
+                    <input type="number" id="emp_${i}_id" required />
+                </div>
+                <div class="form-group">
+                    <label>Employee Name <span class="req">*</span></label>
+                    <input type="text" id="emp_${i}_name" required />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Designation <span class="req">*</span></label>
+                    <input type="text" id="emp_${i}_designation" required />
+                </div>
+                <div class="form-group">
+                    <label>Mobile No <span class="req">*</span></label>
+                    <input type="number" id="emp_${i}_mobile" required />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Alternate Mobile No</label>
+                    <input type="number" id="emp_${i}_altMobile" />
+                </div>
+                <div class="form-group">
+                    <label>Address <span class="req">*</span></label>
+                    <input type="text" id="emp_${i}_address" required />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Date of Birth <span class="req">*</span></label>
+                    <input type="date" id="emp_${i}_dob" max="${today}" required />
+                </div>
+                <div class="form-group">
+                    <label>Date of Joining <span class="req">*</span></label>
+                    <input type="date" id="emp_${i}_doj" max="${today}" required />
+                </div>
+            </div>
+        `;
+        employeeContainer.appendChild(card);
+    }
+
+    // Prefill from existing data
+    existingEmployeesData.forEach((emp, idx) => {
+        const i = idx + 1;
+        if (!emp) return;
+
+        document.getElementById(`emp_${i}_id`).value = emp.employeeId ?? "";
+        document.getElementById(`emp_${i}_name`).value = emp.employeeName ?? "";
+        document.getElementById(`emp_${i}_designation`).value = emp.designation ?? "";
+        document.getElementById(`emp_${i}_mobile`).value = emp.mobileNo ?? "";
+        document.getElementById(`emp_${i}_altMobile`).value = emp.alternateMobNo ?? "";
+        document.getElementById(`emp_${i}_address`).value = emp.address ?? "";
+        document.getElementById(`emp_${i}_dob`).value = emp.dateOfBirth ?? "";
+        document.getElementById(`emp_${i}_doj`).value = emp.dateOfJoining ?? "";
+    });
+
+    goToStep(5);
+}
+
+    // ----------------------- BUILD PAYLOADS -----------------------
+    function buildPlantPayload() {
+        return {
+            plantID: Number(document.getElementById("plantID").value),
+            plantName: document.getElementById("plantName").value.trim(),
+            stateCode: document.getElementById("stateCode").value.trim() || null,
+            district: document.getElementById("district").value.trim() || null,
+            kld: Number(document.getElementById("kld").value),
+            wardNo: document.getElementById("wardNo").value ? Number(document.getElementById("wardNo").value) : null,
+            pinCode: document.getElementById("pinCode").value ? Number(document.getElementById("pinCode").value) : null,
+            zones: Number(document.getElementById("zones").value),
+
+            mnit: document.getElementById("mnit").value === "yes",
+            permanentPower: document.getElementById("permanentPower").value === "yes",
+            solar: document.getElementById("solar").value === "yes",
+            internet: document.getElementById("internet").value === "yes",
+
+            mnitDateOfCompletion: document.getElementById("mnitDate").value || null,
+            permanentPowerDateOfCompletion: document.getElementById("permanentPowerDate").value || null,
+            solarDateOfCompletion: document.getElementById("solarDate").value || null,
+            internetDateOfCompletion: document.getElementById("internetDate").value || null,
+
+            solarPlantCapacity: document.getElementById("solarPlantCapacity").value
+                ? Number(document.getElementById("solarPlantCapacity").value)
+                : null,
+
+            constructionStartedDate: document.getElementById("constructionStartedDate").value || null,
+            civilWorkCompletedDate: document.getElementById("civilWorkCompletedDate").value || null,
+            machinaryAssembleDate: document.getElementById("machinaryAssembleDate").value || null,
+
+            codAndBodSenserDate: document.getElementById("codAndBodSenserDate").value || null,
+            ipPhoneDate: document.getElementById("ipPhoneDate").value || null,
+            cameraConfigurationDate: document.getElementById("cameraConfigurationDate").value || null,
+
+            tabs: document.getElementById("tabs").value === "yes",
+            tabsReceivedDate: document.getElementById("tabsReceivedDate").value || null,
+
+            gps: document.getElementById("gps").value === "yes",
+            gpsDate: document.getElementById("gpsDate").value || null,
+
+            noOfVehicle: Number(document.getElementById("noOfVehicle").value || 0),
+            noOfEmployees: Number(document.getElementById("noOfEmployees").value || 0)
+        };
+    }
+
+    function buildVehiclesPayload() {
+        const noOfVehicle = parseInt(document.getElementById("noOfVehicle").value || "0", 10);
+        const vehicles = [];
+        if (noOfVehicle <= 0) return vehicles;
+
+        for (let i = 1; i <= noOfVehicle; i++) {
+            vehicles.push({
+                vehicleModelName: document.getElementById(`veh_${i}_model`)?.value.trim() || "",
+                vehicleNumber: document.getElementById(`veh_${i}_number`)?.value.trim() || "",
+                vehicleChassisNo: document.getElementById(`veh_${i}_chassis`)?.value.trim() || "",
+                dateOfRegistration: document.getElementById(`veh_${i}_regDate`)?.value || null,
+                insuranceDate: document.getElementById(`veh_${i}_insDate`)?.value || null,
+                insuranceExpiryDate: document.getElementById(`veh_${i}_insExpDate`)?.value || null,
+                gpsStatus: document.getElementById(`veh_${i}_gpsStatus`)?.value === "yes"
+            });
+        }
+        return vehicles;
+    }
+
+    function buildEmployeesPayload() {
+        const noOfEmployees = parseInt(document.getElementById("noOfEmployees").value || "0", 10);
+        const employees = [];
+        if (noOfEmployees <= 0) return employees;
+
+        for (let i = 1; i <= noOfEmployees; i++) {
+            employees.push({
+                employeeId: document.getElementById(`emp_${i}_id`)?.value
+                    ? Number(document.getElementById(`emp_${i}_id`).value)
+                    : null,
+                employeeName: document.getElementById(`emp_${i}_name`)?.value.trim() || "",
+                designation: document.getElementById(`emp_${i}_designation`)?.value.trim() || "",
+                mobileNo: document.getElementById(`emp_${i}_mobile`)?.value
+                    ? Number(document.getElementById(`emp_${i}_mobile`).value)
+                    : null,
+                alternateMobNo: document.getElementById(`emp_${i}_altMobile`)?.value
+                    ? Number(document.getElementById(`emp_${i}_altMobile`).value)
+                    : null,
+                address: document.getElementById(`emp_${i}_address`)?.value.trim() || "",
+                dateOfBirth: document.getElementById(`emp_${i}_dob`)?.value || null,
+                dateOfJoining: document.getElementById(`emp_${i}_doj`)?.value || null
+            });
+        }
+        return employees;
+    }
+
+    // ----------------------- AUTOSAVE -----------------------
+    function collectDraftState() {
+        const fields = {};
+        document.querySelectorAll("input, select").forEach(el => {
+            if (el.id) {
+                fields[el.id] = el.value;
+            }
+        });
+
+        const vehicles = buildVehiclesPayload();
+        const employees = buildEmployeesPayload();
+
+        const draft = {
+            step: currentStep,
+            fields,
+            vehicles,
+            employees
+        };
+        latestDraftCache = draft;
+        return draft;
+    }
+
+    function saveDraft() {
+        try {
+            const draft = collectDraftState();
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch (e) {
+            console.warn("Failed to save draft", e);
+        }
+    }
+
+    function clearDraft() {
+        try {
+            localStorage.removeItem(DRAFT_KEY);
+        } catch {}
+        latestDraftCache = null;
+    }
+
+    function restoreDraft() {
+        try {
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (!raw) return;
+            const draft = JSON.parse(raw);
+            latestDraftCache = draft;
+
+            if (draft.fields && typeof draft.fields === "object") {
+                Object.entries(draft.fields).forEach(([id, val]) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.value = val;
+                    }
+                });
+
+                // re-trigger toggles
+                ["mnit","permanentPower","solar","internet","tabs","gps"].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.dispatchEvent(new Event("change"));
+                });
+                refreshGpsAvailability();
+            }
+
+            if (draft.step && draft.step >= 1 && draft.step <= 5) {
+                document.getElementById("step-" + currentStep).classList.remove("active");
+                currentStep = draft.step;
+                document.getElementById("step-" + currentStep).classList.add("active");
+                updateStepPills();
+            }
+        } catch (e) {
+            console.warn("Failed to restore draft", e);
+        }
+    }
+
+    // autosave every 3 seconds
+    setInterval(saveDraft, 3000);
+
+    // ----------------------------------------
+// Reset entire form when PlantID becomes empty
+// ----------------------------------------
+document.getElementById("plantID").addEventListener("input", function () {
+    if (this.value.trim() === "") {
+
+        // reset flags
+        isEditMode = false;
+        existingPlantData = null;
+        existingVehiclesData = [];
+        existingEmployeesData = [];
+
+        // clear draft from storage
+        clearDraft();
+
+        // clear all fields
+        document.querySelectorAll("input, select").forEach(el => {
+            if (el.id && el.id !== "plantID") {
+                el.value = "";
+            }
+        });
+
+        // reset step counters
+        document.getElementById("noOfVehicle").value = "0";
+        document.getElementById("noOfEmployees").value = "0";
+
+        // refresh dependent UI
+        refreshGpsAvailability();
+        document.getElementById("vehicleFormsContainer").innerHTML = "";
+        document.getElementById("employeeFormsContainerStep5").innerHTML = "";
+
+        showSuccess("Form reset because Plant ID was cleared.");
+    }
+});
+
+
+    // ----------------------- SUBMIT PLANT + VEHICLES + EMPLOYEES -----------------------
+    async function submitPlantAndVehicles() {
+        if (!validateCurrentStep()) return;
+
+        document.getElementById("formError").style.display = "none";
+        document.getElementById("formSuccess").style.display = "none";
+
+        const plantPayload = buildPlantPayload();
+        const vehiclesPayload = buildVehiclesPayload();
+        const employeesPayload = buildEmployeesPayload();
+        const plantId = plantPayload.plantID;
+
+        try {
+            let plantRes;
+
+            // Check if plant exists (same PlantID)
+            const checkPlant = await fetch(`/api/plants/${plantId}`);
+            const exists = checkPlant.ok;
+
+            if (exists) {
+                plantRes = await fetch(`/api/plants/${plantId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(plantPayload)
+                });
+            } else {
+                plantRes = await fetch("/api/plants", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(plantPayload)
+                });
+            }
+
+            if (!plantRes.ok) {
+                const msg = await extractErrorMessage(plantRes);
+                showError("Plant not saved. " + msg);
+                return;
+            }
+
+            // SAVE VEHICLES
+            if (vehiclesPayload.length > 0) {
+                const vehiclePromises = vehiclesPayload.map((v, index) => {
+                    const existingVehicle = existingVehiclesData[index];
+                    if (existingVehicle && existingVehicle.vehicleID) {
+                        return fetch(`/api/vehiclesinformation/update/${plantId}/${existingVehicle.vehicleID}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(v)
+                        });
+                    }
+                    return fetch(`/api/vehiclesinformation/create/${plantId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(v)
+                    });
+                });
+
+                const vehResults = await Promise.all(vehiclePromises);
+                const failedIdx = vehResults.findIndex(r => !r.ok);
+                if (failedIdx !== -1) {
+                    const failedRes = vehResults[failedIdx];
+                    const msg = await extractErrorMessage(failedRes);
+                    showError(`Vehicle ${failedIdx + 1} not saved. ${msg}`);
+                    return;
+                }
+            }
+
+            // SAVE EMPLOYEES
+            if (employeesPayload.length > 0) {
+                const empPromises = employeesPayload.map((e, index) => {
+                    const existingEmp = existingEmployeesData[index];
+                    if (existingEmp) {
+                        return fetch(`/api/plantemployees/update/${plantId}/${existingEmp.employeeId}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(e)
+                        });
+                    }
+                    return fetch(`/api/plantemployees/create/${plantId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(e)
+                    });
+                });
+
+                const empResults = await Promise.all(empPromises);
+                const failedIdx = empResults.findIndex(r => !r.ok);
+                if (failedIdx !== -1) {
+                    const failedRes = empResults[failedIdx];
+                    const msg = await extractErrorMessage(failedRes);
+                    showError(`Employee ${failedIdx + 1} not saved. ${msg}`);
+                    return;
+                }
+            }
+
+            showSuccess(exists ? "Plant updated successfully!" : "Plant created successfully!");
+            clearDraft(); // clear autosave only on full success
+
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 1500);
+
+        } catch (err) {
+            console.error(err);
+            showError("Unexpected error occurred while saving data. Please check your inputs and try again.");
+        }
+    }
+
+    // ----------------------- INITIAL SETUP -----------------------
+    updateStepPills();
+    restoreDraft();
+    // Clear autosave when user closes or refreshes page
+window.addEventListener("beforeunload", () => {
+    clearDraft();
+});
 
 </script>
 

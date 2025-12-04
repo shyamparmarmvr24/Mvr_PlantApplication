@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Employee Attendance - MVR Technology</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            color: #111827;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0f172a, #0ea5e9);
+            padding: 14px 24px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-area img {
+            height: 30px;
+        }
+
+        .brand-title {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: "Times New Roman", serif;
+        }
+
+        .page-title {
+            text-align: center;
+            margin: 20px auto 10px;
+            font-size: 26px;
+            font-weight: 700;
+            color: #0f172a;
+            font-family: "Times New Roman", serif;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+            position: relative;
+        }
+
+        /* NEW BUTTON STYLING */
+        .btn-view-emps {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #0ea5e9;
+            padding: 10px 18px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            transition: 0.25s;
+        }
+
+        .btn-view-emps:hover {
+            background: #0284c7;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        th {
+            background: #0369a1;
+            color: white;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .btn-yes, .btn-no {
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            font-weight: 600;
+            border: none;
+        }
+
+        .btn-yes { background: #10b981; }
+        .btn-no { background: #ef4444; }
+
+        .btn-selected {
+            outline: 3px solid #0f172a;
+        }
+
+        .bottom-buttons {
+            margin-top: 22px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-submit {
+            background: #16a34a;
+            padding: 12px 26px;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+        }
+
+        .btn-back {
+            background: #6b7280;
+            padding: 12px 26px;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+        }
+
+        .no-data {
+            padding: 18px;
+            text-align: center;
+            font-size: 16px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="brand-area">
+        <img src="https://mvrtech.org/MVR_Company_Logo%20copy.png">
+        <div class="brand-title">MVR TECHNOLOGY</div>
+    </div>
+</header>
+
+<div class="page-title">Daily Attendance</div>
+
+<div class="container">
+
+    <!-- ⭐ NEW BUTTON -->
+    <button id="viewEmployeesBtn" class="btn-view-emps"> View Employees</button>
+
+    <h3 id="plantInfo" style="text-align:center; margin-bottom:20px; color:#1e293b;"></h3>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Attendance AM</th>
+            <th>Attendance PM</th>
+        </tr>
+        </thead>
+
+        <tbody id="attendanceBody">
+        <tr><td colspan="5" class="no-data">Loading employees...</td></tr>
+        </tbody>
+    </table>
+
+    <div class="bottom-buttons">
+        <button class="btn-back" onclick="goBack()">Back</button>
+        <button class="btn-submit" onclick="submitAttendance()">Submit</button>
+    </div>
+
+</div>
+
+<script>
+    const tbody = document.getElementById("attendanceBody");
+
+    const url = new URLSearchParams(window.location.search);
+    const plantID = url.get("plantID");
+    const date = url.get("date");
+
+    document.getElementById("plantInfo").innerText =
+        `Plant ID : ${plantID}  •  Date : ${date}`;
+
+    // NEW: Set View Employees Button Link
+    document.getElementById("viewEmployeesBtn").onclick = () => {
+        window.location.href = `view-employees.html?plantID=${plantID}`;
+    };
+
+    let employees = [];
+    let attendanceData = {};
+
+    async function loadEmployees() {
+        const res = await fetch(`/api/plantemployees/plant/${plantID}`);
+        employees = await res.json();
+
+        if (!employees.length) {
+            tbody.innerHTML = `<tr><td colspan="5" class="no-data">No Employees Found</td></tr>`;
+            return;
+        }
+
+        renderRows();
+        loadExistingAttendance();
+    }
+
+    function renderRows() {
+        tbody.innerHTML = "";
+
+        employees.forEach(emp => {
+            attendanceData[emp.employeeId] = { am: null, pm: null };
+
+            tbody.insertAdjacentHTML("beforeend", `
+                <tr id="row-${emp.employeeId}">
+                    <td>${emp.employeeId}</td>
+                    <td>${emp.employeeName}</td>
+                    <td>${emp.designation}</td>
+
+                    <td>
+                        <button class="btn-yes" onclick="selectAM(${emp.employeeId}, true)">Yes</button>
+                        <button class="btn-no" onclick="selectAM(${emp.employeeId}, false)">No</button>
+                    </td>
+
+                    <td>
+                        <button class="btn-yes" onclick="selectPM(${emp.employeeId}, true)">Yes</button>
+                        <button class="btn-no" onclick="selectPM(${emp.employeeId}, false)">No</button>
+                    </td>
+                </tr>
+            `);
+        });
+    }
+
+    function selectAM(empId, value) {
+        attendanceData[empId].am = value;
+        highlight(empId, "AM", value);
+    }
+
+    function selectPM(empId, value) {
+        attendanceData[empId].pm = value;
+        highlight(empId, "PM", value);
+    }
+
+    function highlight(empId, type, value) {
+        const row = document.getElementById(`row-${empId}`);
+        const buttons = row.querySelectorAll(`td:nth-child(${type === "AM" ? 4 : 5}) button`);
+        buttons.forEach(btn => btn.classList.remove("btn-selected"));
+
+        if (value === true) buttons[0].classList.add("btn-selected");
+        if (value === false) buttons[1].classList.add("btn-selected");
+    }
+
+    async function loadExistingAttendance() {
+        for (const emp of employees) {
+            try {
+                const res = await fetch(`/api/employee-operations/${emp.employeeId}/date/${date}`);
+                if (!res.ok) continue;
+
+                const data = await res.json();
+
+                attendanceData[emp.employeeId].am = data.attendanceAm;
+                attendanceData[emp.employeeId].pm = data.attendancePm;
+
+                highlight(emp.employeeId, "AM", data.attendanceAm);
+                highlight(emp.employeeId, "PM", data.attendancePm);
+
+            } catch {}
+        }
+    }
+
+    async function submitAttendance() {
+    for (const emp of employees) {
+        const body = {
+            attendanceAm: attendanceData[emp.employeeId].am,
+            attendancePm: attendanceData[emp.employeeId].pm,
+            operationDate: date
+        };
+
+        await fetch(`/api/employee-operations/update/${plantID}/${emp.employeeId}`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(body)
+        });
+    }
+
+    alert("Attendance Updated Successfully");
+
+    // 🔥 Redirect to index with same date
+    window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+}
+
+
+    function goBack() {
+        window.history.back();
+    }
+
+    loadEmployees();
+</script>
+
+</body>
+</html>

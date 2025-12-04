@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Employees List - MVR TECHNOLOGY</title>
 
+
     <style>
         body {
             margin: 0;
@@ -23,7 +24,7 @@
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1150px;
             margin: 25px auto;
             background: white;
             padding: 22px;
@@ -31,31 +32,21 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: #0369a1;
+        .back-btn {
+            background: #6b7280;
             color: white;
-            padding: 12px;
-            text-transform: uppercase;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
             font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            transition: 0.25s;
         }
 
-        td {
-            text-align: center;
-            padding: 12px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        tr:nth-child(even) {
-            background: #f9fafb;
-        }
-
-        tr:hover {
-            background: #f1f5f9;
+        .back-btn:hover {
+            background: #4b5563;
         }
 
         .btn-create {
@@ -65,8 +56,48 @@
             border-radius: 6px;
             text-decoration: none;
             font-size: 14px;
-            margin-bottom: 12px;
+            margin-bottom: 18px;
             display: inline-block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th {
+            background: #0369a1;
+            color: white;
+            padding: 12px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        td {
+            text-align: center;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) { background: #f9fafb; }
+        tr:hover { background: #f1f5f9; }
+
+        .edit-btn {
+            padding: 7px 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.25s;
+        }
+
+        .edit-btn:hover {
+            background: #1e40af;
         }
     </style>
 </head>
@@ -76,6 +107,8 @@
 <header>Employees List</header>
 
 <div class="container">
+
+    <button class="back-btn" onclick="window.location.href='index.html'">⬅ Back</button>
 
     <a class="btn-create" id="addEmployeeBtn">+ Add New Employee</a>
 
@@ -90,11 +123,12 @@
             <th>Address</th>
             <th>DOB</th>
             <th>Joining</th>
+            <th style="width:110px;">Action</th>
         </tr>
         </thead>
 
         <tbody id="empTableBody">
-        <tr><td colspan="8">Loading...</td></tr>
+        <tr><td colspan="9">Loading...</td></tr>
         </tbody>
     </table>
 
@@ -114,7 +148,7 @@
         tbody.innerHTML = "";
 
         if (employees.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8">No employees found</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9">No employees found</td></tr>`;
             return;
         }
 
@@ -127,8 +161,15 @@
                     <td>${emp.mobileNo}</td>
                     <td>${emp.alternateMobNo ?? "-"}</td>
                     <td>${emp.address}</td>
-                    <td>${emp.dateOfBirth}</td>
+                    <td>${emp.dateOfBirth ?? "-"}</td>
                     <td>${emp.dateOfJoining}</td>
+
+                    <td>
+                        <button class="edit-btn"
+                            onclick="window.location.href='update-employee.html?plantID=${plantID}&edit=1&employeeId=${emp.employeeId}'">
+                            Edit
+                        </button>
+                    </td>
                 </tr>
             `);
         });

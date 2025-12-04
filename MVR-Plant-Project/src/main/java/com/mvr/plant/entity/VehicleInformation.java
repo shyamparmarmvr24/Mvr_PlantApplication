@@ -1,6 +1,7 @@
 package com.mvr.plant.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +11,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -36,18 +39,23 @@ public class VehicleInformation
     @Column(nullable = false,length = 50)
     private String vehicleModelName;
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(nullable = false, length = 30)
     private String vehicleNumber;
 
     @Column(nullable = false, unique = true, length = 50)
     private String vehicleChassisNo;
 
-    @Column(nullable = false)
     private LocalDate dateOfRegistration;
 
     private LocalDate insuranceDate;
 
     private LocalDate insuranceExpiryDate;
+
+    private Boolean gpsStatus;
+
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<VehicleOperation> vehicleOp = new ArrayList<>();
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

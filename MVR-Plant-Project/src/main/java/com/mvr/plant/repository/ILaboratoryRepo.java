@@ -12,8 +12,8 @@ import java.util.Optional;
 
 public interface ILaboratoryRepo extends JpaRepository<LaboratoryOperation,Long>
 {
-    @Query("SELECT o FROM LaboratoryOperation o WHERE o.plant.plantID = :plantId")
-    Optional<LaboratoryOperation> getLabOperationByPlantId(@Param("plantId") Long plantId);
+//    @Query("SELECT o FROM LaboratoryOperation o WHERE o.plant.plantID = :plantId")
+//    Optional<LaboratoryOperation> getLabOperationByPlantId(@Param("plantId") Long plantId);
 
     //date sorting retrieve by plantid and date
     @Query("SELECT o FROM LaboratoryOperation o WHERE o.plant.plantID = :plantId AND o.operationDate = :date")

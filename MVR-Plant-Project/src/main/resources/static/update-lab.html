@@ -106,7 +106,7 @@
     };
 
     // -------------------------------------------
-    // FIELDS — EXACT MATCH WITH BACKEND
+    // LAB FIELDS
     // -------------------------------------------
     const fields = [
         {id:"cod", label:"COD"},
@@ -130,61 +130,105 @@
     async function loadOperation() {
         const res = await fetch(`/api/laboperations/plant/${plantID}?date=${date}`);
         const text = await res.text();
-        currentLab = text ? JSON.parse(text) : {};
-
+        currentLab = text && text.trim() ? JSON.parse(text) : {};
         renderFields();
     }
 
     // -------------------------------------------
-    // RENDER INPUT FIELDS
+    // RENDER INPUT FIELDS + ENTER NAVIGATION
     // -------------------------------------------
     function renderFields() {
         fieldsBody.innerHTML = "";
 
-        fields.forEach(field => {
-            let tr = document.createElement("tr");
+        fields.forEach((field, index) => {
+            const tr = document.createElement("tr");
 
-            let labelTd = document.createElement("td");
+            const labelTd = document.createElement("td");
             labelTd.textContent = field.label;
 
-            let valTd = document.createElement("td");
+            const valTd = document.createElement("td");
 
-            let input = document.createElement("input");
+            const input = document.createElement("input");
             input.className = "input-box";
             input.id = field.id;
             input.value = currentLab[field.id] ?? "";
 
+            // Enter key navigation
+            input.addEventListener("keydown", e => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    const next = fields[index + 1];
+                    if (next) document.getElementById(next.id).focus();
+                    else document.getElementById("saveBtn").click();
+                }
+            });
+
             valTd.appendChild(input);
             tr.appendChild(labelTd);
             tr.appendChild(valTd);
-
             fieldsBody.appendChild(tr);
         });
+
+        document.getElementById(fields[0].id).focus();
     }
 
     // -------------------------------------------
-    // SAVE LAB UPDATE
+    // SAVE LAB DATA (with FIXED VALIDATION)
     // -------------------------------------------
     document.getElementById("saveBtn").onclick = async () => {
-        let data = {};
 
+        // Validate number fields (comma/colon fix)
+        function invalidNumber(val) {
+            if (val === "" || val === null) return false;
+            return !/^\d+(\.\d+)?$/.test(val);
+        }
+
+        for (const f of fields) {
+            const el = document.getElementById(f.id);
+            const v = el.value.trim();
+
+            if (invalidNumber(v)) {
+                alert(`Invalid value in: ${f.label}\nUse only numbers (0-9) and dot (.)`);
+                el.focus();
+                return; // STOP submit
+            }
+        }
+
+        // Build payload
+        const data = {};
         fields.forEach(f => {
             const input = document.getElementById(f.id);
             data[f.id] = input.value === "" ? null : input.value;
         });
 
-        await fetch(`/api/laboperations/${plantID}?date=${date}`, {
-            method:"PUT",
-            headers: { "Content-Type":"application/json" },
-            body: JSON.stringify(data)
-        });
+        // Perform PUT request
+        let response;
+        try {
+            response = await fetch(`/api/laboperations/${plantID}?date=${date}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+        } catch (e) {
+            alert("Network error while saving lab data.");
+            return;
+        }
 
-        alert("Laboratory Operation Updated Successfully!");
+        // ❌ If backend rejects → stop redirect and show real error
+        if (!response.ok) {
+            const errText = await response.text();
+            alert("❌ Lab Operation not saved:\n" + errText);
+            return;
+        }
+
+        // SUCCESS
+        alert("✔ Laboratory Operation Updated Successfully!");
         window.location.href = `index.html?date=${encodeURIComponent(date)}`;
     };
 
     loadOperation();
 
 </script>
+
 </body>
 </html>
