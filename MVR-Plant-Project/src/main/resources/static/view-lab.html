@@ -3,100 +3,120 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
     <title>View Laboratory Operation</title>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-
     <style>
         body {
-            font-family:'Segoe UI', sans-serif;
-            background:#eef2f7;
-            margin:0;
-            padding:0;
-            display:flex;
-            justify-content:center;
+            font-family: "Segoe UI", sans-serif;
+            background: #eef2f7;
+            margin: 0;
+            display: flex;
+            justify-content: center;
         }
 
         .card {
-            background:white;
-            padding:26px;
-            border-radius:12px;
-            box-shadow:0 10px 25px rgba(0,0,0,0.08);
-            max-width:900px;
-            width:100%;
-            margin:20px;
+            background: white;
+            padding: 26px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            max-width: 1100px;
+            width: 100%;
+            margin: 20px;
         }
 
         h2 {
-            text-align:center;
-            margin-bottom:10px;
-            color:#0369a1;
+            text-align: center;
+            color: #0369a1;
+            margin-bottom: 10px;
         }
 
         .top-info {
-            font-weight:700;
-            text-align:center;
-            margin-bottom:16px;
-            color:#374151;
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        /* ================= TABLE ================= */
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
         }
 
         table {
-            width:100%;
-            border-collapse:collapse;
-            margin-top:10px;
+            width: 100%;
+            min-width: 950px;
+            border-collapse: collapse;
+            table-layout: fixed;
         }
 
-        table th, table td {
-            border:1px solid #d9e2ec;
-            padding:10px;
-            font-size:15px;
+        th {
+            background: #0369a1;
+            color: white;
+            padding: 10px;
+            font-size: 14px;
+            text-align: center;
         }
 
-        table th {
-            background:#0369a1;
-            color:white;
-            width:260px;
-            text-align:left;
+        td {
+            border: 1px solid #d9e2ec;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
         }
 
+        /* ================= PROGRESS ================= */
         .progress-bar {
-            width:240px;
-            height:18px;
-            background:#e5edf5;
-            margin:12px auto;
-            border-radius:10px;
-            overflow:hidden;
+            width: 260px;
+            height: 18px;
+            background: #e5edf5;
+            margin: 14px auto;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         .progress-fill {
-            height:100%;
-            width:0;
-            transition:width 0.25s ease-out;
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease;
         }
 
-        .progress-green { background:#10b981; }
-        .progress-yellow { background:#f59e0b; }
-        .progress-red { background:#ef4444; }
+        .green { background: #10b981; }
+        .yellow { background: #f59e0b; }
+        .red { background: #ef4444; }
 
+        /* ================= BUTTONS ================= */
         .buttons {
-            margin-top:20px;
-            text-align:center;
+            margin-top: 20px;
+            text-align: center;
         }
 
         .btn {
-            padding:10px 18px;
-            font-size:15px;
-            border:none;
-            border-radius:6px;
-            color:white;
-            cursor:pointer;
-            margin:0 6px;
+            padding: 10px 18px;
+            font-size: 15px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            margin: 0 6px;
         }
 
-        .btn-update { background:#059669; }
-        .btn-back { background:#6b7280; }
+        .btn-update { background: #059669; }
+        .btn-back { background: #6b7280; }
+        .btn-pdf { background: #2563eb; }
+
+         /* ================= PROGRESS SPACING ================= */
+        .progress-section {
+            text-align: center;
+            margin-bottom: 26px;   /* GAP BETWEEN PROGRESS & TABLE */
+        }
+
+        .progress-text {
+            font-weight: 700;
+            margin-top: 6px;
+        }
 
     </style>
 </head>
@@ -109,136 +129,139 @@
 
     <div class="top-info" id="infoBox"></div>
 
-    <!-- Progress -->
-    <div style="text-align:center;">
+    <!-- ================= PROGRESS ================= -->
+    <!-- ================= PROGRESS ================= -->
+    <div class="progress-section">
         <div class="progress-bar">
             <div id="progressFill" class="progress-fill"></div>
         </div>
-        <div id="progressText" style="font-weight:700; margin-bottom:14px;"></div>
+        <div id="progressText" class="progress-text"></div>
     </div>
 
-    <table>
-        <thead>
-        <tr><th>Field</th><th>Value</th></tr>
-        </thead>
-        <tbody id="fieldsBody"></tbody>
+    <!-- ================= TABLE ================= -->
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>Time</th>
+                <th>COD</th>
+                <th>BOD</th>
+                <th>TN</th>
+                <th>Temperature</th>
+                <th>TSS</th>
+                <th>PH</th>
+            </tr>
+            </thead>
+            <tbody id="labBody"></tbody>
+        </table>
+    </div>
+
+    <!-- ================= FLOW ================= -->
+    <table style="margin-top:14px;">
+        <tr>
+            <th style="width:260px;">Flow Meter AM</th>
+            <td id="flowAm">-</td>
+            <th style="width:260px;">Flow Meter PM</th>
+            <td id="flowPm">-</td>
+        </tr>
+        <tr>
+            <th>Cumulative Flow (Ltrs)</th>
+            <td colspan="3" id="cumulativeFlow">-</td>
+        </tr>
     </table>
 
+    <!-- ================= BUTTONS ================= -->
     <div class="buttons">
         <button class="btn btn-update" id="updateBtn">Update</button>
         <button class="btn btn-back" id="backBtn">Back</button>
-        <button class="btn" style="background:#2563eb;" id="pdfBtn">Download PDF</button>
-
     </div>
 
 </div>
 
 <script>
+    const params = new URLSearchParams(window.location.search);
+    const plantID = params.get("plantID");
+    const date = params.get("date");
 
-const params = new URLSearchParams(window.location.search);
-const plantID = params.get('plantID');
-const date = params.get('date');
+    document.getElementById("infoBox").innerHTML =
+        `Date: <span style="color:#f97316">${date}</span> |
+         Plant ID: <span style="color:#059669">${plantID}</span>`;
 
-document.getElementById("infoBox").innerHTML =
-    `Date: <span style="color:#f97316">${date}</span> &nbsp; | &nbsp;
-     Plant ID: <span style="color:#059669">${plantID}</span>`;
-
-document.getElementById("backBtn").onclick = () =>
-    window.location.href = `index.html?date=${encodeURIComponent(date)}`;
-
-const fields = [
-    "cod", "bod", "th", "temperature", "tss", "ph",
-    "velocity", "cumulativeFlow", "flowMeterReadingAm", "flowMeterReadingPm"
-];
-
-const units = {
-    cod:"mg/L", bod:"mg/L", th:"mg/L", temperature:"°C", tss:"mg/L",
-    ph:"", velocity:"m/s", cumulativeFlow:"liters",
-    flowMeterReadingAm:"liters", flowMeterReadingPm:"liters"
-};
-
-function formatValue(field, value) {
-    if (!value && value !== 0) return "-";
-    return units[field] ? `${value} ${units[field]}` : value;
-}
-
-function calculateProgress(lab) {
-    let filled = 0;
-    fields.forEach(f => { if (lab[f] !== null && lab[f] !== "") filled++; });
-    return Math.round((filled / fields.length) * 100);
-}
-
-function applyProgressBar(progress) {
-    const bar = document.getElementById("progressFill");
-    bar.className = progress === 100 ? "progress-fill progress-green"
-                  : progress > 0 ? "progress-fill progress-yellow"
-                                 : "progress-fill progress-red";
-    bar.style.width = progress + "%";
-    document.getElementById("progressText").textContent = progress + "% Completed";
-}
-
-async function loadOperation() {
-    const res = await fetch(`/api/laboperations/plant/${plantID}?date=${date}`);
-    const raw = await res.text();
-
-    let lab = {};
-    if (raw.trim()) lab = JSON.parse(raw);
-
-    renderTable(lab);
-    applyProgressBar(calculateProgress(lab));
+    document.getElementById("backBtn").onclick = () =>
+        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
 
     document.getElementById("updateBtn").onclick = () =>
         window.location.href = `update-lab.html?plantID=${plantID}&date=${encodeURIComponent(date)}`;
-}
 
-function renderTable(lab) {
-    const body = document.getElementById("fieldsBody");
-    body.innerHTML = "";
+    const timeLabels = ["10:00 AM", "12:00 PM", "02:30 PM", "05:00 PM"];
 
-    fields.forEach(f => {
-        let label = f.replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase());
-        body.innerHTML += `<tr><td>${label}</td><td>${formatValue(f, lab[f])}</td></tr>`;
-    });
-}
+    const fieldGroups = [
+        ["codReading1","bodReading1","thReading1","temperatureReading1","tssReading1","phReading1"],
+        ["codReading2","bodReading2","thReading2","temperatureReading2","tssReading2","phReading2"],
+        ["codReading3","bodReading3","thReading3","temperatureReading3","tssReading3","phReading3"],
+        ["codReading4","bodReading4","thReading4","temperatureReading4","tssReading4","phReading4"]
+    ];
 
-document.getElementById("pdfBtn").onclick = () => {
+    function calculateProgress(lab) {
+        let total = 0, filled = 0;
+        fieldGroups.flat().forEach(f => {
+            total++;
+            if (lab[f] !== null && lab[f] !== undefined) filled++;
+        });
+        if (lab.flowMeterReadingAm != null) filled++;
+        if (lab.flowMeterReadingPm != null) filled++;
+        total += 2;
+        return Math.round((filled / total) * 100);
+    }
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit:"pt", format:"a4" });
+    function applyProgress(progress) {
+        const bar = document.getElementById("progressFill");
+        bar.className = "progress-fill " + (progress === 100 ? "green" : progress > 0 ? "yellow" : "red");
+        bar.style.width = progress + "%";
+        document.getElementById("progressText").innerText = progress + "% Completed";
+    }
 
-    doc.setFontSize(18);
-    doc.text("Laboratory Operation Report", 40, 40);
+    async function loadLab() {
+        const res = await fetch(`/api/laboperations/plant/${plantID}?date=${date}`);
+        if (!res.ok) return;
+        const lab = await res.json();
 
-    doc.setFontSize(12);
-    doc.text(`Date: ${date} | Plant ID: ${plantID}`, 40, 60);
+        const body = document.getElementById("labBody");
+        body.innerHTML = "";
 
-    const rows = [];
-    document.querySelectorAll("#fieldsBody tr").forEach(tr => {
-        let cols = tr.querySelectorAll("td");
-        rows.push([cols[0].innerText, cols[1].innerText]);
-    });
+        fieldGroups.forEach((group, i) => {
+            body.innerHTML += `
+                <tr>
+                    <td><b>${timeLabels[i]}</b></td>
+                    ${group.map(f => `<td>${lab[f] ?? "-"}</td>`).join("")}
+                </tr>`;
+        });
+        /* ================= AVERAGE ROW ================= */
+            body.innerHTML += `
+                <tr style="background:#f1f5f9; font-weight:700;">
+                    <td><b>Average Values</b></td>
+                    <td>${lab.cod ?? "-"}</td>
+                    <td>${lab.bod ?? "-"}</td>
+                    <td>${lab.tn ?? "-"}</td>
+                    <td>${lab.temperature ?? "-"}</td>
+                    <td>${lab.tss ?? "-"}</td>
+                    <td>${lab.ph ?? "-"}</td>
+                </tr>
+            `;
 
-    doc.autoTable({
-        head:[["Field","Value"]],
-        body:rows,
-        startY:90,
-        theme:"grid",
-        headStyles:{fillColor:[3,105,161]}
-    });
+        document.getElementById("flowAm").innerText = lab.flowMeterReadingAm ?? "-";
+        document.getElementById("flowPm").innerText = lab.flowMeterReadingPm ?? "-";
 
-    doc.save(`Lab_${plantID}_${date}.pdf`);
-};
+        const cum =
+            (Number(lab.flowMeterReadingPm || 0) - Number(lab.flowMeterReadingAm || 0)) * 1000;
+        document.getElementById("cumulativeFlow").innerText =
+            isNaN(cum) ? "-" : cum + " Ltrs";
+        document.getElementById("cumulativeFlow").style="background:#f1f5f9; font-weight:700;"
+        applyProgress(calculateProgress(lab));
+    }
 
-function startSSE() {
-    const evt = new EventSource("/api/events/updates");
-    evt.onmessage = loadOperation;
-}
-
-startSSE();
-loadOperation();
-
+    loadLab();
 </script>
-
 
 </body>
 </html>

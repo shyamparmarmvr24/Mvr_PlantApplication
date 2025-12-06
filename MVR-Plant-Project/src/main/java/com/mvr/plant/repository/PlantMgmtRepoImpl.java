@@ -21,7 +21,7 @@ public class PlantMgmtRepoImpl implements IPlantMgmtRepo
     @Override
     public List<FstpPlant> getAllPlants()
     {
-        return plantRepo.findAll();
+        return plantRepo.getAllPlantsWhereMnitIsTrue();
     }
 
     @Override

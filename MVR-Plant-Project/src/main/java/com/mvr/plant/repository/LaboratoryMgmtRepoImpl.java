@@ -52,32 +52,130 @@ public class LaboratoryMgmtRepoImpl implements ILaboratoryMgmtRepo
 
         int count = 0;
 
-        if (labOp.getCod() != null) count++;
-        if (labOp.getBod() != null) count++;
-        if (labOp.getTh() != null) count++;
-        if (labOp.getTemperature() != null) count++;
-        if (labOp.getTss() != null) count++;
-        if (labOp.getPh() != null) count++;
-        if (labOp.getVelocity() != null) count++;
-        if (labOp.getCumulativeFlow() != null) count++;
+        if (labOp.getCodReading1() != null) count++;
+        if (labOp.getCodReading2() != null) count++;
+        if (labOp.getCodReading3() != null) count++;
+        if (labOp.getCodReading4() != null) count++;
+
+        if (labOp.getBodReading1() != null) count++;
+        if (labOp.getBodReading2() != null) count++;
+        if (labOp.getBodReading3() != null) count++;
+        if (labOp.getBodReading4() != null) count++;
+
+        if (labOp.getThReading1() != null) count++;
+        if (labOp.getThReading2() != null) count++;
+        if (labOp.getThReading3() != null) count++;
+        if (labOp.getThReading4() != null) count++;
+
+        if (labOp.getTemperatureReading1() != null) count++;
+        if (labOp.getTemperatureReading2() != null) count++;
+        if (labOp.getTemperatureReading3() != null) count++;
+        if (labOp.getTemperatureReading4() != null) count++;
+
+        if (labOp.getTssReading1() != null) count++;
+        if (labOp.getTssReading2() != null) count++;
+        if (labOp.getTssReading3() != null) count++;
+        if (labOp.getTssReading4() != null) count++;
+
+        if (labOp.getPhReading1() != null) count++;
+        if (labOp.getPhReading2() != null) count++;
+        if (labOp.getPhReading3() != null) count++;
+        if (labOp.getPhReading4() != null) count++;
+
         if (labOp.getFlowMeterReadingAm() != null) count++;
-        if (labOp.getFlowMeterReadingPm() != null) count++; //10
+        if (labOp.getFlowMeterReadingPm() != null) count++; //26
+
+        existing.setCodReading1(labOp.getCodReading1());
+        existing.setCodReading2(labOp.getCodReading2());
+        existing.setCodReading3(labOp.getCodReading3());
+        existing.setCodReading4(labOp.getCodReading4());
+
+        existing.setBodReading1(labOp.getBodReading1());
+        existing.setBodReading2(labOp.getBodReading2());
+        existing.setBodReading3(labOp.getBodReading3());
+        existing.setBodReading4(labOp.getBodReading4());
+
+        existing.setThReading1(labOp.getThReading1());
+        existing.setThReading2(labOp.getThReading2());
+        existing.setThReading3(labOp.getThReading3());
+        existing.setThReading4(labOp.getThReading4());
+
+        existing.setTemperatureReading1(labOp.getTemperatureReading1());
+        existing.setTemperatureReading2(labOp.getTemperatureReading2());
+        existing.setTemperatureReading3(labOp.getTemperatureReading3());
+        existing.setTemperatureReading4(labOp.getTemperatureReading4());
+
+        existing.setTssReading1(labOp.getTssReading1());
+        existing.setTssReading2(labOp.getTssReading2());
+        existing.setTssReading3(labOp.getTssReading3());
+        existing.setTssReading4(labOp.getTssReading4());
+
+        existing.setPhReading1(labOp.getPhReading1());
+        existing.setPhReading2(labOp.getPhReading2());
+        existing.setPhReading3(labOp.getPhReading3());
+        existing.setPhReading4(labOp.getPhReading4());
+
+//        existing.setCod((labOp.getCodReading1()+labOp.getCodReading2()+labOp.getCodReading3()+labOp.getCodReading4())/4);
+//        existing.setBod((labOp.getBodReading1()+labOp.getBodReading2()+labOp.getBodReading3()+labOp.getBodReading4())/4);
+//        existing.setTn((labOp.getThReading1()+labOp.getThReading2()+labOp.getThReading3()+labOp.getThReading4())/4);
+//        existing.setTemperature((labOp.getTemperatureReading1()+labOp.getTemperatureReading2()+labOp.getTemperatureReading3()+labOp.getTemperatureReading4())/4);
+//        existing.setTss((labOp.getTssReading1()+labOp.getTssReading2()+labOp.getTssReading3()+labOp.getTssReading4())/4);
+//        existing.setPh((labOp.getPhReading1()+labOp.getPhReading2()+labOp.getPhReading3()+labOp.getPhReading4())/4);
+
+        existing.setCod(average(
+                labOp.getCodReading1(),
+                labOp.getCodReading2(),
+                labOp.getCodReading3(),
+                labOp.getCodReading4()
+        ));
+
+        existing.setBod(average(
+                labOp.getBodReading1(),
+                labOp.getBodReading2(),
+                labOp.getBodReading3(),
+                labOp.getBodReading4()
+        ));
+
+        existing.setTn(average(
+                labOp.getThReading1(),
+                labOp.getThReading2(),
+                labOp.getThReading3(),
+                labOp.getThReading4()
+        ));
+
+        existing.setTemperature(average(
+                labOp.getTemperatureReading1(),
+                labOp.getTemperatureReading2(),
+                labOp.getTemperatureReading3(),
+                labOp.getTemperatureReading4()
+        ));
+
+        existing.setTss(average(
+                labOp.getTssReading1(),
+                labOp.getTssReading2(),
+                labOp.getTssReading3(),
+                labOp.getTssReading4()
+        ));
+
+        existing.setPh(average(
+                labOp.getPhReading1(),
+                labOp.getPhReading2(),
+                labOp.getPhReading3(),
+                labOp.getPhReading4()
+        ));
 
 
+        if (labOp.getFlowMeterReadingAm() != null && labOp.getFlowMeterReadingPm() != null) {
+            existing.setCumulativeFlow(
+                    (labOp.getFlowMeterReadingPm() - labOp.getFlowMeterReadingAm()) * 1000
+            );
+        } else {
+            existing.setCumulativeFlow(null);
+        }
 
 
-        existing.setCod(labOp.getCod());
-        existing.setBod(labOp.getBod());
-        existing.setTh(labOp.getTh());
-        existing.setTemperature(labOp.getTemperature());
-        existing.setTss(labOp.getTss());
-        existing.setPh(labOp.getPh());
-        existing.setVelocity(labOp.getVelocity());
-        existing.setCumulativeFlow(labOp.getCumulativeFlow());
         existing.setFlowMeterReadingAm(labOp.getFlowMeterReadingAm());
         existing.setFlowMeterReadingPm(labOp.getFlowMeterReadingPm());
-
-
 
         //save the update on db
         labOperationRepo.save(existing);
@@ -92,4 +190,24 @@ public class LaboratoryMgmtRepoImpl implements ILaboratoryMgmtRepo
     {
         return labOperationRepo.getLabOperationByPlantIdAndDate(plantId,date).orElse(null);
     }
+
+    private Double average(Double... values) {
+        double sum = 0;
+        int count = 0;
+
+        for (Double v : values) {
+            if (v != null) {
+                sum += v;
+                count++;
+            }
+        }
+
+        if (count == 0) return null;
+
+        double avg = sum / count;
+
+        // 🔥 ROUND TO 2 DECIMAL PLACES
+        return Math.round(avg * 100.0) / 100.0;
+    }
+
 }

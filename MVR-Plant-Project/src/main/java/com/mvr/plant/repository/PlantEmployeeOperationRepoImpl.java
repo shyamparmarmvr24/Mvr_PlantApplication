@@ -1,10 +1,13 @@
 package com.mvr.plant.repository;
+import com.mvr.plant.DTO.EmployeeOperationDTO;
+import com.mvr.plant.DTO.PlantOperationDTO;
 import com.mvr.plant.entity.PlantEmployee;
 import com.mvr.plant.entity.PlantEmployeeOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,4 +76,72 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
     {
         return empOpRepo.getAllOperationsByEmployeeId(employeeId);
     }
+
+    @Override
+    public List<EmployeeOperationDTO> getAllEmployeesOperationByDate(LocalDate date)
+    {
+        // 1) fetch operations for the date with employee + plant eagerly loaded
+        List<PlantEmployeeOperation> ops = empOpRepo.getAllOperationByDate(date);
+
+        // 2) map each operation -> EmployeeOperationDTO (explicit mapping)
+        List<EmployeeOperationDTO> result = new ArrayList<>();
+        for (PlantEmployeeOperation op : ops) {
+            if (op == null) continue;
+
+            EmployeeOperationDTO dto = new EmployeeOperationDTO();
+
+            if (op.getEmployee() != null) {
+                dto.setEmployeeId(op.getEmployee().getEmployeeId());
+                dto.setEmployeeName(op.getEmployee().getEmployeeName());
+                dto.setDesination(op.getEmployee().getDesignation());
+                if (op.getEmployee().getPlant() != null) {
+                    dto.setPlantId(op.getEmployee().getPlant().getPlantID());
+                } else {
+                    dto.setPlantId(null);
+                }
+            } else {
+                dto.setEmployeeId(null);
+                dto.setPlantId(null);
+            }
+
+            dto.setPlantOp(op);
+
+            result.add(dto);
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<EmployeeOperationDTO> getAllEmployeesOperationBetween(LocalDate start, LocalDate end)
+    {
+        List<PlantEmployeeOperation> ops = empOpRepo.findByOperationDateBetween(start, end);
+
+        List<EmployeeOperationDTO> result = new ArrayList<>();
+
+        for (PlantEmployeeOperation op : ops) {
+
+            if (op == null) continue;
+
+            EmployeeOperationDTO dto = new EmployeeOperationDTO();
+
+            if (op.getEmployee() != null) {
+
+                dto.setEmployeeId(op.getEmployee().getEmployeeId());
+                dto.setEmployeeName(op.getEmployee().getEmployeeName());
+                dto.setDesination(op.getEmployee().getDesignation());
+
+                if (op.getEmployee().getPlant() != null) {
+                    dto.setPlantId(op.getEmployee().getPlant().getPlantID());
+                }
+            }
+
+            dto.setPlantOp(op);
+
+            result.add(dto);
+        }
+
+        return result;
+    }
+
 }

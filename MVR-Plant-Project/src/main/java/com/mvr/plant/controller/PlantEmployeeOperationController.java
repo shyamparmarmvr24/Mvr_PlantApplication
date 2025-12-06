@@ -1,5 +1,6 @@
 package com.mvr.plant.controller;
 
+import com.mvr.plant.DTO.EmployeeOperationDTO;
 import com.mvr.plant.entity.PlantEmployeeOperation;
 import com.mvr.plant.service.IPlantEmployeeOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/employee-operations")
+@CrossOrigin(origins = "*")
 public class PlantEmployeeOperationController
 {
     @Autowired
@@ -57,5 +59,33 @@ public class PlantEmployeeOperationController
 
         return ResponseEntity.ok(list);
     }
+
+    // inside PlantEmployeeOperationController
+    @GetMapping("/date")
+    public ResponseEntity<List<EmployeeOperationDTO>> getEmployeeOperationsByDate(
+            @RequestParam("date") String date
+    ) {
+        LocalDate localDate = LocalDate.parse(date);
+
+        List<EmployeeOperationDTO> list = employeeOpService.getAllEmployeesOperationByDate(localDate);
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/date-range")
+    public ResponseEntity<List<EmployeeOperationDTO>> getEmployeeOperationsBetween(
+            @RequestParam String start,
+            @RequestParam String end)
+    {
+        LocalDate startDate = LocalDate.parse(start);
+        LocalDate endDate = LocalDate.parse(end);
+
+        List<EmployeeOperationDTO> result = employeeOpService.getAllEmployeesOperationBetween(startDate, endDate);
+
+        return ResponseEntity.ok(result);
+    }
+
+
+
+
 
 }

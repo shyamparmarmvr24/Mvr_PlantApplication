@@ -12,6 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/plantemployees")
+@CrossOrigin(origins = "*")
 public class PlantEmployeeController
 {
     @Autowired
@@ -55,6 +56,17 @@ public class PlantEmployeeController
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/delete/{employeeId}")
+    public ResponseEntity<String> deleteEmployee(@PathVariable Integer employeeId)
+    {
+        String result = employeeService.deleteEmployeeByEmpId(employeeId);
+        // If deletion successful
+        if (result.equals("Employee Deleted Successfully")) {
+            return ResponseEntity.ok(result); // 200 OK
+        }
+        // If employee not found
+        return ResponseEntity.status(404).body(result); // 404 NOT FOUND
+    }
 
 
 }

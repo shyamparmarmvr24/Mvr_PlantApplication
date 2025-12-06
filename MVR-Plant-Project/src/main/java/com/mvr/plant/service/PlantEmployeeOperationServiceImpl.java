@@ -1,5 +1,6 @@
 package com.mvr.plant.service;
 
+import com.mvr.plant.DTO.EmployeeOperationDTO;
 import com.mvr.plant.entity.PlantEmployeeOperation;
 import com.mvr.plant.repository.IPlantEmployeeOperationRepoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,4 +31,16 @@ public class PlantEmployeeOperationServiceImpl implements IPlantEmployeeOperatio
     public List<PlantEmployeeOperation> getAllOperationsByEmployeeId(Integer employeeId) {
         return empOpRepo.getAllOperationsByEmployeeId(employeeId);
     }
+
+    @Override
+    public List<EmployeeOperationDTO> getAllEmployeesOperationByDate(LocalDate date)
+    {
+        return empOpRepo.getAllEmployeesOperationByDate(date);
+    }
+
+    @Override
+    public List<EmployeeOperationDTO> getAllEmployeesOperationBetween(LocalDate start, LocalDate end) {
+        return empOpRepo.getAllEmployeesOperationBetween(start,end);
+    }
+
 }

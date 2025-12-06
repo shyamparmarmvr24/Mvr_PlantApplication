@@ -28,4 +28,9 @@ public class PlantEmployeeServiceImpl implements IPlantEmployeeService
     public String updateOperationById(Long plantId, Integer empId, PlantEmployee employee) {
         return empRepo.updateOperationById(plantId,empId,employee);
     }
+
+    @Override
+    public String deleteEmployeeByEmpId(Integer empId) {
+        return empRepo.deleteEmployeeByEmpId(empId);
+    }
 }

@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @RestController
 @RequestMapping("/api/events")
+@CrossOrigin(origins = "*")
 public class SseController {
 
     private final List<SseEmitter> clients = new CopyOnWriteArrayList<>();

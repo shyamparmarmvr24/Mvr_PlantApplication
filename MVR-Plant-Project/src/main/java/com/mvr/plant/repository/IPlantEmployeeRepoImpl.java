@@ -13,4 +13,5 @@ public interface IPlantEmployeeRepoImpl
     public PlantEmployee createEmployee(Long plantId, PlantEmployee employee);
     public List<PlantEmployee> getAllEmployeeByPlantId(Long plantId);
     public String updateOperationById(Long plantId,Integer empId, PlantEmployee employee);
+    public String deleteEmployeeByEmpId(Integer empId);
 }

@@ -1,504 +1,470 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>View Operation</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- pdf libs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-
-
     <style>
-        body {
-            font-family:'Segoe UI', sans-serif;
-            background:#eef2f7;
-            margin:0;
-            padding:0;
-            display:flex;
-            justify-content:center;
-        }
-
-        .card {
-            background:white;
-            padding:26px;
-            border-radius:12px;
-            box-shadow:0 10px 25px rgba(0,0,0,0.08);
-            max-width:900px;
-            width:100%;
-            margin:20px;
-        }
-
-        h2 {
-            text-align:center;
-            margin-bottom:8px;
-            color:#0369a1;
-        }
-
-        .top-info {
-            font-weight:700;
-            text-align:center;
-            margin-bottom:16px;
-            color:#374151;
-        }
-
-        table {
-            width:100%;
-            border-collapse:collapse;
-            margin-top:10px;
-        }
-
-        table th, table td {
-            border:1px solid #d9e2ec;
-            padding:10px;
-            font-size:15px;
-        }
-
-        table th {
-            background:#0369a1;
-            color:white;
-            text-align:left;
-            width:260px;
-        }
-
-        .progress-bar {
-            width:240px;
-            height:18px;
-            background:#e5edf5;
-            margin:12px auto;
-            border-radius:10px;
-            overflow:hidden;
-        }
-
-        .progress-fill {
-            height:100%;
-            width:0;
-            transition:width 0.25s ease-out;
-        }
-
+        body { font-family: "Segoe UI", sans-serif; background:#eef2f7; margin:0; display:flex; justify-content:center; }
+        .card { background:#fff; width:100%; max-width:960px; margin:18px; padding:22px; border-radius:10px; box-shadow:0 10px 25px rgba(2,6,23,0.06); }
+        h2 { color:#0369a1; text-align:center; margin:0 0 8px 0; }
+        .top-info { text-align:center; font-weight:700; color:#374151; margin-bottom:14px; }
+        table { width:100%; border-collapse:collapse; margin-top:12px; }
+        th, td { border:1px solid #d9e2ec; padding:10px; font-size:14px; vertical-align:top; }
+        th { background:#0369a1; color:#fff; text-align:left; width:320px; }
+        .vehicle-title { margin-top:16px; font-weight:700; color:#0f172a; }
+        .buttons { text-align:center; margin-top:18px; }
+        .btn { padding:10px 14px; border-radius:6px; border:none; cursor:pointer; color:#fff; font-weight:700; margin:0 6px; }
+        .btn-update { background:#059669; }
+        .btn-back { background:#6b7280; }
+        .btn-pdf { background:#2563eb; }
+        .progress-bar { width:260px; height:18px; background:#e9f0fb; border-radius:10px; margin:12px auto; overflow:hidden; }
+        .progress-fill { height:100%; width:0; transition:width .25s ease; }
         .progress-green { background:#10b981; }
         .progress-yellow { background:#f59e0b; }
         .progress-red { background:#ef4444; }
-
-        .vehicle-title {
-            margin-top:18px;
-            font-size:17px;
-            font-weight:700;
-            color:#0f172a;
-        }
-
-        .buttons {
-            margin-top:20px;
-            text-align:center;
-        }
-
-        .btn {
-            padding:10px 18px;
-            font-size:15px;
-            border:none;
-            border-radius:6px;
-            color:white;
-            cursor:pointer;
-            margin:0 6px;
-        }
-
-        .btn-update { background:#059669; }
-        .btn-back { background:#6b7280; }
-
-        /* Prevent table rows from splitting across PDF pages */
-table, tr, td, th {
-    page-break-inside: avoid !important;
-}
-
-/* Keep the whole card together unless it's too long */
-.card {
-    page-break-inside: avoid !important;
-}
-
-/* Page break BEFORE vehicle section if too long */
-.vehicle-section {
-    page-break-before: always;
-}
-
-/* Make PDF look tighter */
-.pdf-scale {
-    transform: scale(0.85);
-    transform-origin: top left;
-}
-
+        .progress-text { text-align:center; font-weight:700; margin-top:6px; color:#374151; }
+        .muted { color:#6b7280; font-size:13px; }
+        .inline-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+        @media (max-width:720px){ th { width:180px; } table td { font-size:13px } }
     </style>
 </head>
-
 <body>
+<div class="card" id="mainCard">
+    <h2 id="title">Operation Details</h2>
+    <div class="top-info" id="infoBox">Loading...</div>
 
-<div class="card">
-
-    <h2>Operation Details</h2>
-    <div class="top-info" id="infoBox"></div>
-
-    <div style="text-align:center;">
-        <div class="progress-bar">
-            <div id="progressFill" class="progress-fill"></div>
-        </div>
-        <div id="progressText" style="font-weight:700; margin-bottom:14px;"></div>
+    <div style="text-align:center">
+        <div class="progress-bar" aria-hidden="true"><div id="progressFill" class="progress-fill progress-red"></div></div>
+        <div id="progressText" class="progress-text">0% Completed</div>
     </div>
 
-    <table>
-        <thead>
-        <tr><th>Field</th><th>Value</th></tr>
-        </thead>
+    <table aria-describedby="operation-fields">
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
         <tbody id="fieldsBody"></tbody>
     </table>
 
-    <!-- Vehicle operations section (dynamic, repeated blocks per vehicle) -->
-    <h2 style="margin-top:22px;">Vehicle Operations</h2>
+    <h3 style="margin-top:18px;color:#0369a1">Vehicle Operations</h3>
     <div id="vehicleOps"></div>
 
-    <div class="buttons">
-        <button class="btn btn-update" id="updateBtn">Update</button>
-        <button class="btn btn-back" id="backBtn">Back</button>
-        <button class="btn" style="background:#2563eb;" id="pdfBtn">Download PDF</button>
-    </div>
+    <h3 style="margin-top:14px;color:#0369a1">Private Vehicles (aggregate)</h3>
+    <table id="privateTable" style="margin-top:8px">
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <tbody>
+        <tr><td>Private Vehicles Present</td><td id="pv_present">-</td></tr>
+        <tr><td>No. of Trips (Private)</td><td id="pv_trips">-</td></tr>
+        <tr><td>Sludge (Ltrs) (Private)</td><td id="pv_sludge">-</td></tr>
+        </tbody>
+    </table>
 
+    <div class="buttons">
+        <button id="updateBtn" class="btn btn-update">Update</button>
+        <button id="backBtn" class="btn btn-back">Back</button>
+        <button id="pdfBtn" class="btn btn-pdf">Download PDF</button>
+    </div>
 </div>
 
 <script>
+    (function(){
+        // get params
+        const params = new URLSearchParams(window.location.search);
+        const plantID = params.get('plantID');
+        const date = params.get('date');
 
-    const params = new URLSearchParams(window.location.search);
-    const plantID = params.get('plantID');
-    const date = params.get('date');
+        const infoBox = document.getElementById('infoBox');
+        const fieldsBody = document.getElementById('fieldsBody');
+        const vehicleOpsDiv = document.getElementById('vehicleOps');
+        const pvPresentEl = document.getElementById('pv_present');
+        const pvTripsEl = document.getElementById('pv_trips');
+        const pvSludgeEl = document.getElementById('pv_sludge');
 
-    document.getElementById("infoBox").innerHTML =
-        `Date: <span style="color:#f97316">${date}</span> &nbsp; | &nbsp;
-         Plant ID: <span style="color:#059669">${plantID}</span>`;
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const updateBtn = document.getElementById('updateBtn');
+        const backBtn = document.getElementById('backBtn');
+        const pdfBtn = document.getElementById('pdfBtn');
 
-    document.getElementById("backBtn").onclick = () =>
-        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+        // fields in exact order you requested
+        const fields = [
+            "operationDate",
+            "sludgeTankLevelAm",
+            "sludgeTankLevelPm",
+            "sludgeReceived",
+            "totalNoOfTrips",
+            "sludgeProcessed",
+            "biocharProduced",
+            "plantRunningHrs",
+            "solarIntegration",
+            "powerReadingAmImport",
+            "powerReadingAmExport",
+            "powerReadingPmImport",
+            "powerReadingPmExport",
+            "powerConsumed",
+            "dgReadingAm",
+            "dgReadingPm",
+            "dgDiesalPercentageAm",
+            "dgDiesalPercentagePm",
+            "dgRunHours",
+            "polymerUsage",
+            "polymerStock",
+            "pillets",
+            "pilletsStock",
+            "remarks"
+        ];
 
-    // ---------------------- FIELD ORDER ----------------------
-    // Note: vehicleReadingAm/vehicleReadingPm/vehicleFuelLevel REMOVED from this list
-    const fields = [
-        "operationDate",
-        "sludgeTankLevelAm",
-        "sludgeTankLevelPm",
-        "sludgeReceived",
-        "noOfTrips",
-        "sludgeProcessed",
-        "biocharProduced",
-        "plantRunningHrs",
-        "solarIntegration",
+        const labelMap = {
+            operationDate: "Operation Date",
+            sludgeTankLevelAm: "Sludge Tank Level Morning (Ltrs)",
+            sludgeTankLevelPm: "Sludge Tank Level Evening (Ltrs)",
+            sludgeReceived: "Sludge Received (Ltrs)",
+            totalNoOfTrips: "Total No. Of Trips",
+            sludgeProcessed: "Sludge Processed (Ltrs)",
+            biocharProduced: "Biochar Produced (Kgs)",
+            plantRunningHrs: "Plant Running Hours (Hrs)",
+            solarIntegration: "Solar Integration",
+            powerReadingAmImport: "Power Reading AM - Import (Kwh)",
+            powerReadingAmExport: "Power Reading AM - Export (Kwh)",
+            powerReadingPmImport: "Power Reading PM - Import (Kwh)",
+            powerReadingPmExport: "Power Reading PM - Export (Kwh)",
+            powerConsumed: "Power Consumed (Kwh)",
+            dgReadingAm: "DG RunHours Morning (Hrs)",
+            dgReadingPm: "DG RunHours Evening (Hrs)",
+            dgDiesalPercentageAm: "DG Diesel % Morning",
+            dgDiesalPercentagePm: "DG Diesel % Evening",
+            dgRunHours: "DG Total Run Hours (Hrs)",
+            polymerUsage: "Polymer Usage (grms)",
+            polymerStock: "Polymer Stock (Kgs)",
+            pillets: "Pillets Usage (Kgs)",
+            pilletsStock: "Pillets Stock (Kgs)",
+            remarks: "Remarks"
+        };
 
-        "powerReadingAmImport",
-        "powerReadingAmExport",
-        "powerReadingPmImport",
-        "powerReadingPmExport",
+        const units = {
+            sludgeTankLevelAm: "Ltrs", sludgeTankLevelPm: "Ltrs", sludgeReceived: "Ltrs",
+            sludgeProcessed: "Ltrs", biocharProduced: "Kgs", plantRunningHrs: "Hrs",
+            powerReadingAmImport: "Kwh", powerReadingAmExport: "Kwh", powerReadingPmImport: "Kwh",
+            powerReadingPmExport: "Kwh", powerConsumed: "Kwh",
+            dgReadingAm: "Hrs", dgReadingPm: "Hrs", dgRunHours: "Hrs",
+            dgDiesalPercentageAm: "%", dgDiesalPercentagePm: "%",
+            polymerUsage: "grms", polymerStock: "Kgs", pillets: "Kgs", pilletsStock: "Kgs"
+        };
 
-        "powerReadingAm",
-        "powerReadingPm",
-
-        "powerConsumed",
-        "dgReadingAm",
-        "dgReadingPm",
-        "dgDiesalPercentageAm",
-        "dgDiesalPercentagePm",
-
-        "dgRunHours",
-
-        // vehicle fields removed here intentionally
-
-        "polymerUsage",
-        "pillets",
-
-        "remarks"
-    ];
-
-    const fieldsBody = document.getElementById("fieldsBody");
-
-    // ---------------------- UNITS MAP ----------------------
-    const units = {
-        sludgeTankLevelAm: "liters",
-        sludgeTankLevelPm: "liters",
-        sludgeReceived: "liters",
-        sludgeProcessed: "liters",
-        biocharProduced: "kgs",
-        noOfTrips: "",
-        plantRunningHrs: "",
-        powerReadingAmImport: "kwh",
-        powerReadingAmExport: "kwh",
-        powerReadingPmImport: "kwh",
-        powerReadingPmExport: "kwh",
-        powerReadingAm: "kwh",
-        powerReadingPm: "kwh",
-        powerConsumed: "kwh",
-        dgReadingAm: "",
-        dgReadingPm: "",
-        dgRunHours: "",
-        dgDiesalPercentageAm: "%",
-        dgDiesalPercentagePm: "%",
-        // vehicleReadingAm/vehicleReadingPm/vehicleFuelLevel removed from units map usage
-        polymerUsage: "grams",
-        pillets: "kgs",
-        remarks: ""
-    };
-
-    // ---------------------- TIME FORMATTER ----------------------
-    function formatTimeDecimal(value) {
-        if (value === null || value === undefined || value === "" || isNaN(value)) return "-";
-
-        const hours = Math.floor(value);
-        const minutes = Math.round((value - hours) * 100);
-
-        let parts = [];
-        if (hours > 0) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
-        if (minutes > 0) parts.push(`${minutes} minutes`);
-
-        return parts.join(" ");
-    }
-
-    // ---------------------- VALUE FORMATTER ----------------------
-    function formatValue(field, value) {
-
-        if (value === null || value === "" || value === undefined)
-            return "-";
-
-        if (field === "solarIntegration")
-            return value ? "Yes" : "No";
-
-        if (["plantRunningHrs", "dgReadingAm", "dgReadingPm", "dgRunHours"].includes(field))
-            return formatTimeDecimal(parseFloat(value));
-
-        if (units[field] === "%")
-            return `${value} %`;
-
-        if (units[field])
-            return `${value} ${units[field]}`;
-
-        return value;
-    }
-
-    // ---------------------- PROGRESS FIELDS (EXCLUDES VEHICLE FIELDS) ----------------------
-    // removed vehicleReadingAm/vehicleReadingPm/vehicleFuelLevel from baseProgressFields
-    const baseProgressFields = [
-        "sludgeTankLevelAm","sludgeTankLevelPm","sludgeReceived","noOfTrips",
-        "sludgeProcessed","biocharProduced","plantRunningHrs","solarIntegration",
-        "dgReadingAm","dgReadingPm","dgDiesalPercentageAm","dgDiesalPercentagePm",
-        "polymerUsage","pillets"
-    ];
-
-    function calculateProgress(op) {
-
-        let fieldsToCheck = [...baseProgressFields];
-
-        // Solar Yes → use IMPORT/EXPORT fields
-        if (op.solarIntegration === true) {
-            fieldsToCheck.push(
-                "powerReadingAmImport",
-                "powerReadingAmExport",
-                "powerReadingPmImport",
-                "powerReadingPmExport"
-            );
-        }
-        // Solar No → use normal AM/PM fields
-        else {
-            fieldsToCheck.push(
-                "powerReadingAm",
-                "powerReadingPm"
-            );
-        }
-
-        // Count filled plant fields
-        let filled = 0;
-        fieldsToCheck.forEach(f => {
-            if (op[f] !== null && op[f] !== "" && op[f] !== undefined)
-                filled++;
-        });
-
-        const total = fieldsToCheck.length;
-        return total === 0 ? 0 : Math.round((filled / total) * 100);
-    }
-
-    function applyProgressBar(progress) {
-        const bar = document.getElementById("progressFill");
-
-        bar.className =
-            progress === 100 ? "progress-fill progress-green" :
-            progress > 0     ? "progress-fill progress-yellow" :
-                               "progress-fill progress-red";
-
-        bar.style.width = progress + "%";
-        document.getElementById("progressText").textContent = progress + "% Completed";
-    }
-
-    // ---------------------- LOAD OPERATION ----------------------
-    async function loadOperation() {
-        const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
-        const text = await res.text();
-
-        let op = {};
-        if (text.trim()) op = JSON.parse(text);
-
-        fieldsBody.innerHTML = "";
-
-        fields.forEach(f => {
-            let label = f.replace(/([A-Z])/g, " $1")
-                         .replace(/^./, c => c.toUpperCase());
-            let value = formatValue(f, op[f]);
-
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${label}</td><td>${value}</td>`;
-            fieldsBody.appendChild(tr);
-        });
-
-        const progress = calculateProgress(op);
-        applyProgressBar(progress);
-
-        // load vehicles after plant fields are rendered
-        loadVehicleOps();
-
-        // update button binding (keeps same redirection logic)
-        document.getElementById("updateBtn").onclick = () =>
-            window.location.href =
-                `update-operation.html?plantID=${plantID}&date=${encodeURIComponent(date)}`;
-    }
-
-    // ---------------------- LOAD VEHICLE OPERATIONS ----------------------
-    async function loadVehicleOps() {
-
-        const container = document.getElementById("vehicleOps");
-        container.innerHTML = "";
-
-        try {
-            const vehRes = await fetch(`/api/vehicle-operations/plant/${plantID}/vehicles`);
-            if (!vehRes.ok) {
-                container.innerHTML = `<div style="color:#6b7280; padding:10px;">No vehicles found</div>`;
-                return;
-            }
-            const vehicles = await vehRes.json();
-
-            for (const v of vehicles) {
-                // fetch operation for this vehicle
-                let op = {};
+        // helper format
+        function fmt(field, v){
+            if (v === null || v === undefined || v === "") return "-";
+            if (field === "solarIntegration") return v === true ? "Yes" : "No";
+            if (units[field]) return `${v} ${units[field]}`;
+            if (field === "operationDate") {
                 try {
-                    const opRes = await fetch(`/api/vehicle-operations/${v.vehicleID}?date=${date}`);
-                    const text = await opRes.text();
-                    if (text.trim()) op = JSON.parse(text);
-                } catch (e) {
-                    op = {};
+                    const d = new Date(v);
+                    if (!isNaN(d.getTime())) return d.toLocaleDateString();
+                } catch {}
+                return v;
+            }
+            return v;
+        }
+
+        // compute progress according to rules:
+        // base fields + solar logic + vehicle counts + private aggregates logic
+        function computeProgress(op, vehicleOps, privateAgg){
+            // base list (same as you gave, but remove remarks)
+            const base = [
+                "sludgeTankLevelAm","sludgeTankLevelPm","sludgeReceived","totalNoOfTrips",
+                "sludgeProcessed","biocharProduced","plantRunningHrs","solarIntegration",
+                "dgReadingAm","dgReadingPm","dgDiesalPercentageAm","dgDiesalPercentagePm",
+                "polymerUsage","pillets"
+            ];
+
+            let fieldsToCheck = base.slice();
+
+            if (op && op.solarIntegration === true) {
+                fieldsToCheck = fieldsToCheck.concat([
+                    "powerReadingAmImport","powerReadingAmExport","powerReadingPmImport","powerReadingPmExport"
+                ]);
+            } else {
+                // When no solar, count the two imports (AM + PM) as per your rule
+                fieldsToCheck = fieldsToCheck.concat([
+                    "powerReadingAmImport","powerReadingPmImport"
+                ]);
+            }
+
+            // count filled plant fields
+            let filled = 0;
+            fieldsToCheck.forEach(f => {
+                if (op && op[f] !== null && op[f] !== undefined && op[f] !== "") filled++;
+            });
+            const plantTotal = fieldsToCheck.length;
+
+            // per-vehicle: each vehicle contributes 3 always (am, pm, fuel).
+            // plus lastFuelDate counts only if lastFuelFilled true (per-vehicle)
+            let vehicleFilled = 0;
+            let vehicleTotal = 0;
+            if (Array.isArray(vehicleOps)) {
+                for (const v of vehicleOps) {
+                    // am, pm, fuel
+                    vehicleTotal += 3;
+                    if (v.vehicleReadingAm !== null && v.vehicleReadingAm !== undefined && v.vehicleReadingAm !== "") vehicleFilled++;
+                    if (v.vehicleReadingPm !== null && v.vehicleReadingPm !== undefined && v.vehicleReadingPm !== "") vehicleFilled++;
+                    if (v.vehicleFuelLevel !== null && v.vehicleFuelLevel !== undefined && v.vehicleFuelLevel !== "") vehicleFilled++;
+
+                    // lastFuelFilled touched
+                    vehicleTotal += 1;
+                    if (v.lastFuelFilled === true) {
+                        if (v.lastFuelFilledDate !== null && v.lastFuelFilledDate !== undefined && v.lastFuelFilledDate !== "") vehicleFilled++;
+                    } else {
+                        // if not filled, we still count the field as "not present" (so no increment).
+                    }
+
+                    // noOfTrips & sludgeCollect
+                    vehicleTotal += 2;
+                    if (v.noOfTrips !== null && v.noOfTrips !== undefined && v.noOfTrips !== "") vehicleFilled++;
+                    if (v.sludgeCollect !== null && v.sludgeCollect !== undefined && v.sludgeCollect !== "") vehicleFilled++;
+                }
+            }
+
+            // private aggregates
+            let privateFilled = 0, privateTotal = 0;
+            if (privateAgg && privateAgg.privateVehicle === true) {
+                privateTotal = 2;
+                if (privateAgg.noOfTripsPrivateVehicle !== null && privateAgg.noOfTripsPrivateVehicle !== undefined && privateAgg.noOfTripsPrivateVehicle !== "") privateFilled++;
+                if (privateAgg.sludgeCollectPrivateVehicle !== null && privateAgg.sludgeCollectPrivateVehicle !== undefined && privateAgg.sludgeCollectPrivateVehicle !== "") privateFilled++;
+            } else {
+                // if privateVehicle false, treat as not present (counts as 0 filled, 0 total)
+                privateTotal = 0;
+            }
+
+            const total = plantTotal + vehicleTotal + privateTotal;
+            const totalFilled = filled + vehicleFilled + privateFilled;
+            if (total === 0) return 0;
+            return Math.round((totalFilled / total) * 100);
+        }
+
+        function applyProgressBar(pct){
+            progressFill.style.width = pct + "%";
+            progressFill.classList.remove("progress-green","progress-yellow","progress-red");
+            if (pct === 100) progressFill.classList.add("progress-green");
+            else if (pct > 0) progressFill.classList.add("progress-yellow");
+            else progressFill.classList.add("progress-red");
+            progressText.textContent = pct + "% Completed";
+        }
+
+        // load plant op + vehicles + vehicle ops
+        async function loadAll(){
+            try {
+                // set header
+                infoBox.innerHTML = `Date: <strong style="color:#f97316">${escapeHtml(date)}</strong> &nbsp; | &nbsp; Plant ID: <strong style="color:#059669">${escapeHtml(plantID)}</strong>`;
+
+                // fetch plant info (for name)
+                let plantName = null;
+                try {
+                    const pr = await fetch(`/api/plants/${plantID}`);
+                    if (pr.ok) {
+                        const plant = await pr.json();
+                        plantName = plant.plantName || plant.name || null;
+                    }
+                } catch(e){ plantName = null; }
+                if (plantName) {
+                    document.getElementById('title').textContent = `${plantName} — Operation Details`;
+                } else {
+                    document.getElementById('title').textContent = `Operation Details`;
                 }
 
-                container.innerHTML += `
-                    <div class="vehicle-title">${v.vehicleNumber} - ${v.vehicleModelName}</div>
+                // fetch plant operation
+                const resOp = await fetch(`/api/operations/plant/${plantID}?date=${encodeURIComponent(date)}`);
+                const textOp = await resOp.text();
+                const op = (textOp && textOp.trim()) ? JSON.parse(textOp) : {};
 
-                    <table>
-                        <tr><th>Vehicle Reading AM</th><td>${op.vehicleReadingAm ?? "-"}</td></tr>
-                        <tr><th>Vehicle Reading PM</th><td>${op.vehicleReadingPm ?? "-"}</td></tr>
-                        <tr><th>Fuel Level</th><td>${op.vehicleFuelLevel ?? "-"}</td></tr>
-                    </table>
-                `;
+                // render plant fields in the exact order
+                fieldsBody.innerHTML = "";
+                for (const f of fields){
+                    const tr = document.createElement('tr');
+                    const label = labelMap[f] || f;
+                    const val = fmt(f, op[f]);
+                    tr.innerHTML = `<td>${escapeHtml(label)}</td><td>${escapeHtml(val)}</td>`;
+                    fieldsBody.appendChild(tr);
+                }
+
+                // fetch vehicles for this plant
+                vehicleOpsDiv.innerHTML = "";
+                const rv = await fetch(`/api/vehicle-operations/plant/${plantID}/vehicles`);
+                const vehicles = rv.ok ? await rv.json() : [];
+
+                // gather all vehicle operation objects for progress calc
+                const vehicleOpsList = [];
+                for (const v of vehicles) {
+                    let vo = {};
+                    try {
+                        const rvo = await fetch(`/api/vehicle-operations/${v.vehicleID}?date=${encodeURIComponent(date)}`);
+                        const tv = await rvo.text();
+                        vo = (tv && tv.trim()) ? JSON.parse(tv) : {};
+                    } catch (e) {
+                        vo = {};
+                    }
+                    // ensure keys exist explicitly (so computeProgress works)
+                    vo.vehicleReadingAm = vo.vehicleReadingAm ?? null;
+                    vo.vehicleReadingPm = vo.vehicleReadingPm ?? null;
+                    vo.vehicleFuelLevel = vo.vehicleFuelLevel ?? null;
+                    vo.lastFuelFilled = vo.lastFuelFilled ?? false;
+                    vo.lastFuelFilledDate = vo.lastFuelFilledDate ?? null;
+                    vo.noOfTrips = vo.noOfTrips ?? null;
+                    vo.sludgeCollect = vo.sludgeCollect ?? null;
+
+                    vehicleOpsList.push(vo);
+
+                    // render block for this vehicle
+                    const html = `
+                        <div class="vehicle-title">${escapeHtml(v.vehicleNumber || "Vehicle")} - <span class="muted">${escapeHtml(v.vehicleModelName || "")}</span></div>
+                        <table style="margin-top:8px">
+                            <tr><th>Vehicle Odometer Reading Morning (Km)</th><td>${vo.vehicleReadingAm ?? "-"}</td></tr>
+                            <tr><th>Vehicle Odometer Reading Evening (Km)</th><td>${vo.vehicleReadingPm ?? "-"}</td></tr>
+                            <tr><th>Fuel Level (0-6 %)</th><td>${vo.vehicleFuelLevel ?? "-"}</td></tr>
+                            <tr><th>Last Fuel Filled?</th><td>${vo.lastFuelFilled ? "Yes" : "No"}</td></tr>
+                            <tr><th>Last Fuel Filled Date</th><td>${vo.lastFuelFilled ? (vo.lastFuelFilledDate ?? "-") : "-"}</td></tr>
+                            <tr><th>No. of Trips</th><td>${vo.noOfTrips ?? "-"}</td></tr>
+                            <tr><th>Sludge Collect (Ltrs)</th><td>${vo.sludgeCollect ?? "-"}</td></tr>
+                        </table>
+                    `;
+                    vehicleOpsDiv.insertAdjacentHTML('beforeend', html);
+                }
+
+                // private aggregates (part of PlantOperation response maybe)
+                const privateAgg = {
+                    privateVehicle: op.privateVehicle ?? false,
+                    noOfTripsPrivateVehicle: op.noOfTripsPrivateVehicle ?? null,
+                    sludgeCollectPrivateVehicle: op.sludgeCollectPrivateVehicle ?? null
+                };
+
+                pvPresentEl.textContent = privateAgg.privateVehicle ? "Yes" : "No";
+                pvTripsEl.textContent = (privateAgg.privateVehicle ? (privateAgg.noOfTripsPrivateVehicle ?? "-") : "0");
+                pvSludgeEl.textContent = (privateAgg.privateVehicle ? (privateAgg.sludgeCollectPrivateVehicle ?? "-") : "0");
+
+                // compute and apply progress
+                const pct = computeProgress(op, vehicleOpsList, privateAgg);
+                applyProgressBar(pct);
+
+                // wire update/back/pdf buttons
+                updateBtn.onclick = () => {
+                    window.location.href = `update-operation.html?plantID=${encodeURIComponent(plantID)}&date=${encodeURIComponent(date)}`;
+                };
+                backBtn.onclick = () => {
+                    window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+                };
+                pdfBtn.onclick = () => downloadPdf(op, vehicles, vehicleOpsList, plantName);
+
+            } catch (e){
+                fieldsBody.innerHTML = `<tr><td colspan="2" style="color:#6b7280">Error loading operation</td></tr>`;
+                vehicleOpsDiv.innerHTML = `<div style="color:#6b7280; padding:8px">Error loading vehicles</div>`;
+                console.error(e);
+            }
+        }
+
+        // simple escape to avoid injection when injecting into innerHTML for small strings
+        function escapeHtml(txt){
+            if (txt === null || txt === undefined) return "";
+            return String(txt)
+                .replaceAll("&","&amp;")
+                .replaceAll("<","&lt;")
+                .replaceAll(">","&gt;")
+                .replaceAll("\"","&quot;")
+                .replaceAll("'","&#39;");
+        }
+
+        // PDF generation: create a compact PDF covering plant + operation + vehicles + private aggregates
+        async function downloadPdf(op, vehiclesMeta, vehicleOpsList, plantName) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit:"pt", format:"a4", orientation:"portrait" });
+            const pageW = doc.internal.pageSize.getWidth();
+            const margin = 40;
+            let y = margin;
+
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            const title = (plantName ? plantName + " — " : "") + `Plant Operation (${plantID})`;
+            doc.text(title, pageW/2, y, { align: "center" });
+            y += 22;
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Operation Date: ${op.operationDate ?? date}`, pageW - margin, margin+2, { align:"right" });
+            y += 8;
+
+            // Build rows for autoTable
+            const rows = [];
+            function addRow(label, value){ rows.push([label, String(value ?? "-")]); }
+
+            // Plant fields order (same as fields array)
+            for (const f of fields) {
+                addRow(labelMap[f] || f, fmt(f, op[f]));
             }
 
-        } catch (e) {
-            container.innerHTML = `<div style="color:#6b7280; padding:10px;">Error loading vehicles</div>`;
+            // Private aggregates
+            addRow("Private Vehicles Present", op.privateVehicle ? "Yes" : "No");
+            addRow("Private - No. of Trips", op.privateVehicle ? (op.noOfTripsPrivateVehicle ?? "-") : "0");
+            addRow("Private - Sludge (Ltrs)", op.privateVehicle ? (op.sludgeCollectPrivateVehicle ?? "-") : "0");
+
+            // Vehicle sections (list each vehicle and its op)
+            for (let i=0;i<vehiclesMeta.length;i++){
+                const v = vehiclesMeta[i];
+                // header row for vehicle
+                rows.push([`Vehicle: ${v.vehicleNumber} (${v.vehicleModelName || ""})`, ""]);
+                // try load its op from vehicleOpsList by index if available
+                let vo = {};
+                // attempt match by vehicleID if vehicleOpsList elements had vehicle id? We didn't store ids there.
+                // We'll fetch again quickly to be robust
+                try {
+                    const r = await fetch(`/api/vehicle-operations/${v.vehicleID}?date=${encodeURIComponent(date)}`);
+                    const t = await r.text();
+                    vo = (t && t.trim()) ? JSON.parse(t) : {};
+                } catch(e){ vo = {}; }
+                addRow("Vehicle Reading AM (Km)", vo.vehicleReadingAm ?? "-");
+                addRow("Vehicle Reading PM (Km)", vo.vehicleReadingPm ?? "-");
+                addRow("Vehicle Fuel Level (0-6 %)", vo.vehicleFuelLevel ?? "-");
+                addRow("Last Fuel Filled?", vo.lastFuelFilled ? "Yes" : "No");
+                addRow("Last Fuel Filled Date", vo.lastFuelFilled ? (vo.lastFuelFilledDate ?? "-") : "-");
+                addRow("No. of Trips", vo.noOfTrips ?? "-");
+                addRow("Sludge Collect (Ltrs)", vo.sludgeCollect ?? "-");
+            }
+
+            doc.autoTable({
+                startY: y,
+                head: [["Field","Value"]],
+                body: rows,
+                styles: { fontSize: 10, cellPadding: 6 },
+                headStyles: { fillColor: [3,105,161], textColor: [255,255,255], fontStyle: "bold" },
+                columnStyles: { 0: { cellWidth: 220 }, 1: { cellWidth: pageW - margin*2 - 220 } },
+                theme: "grid",
+                didDrawPage: function (data) {
+                    // nothing extra
+                }
+            });
+
+            doc.save(`Plant_${plantName || plantID}_Operation_${date}.pdf`);
         }
-    }
 
-    // ---------------------- SSE AUTO REFRESH ----------------------
-    function startSSE() {
-        try {
-            const evt = new EventSource("/api/events/updates");
-            evt.onmessage = () => loadOperation();
-            evt.onerror = () => setTimeout(startSSE, 2000);
-        } catch (e) {
-            // ignore SSE if not available
+        // Simple SSE refresh (throttled)
+        let sseCooldown = false;
+        function startSSE(){
+            try {
+                const es = new EventSource("/api/events/updates");
+                es.onmessage = () => {
+                    if (sseCooldown) return;
+                    sseCooldown = true;
+                    loadAll();
+                    setTimeout(()=> sseCooldown = false, 1000);
+                };
+                es.onerror = ()=> setTimeout(startSSE, 2000);
+            } catch(e){}
         }
-    }
 
-document.getElementById("pdfBtn").onclick = () => {
+        // initial load
+        loadAll();
+        startSSE();
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
-
-    const title = `Operation Details`;
-    const info = `Date: ${date}    |    Plant ID: ${plantID}`;
-
-    // Title
-    doc.setFontSize(18);
-    doc.setTextColor(30, 80, 160);
-    doc.text(title, 40, 40);
-
-    // Subtitle
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text(info, 40, 60);
-
-    // ----------------------------
-    // Extract TABLE DATA
-    // ----------------------------
-    const rows = [];
-    document.querySelectorAll("#fieldsBody tr").forEach(tr => {
-        const cols = tr.querySelectorAll("td");
-        rows.push([cols[0].innerText, cols[1].innerText]);
-    });
-
-    // ----------------------------
-    // Add Table to PDF
-    // ----------------------------
-    doc.autoTable({
-        head: [["Field", "Value"]],
-        body: rows,
-        startY: 90,
-        theme: 'grid',
-        headStyles: { fillColor: [3, 105, 161], halign: "left" },
-        styles: { fontSize: 10, cellPadding: 5 },
-        columnStyles: {
-            0: { cellWidth: 180 },
-            1: { cellWidth: 330 }
-        }
-    });
-
-    // ----------------------------
-    // Vehicle Operations Section
-    // ----------------------------
-    let y = doc.lastAutoTable.finalY + 30;
-
-    doc.setFontSize(15);
-    doc.text("Vehicle Operations", 40, y);
-    y += 10;
-
-    const vehicleBlocks = document.querySelectorAll("#vehicleOps table");
-    const vehicleTitles = document.querySelectorAll(".vehicle-title");
-
-    vehicleBlocks.forEach((table, index) => {
-        const rowsVeh = [];
-
-        table.querySelectorAll("tr").forEach(tr => {
-            const td = tr.querySelectorAll("td");
-            rowsVeh.push([tr.querySelector("th").innerText, td[0].innerText]);
-        });
-
-        doc.autoTable({
-            head: [[vehicleTitles[index].innerText, ""]],
-            body: rowsVeh,
-            startY: doc.lastAutoTable.finalY + 10,
-            theme: 'grid',
-            headStyles: { fillColor: [15, 23, 42], halign: "left" },
-            styles: { fontSize: 10, cellPadding: 5 },
-            columnStyles: { 0: { cellWidth: 200 }, 1: { cellWidth: 300 } }
-        });
-    });
-
-    doc.save(`Plant_${plantID}_Operation_${date}.pdf`);
-};
-
-
-
-startSSE();
-    loadOperation();
-
-
+    })();
 </script>
-
 </body>
 </html>

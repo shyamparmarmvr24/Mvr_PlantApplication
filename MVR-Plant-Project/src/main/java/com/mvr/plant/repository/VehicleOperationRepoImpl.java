@@ -1,14 +1,15 @@
 package com.mvr.plant.repository;
-
-import com.mvr.plant.entity.PlantEmployee;
-import com.mvr.plant.entity.PlantEmployeeOperation;
+import com.mvr.plant.DTO.VehicleOperationBetweenDTO;
+import com.mvr.plant.DTO.VehicleOperationDTO;
 import com.mvr.plant.entity.VehicleInformation;
 import com.mvr.plant.entity.VehicleOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 @Repository
 public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
@@ -19,6 +20,9 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
 
     @Autowired
     private IVehicleRepo vehicleRepo;
+
+    @Autowired
+    private IPlantOperationMgmtRepo plantOp;
 
     @Override
     public VehicleOperation getVehicleOperationByVehicleIdAndDate(Long vehicleID, LocalDate date)
@@ -57,18 +61,99 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
 
         int count = 0;
 
-        if (vehicleOp.getVehicleReadingAm() != null) count++;
-        if (vehicleOp.getVehicleReadingPm() != null) count++;
+        if(vehicleOp.getVehicleReadingAm() != null) count++;
+        if(vehicleOp.getVehicleReadingPm() != null) count++;
         if(vehicleOp.getVehicleFuelLevel() !=null) count++;
+        if(vehicleOp.getLastFuelFilled() !=null) count++;
+        if(vehicleOp.getLastFuelFilledDate() !=null) count++;
+        if(vehicleOp.getFilledLiters() != null) count++;
+        if(vehicleOp.getNoOfTrips() != null) count++;
+        if(vehicleOp.getSludgeCollect() != null) count++;
+
 
         existing.setVehicleReadingAm(vehicleOp.getVehicleReadingAm());
         existing.setVehicleReadingPm(vehicleOp.getVehicleReadingPm());
         existing.setVehicleFuelLevel(vehicleOp.getVehicleFuelLevel());
+        existing.setLastFuelFilled(vehicleOp.getLastFuelFilled());
+        existing.setLastFuelFilledDate(vehicleOp.getLastFuelFilledDate());
+        existing.setFilledLiters(vehicleOp.getFilledLiters());
+        existing.setNoOfTrips(vehicleOp.getNoOfTrips());
+
+        existing.setSludgeCollect(vehicleOp.getSludgeCollect());
 
         vehicleOpRepo.save(existing);
+
+
+        //this save
+        plantOp.recomputePlantTotals(plantId, date);
 
         Map<String, Integer> map = new HashMap<>();
         map.put("Vehicle Operation Updated Successfully", count);
         return map;
     }
+
+    @Override
+    public List<VehicleOperationDTO> getVehicleOperationsByDate(LocalDate date)
+    {
+        // 1) fetch operations with vehicle and plant eagerly loaded
+        List<VehicleOperation> ops = vehicleOpRepo.findByOperationDateWithVehicleAndPlant(date);
+
+        // 2) explicit mapping to DTO
+        List<VehicleOperationDTO> result = new ArrayList<>();
+        for (VehicleOperation op : ops) {
+            if (op == null) continue;
+
+            VehicleOperationDTO dto = new VehicleOperationDTO();
+
+            if (op.getVehicle() != null) {
+                dto.setVehicle(op.getVehicle());
+
+                if (op.getVehicle().getPlant() != null) {
+                    dto.setPlantId(op.getVehicle().getPlant().getPlantID());
+                } else {
+                    dto.setPlantId(null);
+                }
+            } else {
+                dto.setVehicle(null);
+                dto.setPlantId(null);
+            }
+
+            dto.setVehicleOp(op);
+
+            result.add(dto);
+        }
+        return result;
+    }
+
+    @Override
+    public List<VehicleOperationBetweenDTO> getVehicleOperationsBetween(LocalDate start, LocalDate end)
+    {
+        List<VehicleOperation> ops = vehicleOpRepo.findByOperationDateBetween(start, end);
+
+        List<VehicleOperationBetweenDTO> result = new ArrayList<>();
+
+        for (VehicleOperation op : ops) {
+
+            if (op == null) continue;
+
+            VehicleInformation vehicle = op.getVehicle();
+            Long plantId = null;
+
+            if (vehicle != null && vehicle.getPlant() != null) {
+                plantId = vehicle.getPlant().getPlantID();
+            }
+
+            result.add(
+                    new VehicleOperationBetweenDTO(
+                            plantId,
+                            vehicle,
+                            op
+                    )
+            );
+        }
+
+        return result;
+    }
+
 }
+

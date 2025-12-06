@@ -1,480 +1,781 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Update Plant Operation</title>
-
     <style>
-        body {
-            font-family:'Segoe UI',sans-serif;
-            background:#f5f7fa;
-            margin:0; padding:0;
-            display:flex;
-            justify-content:center;
+        :root{
+          --blue:#0369a1;
+          --muted:#6b7280;
+          --bg:#f5f7fa;
+          --card:#fff;
+          --green:#059669;
+          --yellow:#d97706;
+          --red:#dc2626;
+          --input-border:#d1d5db;
+          --back-gray:#94a3b8;
         }
-        .card {
-            background:white;
-            padding:28px;
-            border-radius:12px;
-            box-shadow:0 10px 25px rgba(0,0,0,0.08);
-            max-width:900px;
-            width:100%;
-            margin:20px;
+        html,body{height:100%;margin:0;font-family: "Segoe UI",sans-serif;background:var(--bg);}
+        .wrap{display:flex;justify-content:center;padding:18px;}
+        .card{width:100%;max-width:980px;background:var(--card);border-radius:12px;padding:22px;box-shadow:0 10px 30px rgba(2,6,23,0.06);}
+        h1{margin:0;text-align:center;color:var(--blue);font-size:20px}
+        .top-info{ text-align:center;margin:8px 0 18px;font-weight:700;color:#374151}
+        table{width:100%;border-collapse:collapse;margin-top:8px}
+        table th, table td{padding:10px;border:1px solid #eef3f7;vertical-align:middle}
+        table th{background:var(--blue);color:white;text-align:left;width:320px;font-size:14px}
+        .input{width:100%;padding:8px;border-radius:6px;border:1px solid var(--input-border);box-sizing:border-box;font-size:14px}
+        textarea.input{min-height:84px;resize:vertical}
+        .row{display:flex;gap:12px;align-items:center}
+        .col{flex:1}
+        .inline-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center}
+        .vehicle-title{margin-top:18px;font-weight:700;color:#0f172a}
+        .buttons{text-align:center;margin-top:18px;display:flex;gap:12px;align-items:center;justify-content:center}
+        .btn{padding:10px 18px;border-radius:8px;border:none;color:white;cursor:pointer;font-weight:700;margin:0 6px;min-width:120px}
+        .btn-back{background:var(--back-gray);border-radius:10px}
+        .btn-submit{background:var(--green);border-radius:10px}
+        .status-pill{display:inline-block;padding:6px 10px;border-radius:999px;color:white;font-weight:700;font-size:13px}
+        .status-red{background:var(--red)}
+        .status-yellow{background:var(--yellow)}
+        .status-green{background:var(--green)}
+        .muted-note{color:var(--muted);font-size:13px;margin-top:6px}
+        .vehicle-block{margin-top:10px;border-radius:8px;padding:10px;border:1px solid #eef3f7;background:#fbfdff}
+        .small{font-size:13px;color:#374151}
+        label.switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+        .two-inline{display:flex;gap:8px}
+        .field-inline {display:flex;gap:8px;align-items:center}
+        .label-inline {width:170px; font-weight:700}
+        @media (max-width:900px){
+          .inline-pair{grid-template-columns:1fr}
+          table th{width:200px}
         }
-        h2 { text-align:center; color:#0369a1; margin-bottom:8px; }
-        .top-info { text-align:center; font-weight:700; margin-bottom:14px; }
-
-        table {
-            width:100%;
-            border-collapse:collapse;
-            margin-top:8px;
-        }
-        table th, table td {
-            border:1px solid #e6eef6;
-            padding:12px;
-        }
-        table th {
-            background:#0369a1;
-            color:white;
-            text-align:left;
-            width:260px;
-            font-size:15px;
-        }
-
-        .input-box, textarea {
-            width:100%;
-            padding:8px 10px;
-            border-radius:6px;
-            border:1px solid #ccc;
-            box-sizing:border-box;
-            font-size:15px;
-        }
-
-        textarea {
-            min-height:90px;
-            resize:vertical;
-        }
-
-        input:disabled, textarea:disabled {
-            background:#eef1f5;
-            color:#6b7280;
-        }
-
-        .vehicle-title {
-            margin-top:18px;
-            font-size:17px;
-            font-weight:700;
-            color:#0f172a;
-        }
-
-        .buttons { text-align:center; margin-top:18px; }
-        .btn {
-            padding:10px 18px;
-            margin:0 8px;
-            border:none;
-            border-radius:6px;
-            font-size:15px;
-            cursor:pointer;
-        }
-        .btn-save { background:#059669; color:white; }
-        .btn-back { background:#94a3b8; color:white; }
     </style>
 </head>
-
 <body>
+<div class="wrap">
+    <div class="card">
+        <h1>Update Plant Operation</h1>
+        <div id="info" class="top-info">Loading...</div>
 
-<div class="card">
+        <table aria-describedby="plant-fields">
+            <thead><tr><th>Field</th><th>Value</th></tr></thead>
+            <tbody id="fieldsBody"></tbody>
+        </table>
 
-    <h2>Update Operation</h2>
+        <h2 style="margin-top:18px;color:var(--blue);font-size:16px">Vehicle Operations</h2>
+        <div id="vehicleSection" style="margin-top:8px"></div>
 
-    <div class="top-info" id="infoBox"></div>
+        <div style="margin-top:12px">
+            <div style="font-weight:700;margin-bottom:6px">Private Vehicles (aggregate)</div>
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+                <label class="switch">
+                    <input id="privateToggle" type="checkbox">
+                    <span class="small">Private Vehicles Present?</span>
+                </label>
+                <div style="width:160px">
+                    <input id="privateTrips" class="input" placeholder="No. of trips (private)" />
+                </div>
+                <div style="width:200px">
+                    <input id="privateSludge" class="input" placeholder="Sludge (Ltrs) (private)" />
+                </div>
+                <div class="muted-note">Note: <code>sludgeReceived</code> and <code>totalNoOfTrips</code> are computed server-side; not editable here.</div>
+            </div>
+        </div>
 
-    <table>
-        <thead>
-        <tr><th>Field</th><th>Value</th></tr>
-        </thead>
-        <tbody id="fieldsBody"></tbody>
-    </table>
+        <div class="buttons" style="margin-top:18px">
+            <button id="submitBtn" class="btn btn-submit">Submit</button>
+            <button id="backBtn" class="btn btn-back">Back</button>
+        </div>
 
-    <!-- Vehicle operations input section (dynamic blocks per vehicle) -->
-    <h2 style="margin-top:22px;">Vehicle Operations</h2>
-    <div id="vehicleSection"></div>
-
-    <div class="buttons">
-        <button class="btn btn-save" id="saveBtn">Save</button>
-        <button class="btn btn-back" id="backBtn">Back</button>
+        <div style="text-align:center; margin-top:10px;">
+            <span id="statusPill" class="status-pill status-red">No data (0%)</span>
+        </div>
     </div>
 </div>
 
 <script>
+    (function(){
+      /* ================== CONFIG ================== */
+      const plantFieldDefs = [
+        { id: "sludgeTankLevelAm", label: "Sludge Tank Level Morning (Ltrs)", placeholder: "Enter Ltrs" },
+        { id: "sludgeProcessed", label: "Sludge Processed (Ltrs)", placeholder: "Enter Ltrs" },
+        { id: "sludgeTankLevelPm", label: "Sludge Tank Level Evening (Ltrs)", placeholder: "Enter Ltrs" },
+        { id: "biocharProduced", label: "Biochar Produced (Kgs)", placeholder: "Enter Kgs" },
+        { id: "plantRunningHrs", label: "Plant Running Hrs (Hrs)", placeholder: "Enter Hrs" },
 
-    const params = new URLSearchParams(window.location.search);
-    const plantID = params.get("plantID");
-    const date = params.get("date");
+        { id: "solarIntegration", label: "Solar Integration", type: "radio" },
 
-    document.getElementById("infoBox").innerHTML =
-        `Date: <span style="color:#f97316">${date}</span>
-         &nbsp; | &nbsp;
-         Plant ID: <span style="color:#059669">${plantID}</span>`;
+        // Import (always)
+        { id: "powerReadingAmImport", label: "Power Import - Morning (Kwh)", placeholder: "Enter Morning Kwh" },
+        { id: "powerReadingPmImport", label: "Power Import - Evening (Kwh)", placeholder: "Enter Evening Kwh" },
 
-    document.getElementById("backBtn").onclick = () =>
-        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+        // Export (only when solarIntegration === true)
+        { id: "powerReadingAmExport", label: "Solar Power Export - Morning (Kwh)", placeholder: "Enter Morning Kwh", solarExport: true },
+        { id: "powerReadingPmExport", label: "Solar Power Export - Evening (Kwh)", placeholder: "Enter Evening Kwh", solarExport: true },
 
-    //--------------------------------------------------------
-    // EXACT FIELD ORDER AS BACKEND (ALL INCLUDED)
-    // vehicleReadingAm/vehicleReadingPm/vehicleFuelLevel removed from this list
-    //--------------------------------------------------------
-    const fields = [
-        {id:"sludgeTankLevelAm", label:"Sludge Tank Level AM"},
-        {id:"sludgeTankLevelPm", label:"Sludge Tank Level PM"},
-        {id:"sludgeReceived", label:"Sludge Received"},
-        {id:"noOfTrips", label:"No Of Trips"},
-        {id:"sludgeProcessed", label:"Sludge Processed"},
-        {id:"biocharProduced", label:"Biochar Produced"},
-        {id:"plantRunningHrs", label:"Plant Running Hours"},
+        { id: "dgReadingAm", label: "DG RunHours Morning (Hrs)", placeholder: "Enter Hrs" },
+        { id: "dgReadingPm", label: "DG RunHours Evening (Hrs)", placeholder: "Enter Hrs" },
+        { id: "dgDiesalPercentageAm", label: "DG Diesel % Morning", placeholder: "%" },
+        { id: "dgDiesalPercentagePm", label: "DG Diesel % Evening", placeholder: "%" },
 
-        {id:"solarIntegration", label:"Solar Integration", type:"radio"},
+        { id: "polymerUsage", label: "Polymer Usage (Grms)", placeholder: "Enter Grms" },
+        { id: "polymerStock", label: "Polymer Stock (Kgs)", placeholder: "Enter Kgs" },
+        { id: "pillets", label: "Pillets Usage (Kgs)", placeholder: "Enter Kgs" },
+        { id: "pilletsStock", label: "Pillets Stock (Kgs)", placeholder: "Enter Kgs" },
 
-        // Solar YES
-        {id:"powerReadingAmImport", label:"Power Reading AM Import"},
-        {id:"powerReadingAmExport", label:"Power Reading AM Export"},
-        {id:"powerReadingPmImport", label:"Power Reading PM Import"},
-        {id:"powerReadingPmExport", label:"Power Reading PM Export"},
+        { id: "remarks", label: "Remarks", type: "textarea", placeholder: "Enter remarks" } // free-text, not counted
+      ];
 
-        // Solar NO
-        {id:"powerReadingAm", label:"Power Reading AM"},
-        {id:"powerReadingPm", label:"Power Reading PM"},
+      const endpoints = {
+        plantGet: (plantId, date) => `/api/operations/plant/${plantId}?date=${encodeURIComponent(date)}`,
+        plantPut: (plantId, date) => `/api/operations/${plantId}?date=${encodeURIComponent(date)}`,
+        vehiclesByPlant: (plantId) => `/api/vehicle-operations/plant/${plantId}/vehicles`,
+        vehicleOpGet: (vehicleId, date) => `/api/vehicle-operations/${vehicleId}?date=${encodeURIComponent(date)}`,
+        vehicleOpPut: (plantId, vehicleId, date) => `/api/vehicle-operations/${plantId}/${vehicleId}?date=${encodeURIComponent(date)}`
+      };
 
-        {id:"dgReadingAm", label:"DG Reading AM"},
-        {id:"dgReadingPm", label:"DG Reading PM"},
-        {id:"dgDiesalPercentageAm", label:"DG Diesel % AM"},
-        {id:"dgDiesalPercentagePm", label:"DG Diesel % PM"},
+      /* ================== DOM ================== */
+      const params = new URLSearchParams(window.location.search);
+      const plantID = params.get("plantID");
+      const date = params.get("date");
 
-        // vehicle fields are handled separately below
+      const infoEl = document.getElementById("info");
+      const fieldsBody = document.getElementById("fieldsBody");
+      const vehicleSection = document.getElementById("vehicleSection");
+      const submitBtn = document.getElementById("submitBtn");
+      const backBtn = document.getElementById("backBtn");
+      const statusPill = document.getElementById("statusPill");
+      const privateToggle = document.getElementById("privateToggle");
+      const privateTripsEl = document.getElementById("privateTrips");
+      const privateSludgeEl = document.getElementById("privateSludge");
 
-        {id:"polymerUsage", label:"Polymer Usage"},
-        {id:"pillets", label:"Pellets"},
+      infoEl.innerHTML = `Date: <strong style="color:#f97316">${escapeHtml(date)}</strong> &nbsp; | &nbsp; Plant ID: <strong style="color:#059669">${escapeHtml(plantID)}</strong>`;
 
-        {id:"remarks", label:"Remarks", type:"textarea"}
-    ];
+      /* ================== STATE ================== */
+      let currentOp = {};
+      let vehicles = [];
+      let vehicleOps = {};
 
-    let currentOp = {};
-    const fieldsBody = document.getElementById("fieldsBody");
+      /* ================== HELPERS ================== */
+      function escapeHtml(s){ return String(s ?? ""); }
 
-    //--------------------------------------------------------
-    // LOAD EXISTING OPERATION (PLANT)
-    //--------------------------------------------------------
-    async function loadOperation() {
-        const res = await fetch(`/api/operations/plant/${plantID}?date=${date}`);
-        const text = await res.text();
-        currentOp = text && text.trim() ? JSON.parse(text) : {};
+      function createInput(id, placeholder, value, opts = {}) {
+        const input = document.createElement('input');
+        input.className = "input";
+        input.id = id;
+        input.placeholder = placeholder || "";
+        input.value = value == null ? "" : String(value);
+        if(opts.type) input.type = opts.type;
+        if(opts.disabled) input.disabled = true;
+        return input;
+      }
+      function createTextarea(id, placeholder, value){
+        const ta = document.createElement('textarea');
+        ta.className = 'input';
+        ta.id = id;
+        ta.placeholder = placeholder || "";
+        ta.value = value == null ? "" : String(value);
+        return ta;
+      }
 
-        renderFields();
-    }
+      function numericValid(val){
+        if(val === null || val === undefined || String(val).trim() === "") return true;
+        return /^\d+(\.\d+)?$/.test(String(val).trim());
+      }
 
-    //--------------------------------------------------------
-    // RENDER INPUT FIELDS (PLANT)
-    //--------------------------------------------------------
-    function renderFields() {
+      function dateFilled(el){
+        return el && String(el.value).trim() !== "";
+      }
 
-        fieldsBody.innerHTML = "";
+      function setStatusBadge(percent){
+        const p = Math.round(percent);
+        statusPill.textContent = p === 0 ? "No data (0%)" : (p === 100 ? "Complete (100%)" : `Partial (${p}%)`);
+        statusPill.className = "status-pill " + (p === 0 ? "status-red" : (p === 100 ? "status-green" : "status-yellow"));
+        if(p === 0) submitBtn.style.background = "var(--red)";
+        else if(p === 100) submitBtn.style.background = "var(--green)";
+        else submitBtn.style.background = "var(--yellow)";
+      }
 
-        fields.forEach(f => {
+      /* ========== COMPLETENESS RULES (as confirmed) ========== */
+      function computeCompleteness(){
+        let filled = 0, total = 0;
 
-            const tr = document.createElement("tr");
-            const labelTd = document.createElement("td");
-            labelTd.textContent = f.label;
+        const sel = document.querySelector('input[name="solarIntegration"]:checked');
+        const solarYes = sel ? sel.value === "true" : (currentOp.solarIntegration === true);
 
-            const valueTd = document.createElement("td");
-
-            // RADIO BUTTONS (solar Integration)
-            if (f.type === "radio") {
-
-                valueTd.innerHTML = `
-                    <label><input type="radio" name="solarIntegration" value="true"> Yes</label>
-                    &nbsp;&nbsp;
-                    <label><input type="radio" name="solarIntegration" value="false"> No</label>
-                `;
-
-                const yes = valueTd.querySelector('input[value="true"]');
-                const no = valueTd.querySelector('input[value="false"]');
-
-                if (currentOp.solarIntegration === true) yes.checked = true;
-                else if (currentOp.solarIntegration === false) no.checked = true;
-
-                yes.addEventListener("change", applySolarLogic);
-                no.addEventListener("change", applySolarLogic);
-            }
-
-            else if (f.type === "textarea") {
-                const ta = document.createElement("textarea");
-                ta.id = f.id;
-                ta.value = currentOp[f.id] ?? "";
-                valueTd.appendChild(ta);
-            }
-
-            else {
-                const input = document.createElement("input");
-                input.className = "input-box";
-                input.id = f.id;
-                input.value = currentOp[f.id] ?? "";
-                valueTd.appendChild(input);
-            }
-
-            tr.appendChild(labelTd);
-            tr.appendChild(valueTd);
-            fieldsBody.appendChild(tr);
-        });
-
-        disableAllPowerFields();
-        applySolarLogic();
-        enableEnterNavigation(); // bind enter navigation for plant fields
-    }
-
-    //--------------------------------------------------------
-    // DISABLE ALL POWER-FIELDS INITIALLY
-    //--------------------------------------------------------
-    function disableAllPowerFields() {
-        [
-            "powerReadingAmImport","powerReadingAmExport",
-            "powerReadingPmImport","powerReadingPmExport",
-            "powerReadingAm","powerReadingPm"
-        ].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.disabled = true;
-        });
-    }
-
-    //--------------------------------------------------------
-    // SOLAR LOGIC
-    //--------------------------------------------------------
-    function applySolarLogic() {
-
-        const yes = document.querySelector('input[name="solarIntegration"][value="true"]');
-        const no  = document.querySelector('input[name="solarIntegration"][value="false"]');
-
-        const importExport = [
-            "powerReadingAmImport","powerReadingAmExport",
-            "powerReadingPmImport","powerReadingPmExport"
+        const alwaysPlant = [
+          "sludgeTankLevelAm",
+          "sludgeTankLevelPm",
+          "sludgeProcessed",
+          "biocharProduced",
+          "plantRunningHrs",
+          "dgReadingAm",
+          "dgReadingPm",
+          "dgDiesalPercentageAm",
+          "dgDiesalPercentagePm",
+          "polymerUsage",
+          "polymerStock",
+          "pillets",
+          "pilletsStock"
         ];
+        alwaysPlant.forEach(id=>{
+          total++;
+          const el = document.getElementById(id);
+          if(el && String(el.value).trim() !== "") filled++;
+        });
 
-        const ampm = ["powerReadingAm","powerReadingPm"];
+        total++; // solarIntegration choice
+        if(sel) filled++;
 
-        if (yes && yes.checked) {
-            importExport.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = false; });
-            ampm.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = true; });
+        ["powerReadingAmImport","powerReadingPmImport"].forEach(id=>{
+          total++;
+          const el = document.getElementById(id);
+          if(el && String(el.value).trim() !== "") filled++;
+        });
+
+        if(solarYes){
+          ["powerReadingAmExport","powerReadingPmExport"].forEach(id=>{
+            total++;
+            const el = document.getElementById(id);
+            if(el && String(el.value).trim() !== "") filled++;
+          });
         }
 
-        if (no && no.checked) {
-            ampm.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = false; });
-            importExport.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = true; });
+        if(privateToggle.checked){
+          total += 2;
+          if(String(privateTripsEl.value).trim() !== "") filled++;
+          if(String(privateSludgeEl.value).trim() !== "") filled++;
         }
-    }
 
-    //------------------------------------------------------------
-    // LOAD VEHICLE INPUT BLOCKS (dynamic per vehicle)
-    //------------------------------------------------------------
-    async function loadVehicleInputs() {
+        vehicles.forEach(v=>{
+          const vid = String(v.vehicleID);
+          const am = document.getElementById(`am_${vid}`);
+          const pm = document.getElementById(`pm_${vid}`);
+          const fuel = document.getElementById(`fuel_${vid}`);
+          const lastFuel = document.getElementById(`lastFuel_${vid}`);
+          const lastFuelDate = document.getElementById(`lastFuelDate_${vid}`);
+          const trips = document.getElementById(`trips_${vid}`);
+          const sludge = document.getElementById(`sludge_${vid}`);
 
-        const container = document.getElementById("vehicleSection");
-        container.innerHTML = "";
+          total += 5;
+          if(am && String(am.value).trim() !== "") filled++;
+          if(pm && String(pm.value).trim() !== "") filled++;
+          if(fuel && String(fuel.value).trim() !== "") filled++;
+          if(trips && String(trips.value).trim() !== "") filled++;
+          if(sludge && String(sludge.value).trim() !== "") filled++;
 
+          if(lastFuel && lastFuel.checked)
+          {
+                total += 3; // checkbox + date + filledLiters
+
+                // checkbox counts as present
+                filled++;
+
+                // date counts if non-empty
+                if(lastFuelDate && String(lastFuelDate.value).trim() !== "") filled++;
+
+                // filledLiters counts if non-empty
+                const filledEl = document.getElementById(`filledLiters_${vid}`);
+                if(filledEl && String(filledEl.value).trim() !== "") filled++;
+          }
+        });
+
+        const pct = total === 0 ? 0 : Math.round((filled / total) * 100);
+        return pct;
+      }
+
+      /* ================== RENDER PLANT FIELDS ================== */
+      function renderPlantFields(){
+        fieldsBody.innerHTML = "";
+        plantFieldDefs.forEach(f=>{
+          const tr = document.createElement('tr');
+          const tdLabel = document.createElement('td'); tdLabel.textContent = f.label;
+          const tdVal = document.createElement('td');
+
+          if(f.type === "radio"){
+            tdVal.innerHTML = `
+              <label style="margin-right:12px"><input type="radio" name="solarIntegration" value="true"> Yes</label>
+              <label><input type="radio" name="solarIntegration" value="false"> No</label>
+              <div class="muted-note" style="margin-top:6px">If Yes → Solar Export inputs enabled. If No → export inputs disabled.</div>
+            `;
+            const yes = tdVal.querySelector('input[value="true"]');
+            const no = tdVal.querySelector('input[value="false"]');
+            if(currentOp.solarIntegration === true) yes.checked = true;
+            else if(currentOp.solarIntegration === false) no.checked = true;
+            yes.addEventListener('change', applySolarLogic);
+            no.addEventListener('change', applySolarLogic);
+          } else if(f.type === "textarea"){
+            const ta = createTextarea(f.id, f.placeholder, currentOp[f.id] ?? "");
+            tdVal.appendChild(ta);
+          } else {
+            const node = createInput(f.id, f.placeholder, currentOp[f.id] ?? "");
+            tdVal.appendChild(node);
+          }
+
+          tr.appendChild(tdLabel);
+          tr.appendChild(tdVal);
+          fieldsBody.appendChild(tr);
+        });
+
+        // combine import pair
+        combinePair("powerReadingAmImport","powerReadingPmImport","Power Import (Kwh)");
+        // combine export pair
+        combinePair("powerReadingAmExport","powerReadingPmExport","Solar Power Export (Kwh)");
+        applySolarLogic();
+      }
+
+      function combinePair(amId, pmId, labelText){
+        const rows = Array.from(fieldsBody.querySelectorAll('tr'));
+        const amRow = rows.find(r => r.querySelector(`#${amId}`));
+        const pmRow = rows.find(r => r.querySelector(`#${pmId}`));
+        if(!amRow || !pmRow) return;
+
+        const th = document.createElement('td'); th.textContent = labelText;
+        const td = document.createElement('td');
+
+        const amInput = amRow.querySelector(`#${amId}`);
+        const pmInput = pmRow.querySelector(`#${pmId}`);
+        if(!amInput || !pmInput) return;
+
+        amInput.style.width = "48%";
+        pmInput.style.width = "48%";
+
+        const wrapper = document.createElement('div');
+        wrapper.style.display = "flex";
+        wrapper.style.gap = "8px";
+        wrapper.appendChild(amInput);
+        wrapper.appendChild(pmInput);
+
+        td.appendChild(wrapper);
+
+        amRow.innerHTML = "";
+        amRow.appendChild(th);
+        amRow.appendChild(td);
+
+        pmRow.remove();
+      }
+
+      function applySolarLogic(){
+        const sel = document.querySelector('input[name="solarIntegration"]:checked');
+        const solarYes = sel ? sel.value === "true" : (currentOp.solarIntegration === true);
+
+        ["powerReadingAmExport","powerReadingPmExport"].forEach(id=>{
+          const el = document.getElementById(id);
+          if(!el) return;
+          el.disabled = !solarYes;
+          if(!solarYes) el.value = "";
+        });
+
+        ["powerReadingAmImport","powerReadingPmImport"].forEach(id=>{
+          const el = document.getElementById(id);
+          if(el) el.disabled = false;
+        });
+
+        setStatusBadge(computeCompleteness());
+      }
+
+      /* ================== VEHICLES ================== */
+      async function loadVehiclesAndOps(){
+        vehicleSection.innerHTML = "Loading vehicles...";
+        vehicles = [];
+        vehicleOps = {};
         try {
-            const vehRes = await fetch(`/api/vehicle-operations/plant/${plantID}/vehicles`);
-            if (!vehRes.ok) {
-                container.innerHTML = `<div style="color:#6b7280; padding:10px;">No vehicles found</div>`;
-                return;
+          const r = await fetch(endpoints.vehiclesByPlant(plantID));
+          if(!r.ok){
+            vehicleSection.innerHTML = `<div style="color:var(--muted);padding:8px">No vehicles found</div>`;
+            setStatusBadge(computeCompleteness());
+            return;
+          }
+          const list = await r.json();
+          const map = new Map();
+          (Array.isArray(list) ? list : []).forEach(v=>{
+            if(v && v.vehicleID != null){
+              const key = String(v.vehicleID);
+              if(!map.has(key)) map.set(key, v);
             }
-            const vehicles = await vehRes.json();
+          });
+          vehicles = Array.from(map.values());
+          vehicleSection.innerHTML = "";
 
-            for (const v of vehicles) {
+          for(const v of vehicles){
+            const vid = String(v.vehicleID);
+            const block = document.createElement('div');
+            block.className = 'vehicle-block';
+            block.setAttribute('data-vehicleid', vid);
+            block.innerHTML = `
+              <div class="vehicle-title">${escapeHtml(v.vehicleNumber || 'Unknown')} - <span class="small">${escapeHtml(v.vehicleModelName || '')}</span></div>
+              <div style="margin-top:8px">
+                <table style="width:100%;border-collapse:collapse">
+                  <tr>
+                    <th style="width:35%">Odometer Reading Morning (Km)</th>
+                    <td style="width:65%"><input id="am_${vid}" class="input" placeholder="Enter km"></td>
+                  </tr>
+                  <tr>
+                    <th>Odometer Reading Evening (Km)</th>
+                    <td><input id="pm_${vid}" class="input" placeholder="Enter km"></td>
+                  </tr>
+                  <tr>
+                    <th>Vehicle Fuel Level (0-6 %)</th>
+                    <td><input id="fuel_${vid}" class="input" placeholder="Enter (0-6 )"></td>
+                  </tr>
+                  <tr>
+                    <th>Last Fuel Filled?</th>
+                    <td style="display:flex; gap:8px; align-items:center;">
+                      <label><input type="checkbox" id="lastFuel_${vid}"> Yes</label>
+                      <input id="lastFuelDate_${vid}" type="date" class="input" style="max-width:160px" disabled>
+                      <input id="filledLiters_${vid}" class="input" placeholder="Filled Liters" style="max-width:140px" disabled>
+                    </td>
+                  </tr>
 
-                let op = {};
-                try {
-                    const opRes = await fetch(`/api/vehicle-operations/${v.vehicleID}?date=${date}`);
-                    const txt = await opRes.text();
-                    if (txt.trim()) op = JSON.parse(txt);
-                } catch (e) {
-                    op = {};
-                }
+                  <tr>
+                    <th>No. of Trips</th>
+                    <td><input id="trips_${vid}" class="input" placeholder="Enter integer"></td>
+                  </tr>
+                  <tr>
+                    <th>Sludge Collect (Ltrs)</th>
+                    <td><input id="sludge_${vid}" class="input" placeholder="Enter Ltrs"></td>
+                  </tr>
+                </table>
+              </div>
+            `;
+            vehicleSection.appendChild(block);
 
-                container.innerHTML += `
-                    <div class="vehicle-title">${v.vehicleNumber} - ${v.vehicleModelName}</div>
+            // attach lastFuel handler safely
+            (function(localVid){
+                const chk = document.getElementById(`lastFuel_${localVid}`);
+                const dateEl = document.getElementById(`lastFuelDate_${localVid}`);
+                const filledEl = document.getElementById(`filledLiters_${localVid}`);
 
-                    <table>
-                        <tr>
-                            <th>Vehicle Reading AM</th>
-                            <td><input id="am_${v.vehicleID}" class="input-box" value="${op.vehicleReadingAm ?? ""}"></td>
-                        </tr>
-                        <tr>
-                            <th>Vehicle Reading PM</th>
-                            <td><input id="pm_${v.vehicleID}" class="input-box" value="${op.vehicleReadingPm ?? ""}"></td>
-                        </tr>
-                        <tr>
-                            <th>Vehicle Fuel Level</th>
-                            <td><input id="fuel_${v.vehicleID}" class="input-box" value="${op.vehicleFuelLevel ?? ""}"></td>
-                        </tr>
-                    </table>
-                `;
-            }
-        } catch (e) {
-            container.innerHTML = `<div style="color:#6b7280; padding:10px;">Error loading vehicles</div>`;
-        }
-
-        // re-bind enter-key navigation to include vehicle inputs too
-        enableEnterNavigation();
-    }
-
-    //------------------------------------------------------------
-    // SAVE OPERATION (plant + all vehicles)
-    //------------------------------------------------------------
-    document.getElementById("saveBtn").onclick = async () => {
-
-    // -------------------------------
-    // 1️⃣ FRONTEND VALIDATION (fix for , and :)
-    // -------------------------------
-    function invalidNumber(val) {
-        if (val === null || val === "") return false; // empty allowed
-        // Allow only: digits, optional decimal .
-        return !/^\d+(\.\d+)?$/.test(val);
-    }
-
-    // Validate PLANT fields
-    for (const f of fields) {
-        if (f.type === "radio" || f.type === "textarea") continue;
-        const el = document.getElementById(f.id);
-        if (!el || el.disabled) continue;
-        const v = el.value.trim();
-        if (invalidNumber(v)) {
-            alert(`Invalid value in: ${f.label}\nUse only numbers (0-9) and dot (.)`);
-            el.focus();
-            return; // ❌ STOP SUBMIT
-        }
-    }
-
-    // Validate VEHICLE fields
-    const vehInputs = document.querySelectorAll("#vehicleSection input");
-    for (const input of vehInputs) {
-        const v = input.value.trim();
-        if (invalidNumber(v)) {
-            alert("Invalid value in Vehicle fields. Use only numbers and dot (.)");
-            input.focus();
-            return; // ❌ STOP SUBMIT
-        }
-    }
-
-    // -------------------------------
-    // 2️⃣ COLLECT PLANT DATA
-    // -------------------------------
-    const data = {};
-
-    fields.forEach(f => {
-        if (f.type === "radio") {
-            const sel = document.querySelector('input[name="solarIntegration"]:checked');
-            data[f.id] = sel ? sel.value === "true" : null;
-        }
-        else if (f.type === "textarea") {
-            data[f.id] = document.getElementById(f.id).value || null;
-        }
-        else {
-            const el = document.getElementById(f.id);
-            if (!el || el.disabled) data[f.id] = null;
-            else data[f.id] = el.value === "" ? null : el.value;
-        }
-    });
-
-    data.operationDate = date;
-
-    // -------------------------------
-    // 3️⃣ SEND PLANT OPERATION SAVE
-    // -------------------------------
-    let plantRes;
-    try {
-        plantRes = await fetch(`/api/operations/${plantID}?date=${encodeURIComponent(date)}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-    } catch (e) {
-        alert("Network error while saving plant operation.");
-        return;
-    }
-
-    if (!plantRes.ok) {
-        const errText = await plantRes.text();
-        alert("❌ ERROR saving plant operation:\n" + errText);
-        return; // ❌ STOP – DO NOT REDIRECT
-    }
-
-    // -------------------------------
-    // 4️⃣ SAVE VEHICLE OPERATIONS
-    // -------------------------------
-    try {
-        const vehRes = await fetch(`/api/vehicle-operations/plant/${plantID}/vehicles`);
-        if (vehRes.ok) {
-            const vehicles = await vehRes.json();
-
-            for (const v of vehicles) {
-                const payload = {
-                    operationDate: date,
-                    vehicleReadingAm: document.getElementById(`am_${v.vehicleID}`).value || null,
-                    vehicleReadingPm: document.getElementById(`pm_${v.vehicleID}`).value || null,
-                    vehicleFuelLevel: document.getElementById(`fuel_${v.vehicleID}`).value || null
-                };
-
-                const vr = await fetch(`/api/vehicle-operations/${plantID}/${v.vehicleID}?date=${encodeURIComponent(date)}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
+                if(!chk) return;
+                chk.addEventListener('change', ()=>{
+                    if(chk.checked){
+                        if(dateEl) dateEl.disabled = false;
+                        if(filledEl) filledEl.disabled = false;
+                    } else {
+                        if(dateEl){ dateEl.disabled = true; dateEl.value = ""; }
+                        if(filledEl){ filledEl.disabled = true; filledEl.value = ""; }
+                    }
+                    setStatusBadge(computeCompleteness());
                 });
+            })(vid);
+          }
 
-                if (!vr.ok) {
-                    const t = await vr.text();
-                    alert(`❌ ERROR saving vehicle ${v.vehicleNumber}:\n${t}`);
-                    return; // ❌ STOP – DO NOT REDIRECT
-                }
+          // fetch existing vehicle ops and populate (fixed: declare vid early)
+          await Promise.all(vehicles.map(async v=>{
+            try{
+              const rr = await fetch(endpoints.vehicleOpGet(v.vehicleID, date));
+              if(!rr.ok) return;
+              const txt = await rr.text();
+              if(!txt.trim()) return;
+
+              const op = JSON.parse(txt);
+              const vid = String(v.vehicleID);   // MUST be first
+              vehicleOps[vid] = op;
+
+              const am = document.getElementById(`am_${vid}`);
+              const pm = document.getElementById(`pm_${vid}`);
+              const fuel = document.getElementById(`fuel_${vid}`);
+              const lastFuel = document.getElementById(`lastFuel_${vid}`);
+              const lastFuelDate = document.getElementById(`lastFuelDate_${vid}`);
+              const filledLitersEl = document.getElementById(`filledLiters_${vid}`);
+              const trips = document.getElementById(`trips_${vid}`);
+              const sludge = document.getElementById(`sludge_${vid}`);
+
+              if(am) am.value = op.vehicleReadingAm ?? "";
+              if(pm) pm.value = op.vehicleReadingPm ?? "";
+              if(fuel) fuel.value = op.vehicleFuelLevel ?? "";
+              if(trips) trips.value = op.noOfTrips ?? "";
+              if(sludge) sludge.value = op.sludgeCollect ?? "";
+
+              if(lastFuel){
+                  lastFuel.checked = !!op.lastFuelFilled;
+              }
+
+              // enable/disable dependent fields based on checkbox
+              if(lastFuel && lastFuel.checked){
+                  if(lastFuelDate){ lastFuelDate.disabled = false; lastFuelDate.value = op.lastFuelFilledDate ?? ""; }
+                  if(filledLitersEl){ filledLitersEl.disabled = false; filledLitersEl.value = (op.filledLiters == null ? "" : String(op.filledLiters)); }
+              } else {
+                  if(lastFuelDate){ lastFuelDate.disabled = true; lastFuelDate.value = ""; }
+                  if(filledLitersEl){ filledLitersEl.disabled = true; filledLitersEl.value = ""; }
+              }
+
+            }catch(e){
+              // ignore per-vehicle error
+              console.warn("vehicle populate error", e);
             }
+          }));
+
+        } catch(e){
+          vehicleSection.innerHTML = `<div style="color:var(--muted);padding:8px">Error loading vehicles</div>`;
         }
-    } catch (e) {
-        alert("❌ Vehicle save failed. No changes were saved for vehicles.");
-        return;
-    }
 
-    // -------------------------------
-    // 5️⃣ SUCCESS
-    // -------------------------------
-    alert("✔ Operation updated successfully!");
-    window.location.href = `index.html?date=${encodeURIComponent(date)}`;
-};
+        attachEnterNav();
+        setStatusBadge(computeCompleteness());
+      }
 
+      /* ================== LOAD PLANT ================== */
+      async function loadPlantOperation(){
+        try{
+          const r = await fetch(endpoints.plantGet(plantID, date));
+          if(!r.ok){
+            currentOp = {};
+          } else {
+            const txt = await r.text();
+            currentOp = txt && txt.trim() ? JSON.parse(txt) : {};
+          }
+        } catch(e){
+          currentOp = {};
+        }
 
-    //--------------------------------------------------------
-    // ENTER KEY NAVIGATION (across plant + vehicle inputs)
-    //--------------------------------------------------------
-    function enableEnterNavigation() {
-        // select only inputs and textareas visible on page
-        const all = Array.from(document.querySelectorAll("input:not([type=radio]), textarea")).filter(el => el.offsetParent !== null);
-        all.forEach((el, index) => {
-            el.removeEventListener("keydown", enterNavHandler);
-            el.addEventListener("keydown", enterNavHandler);
+        renderPlantFields();
+
+        // private aggregates in plant
+        if(currentOp.noOfTripsPrivateVehicle != null || currentOp.sludgeCollectPrivateVehicle != null){
+          privateToggle.checked = !!currentOp.noOfTripsPrivateVehicle || !!currentOp.sludgeCollectPrivateVehicle;
+          if(privateToggle.checked){
+            privateTripsEl.value = currentOp.noOfTripsPrivateVehicle ?? "";
+            privateSludgeEl.value = currentOp.sludgeCollectPrivateVehicle ?? "";
+            privateTripsEl.disabled = false;
+            privateSludgeEl.disabled = false;
+          } else {
+            privateTripsEl.value = "";
+            privateSludgeEl.value = "";
+            privateTripsEl.disabled = true;
+            privateSludgeEl.disabled = true;
+          }
+        } else {
+          privateToggle.checked = false;
+          privateTripsEl.value = "";
+          privateSludgeEl.value = "";
+          privateTripsEl.disabled = true;
+          privateSludgeEl.disabled = true;
+        }
+
+        // populate other plant values into inputs (if existed)
+        plantFieldDefs.forEach(f=>{
+          if(f.type === "radio" || f.type === "textarea") return;
+          const el = document.getElementById(f.id);
+          if(el && currentOp[f.id] != null) el.value = currentOp[f.id];
+        });
+        const remarksEl = document.getElementById("remarks");
+        if(remarksEl && currentOp.remarks != null) remarksEl.value = currentOp.remarks;
+
+        setStatusBadge(computeCompleteness());
+      }
+
+      /* ================== SAVE / SUBMIT ================== */
+      async function onSubmit(){
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+
+        // validate plant numeric fields (remark excluded)
+        for(const f of plantFieldDefs){
+          if(f.type === "radio" || f.id === "remarks") continue;
+          const el = document.getElementById(f.id);
+          if(!el || el.disabled) continue;
+          if(!numericValid(el.value)){
+            alert(`Invalid numeric value for "${f.label}". Use digits and '.' for decimals — do not use ',' or ':'`);
+            el.focus();
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit";
+            return;
+          }
+        }
+
+        // validate private aggregates if enabled
+        if(privateToggle.checked){
+          if(!numericValid(privateTripsEl.value) || !numericValid(privateSludgeEl.value)){
+            alert("Invalid number in private aggregate fields. Use digits and '.' only.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit";
+            return;
+          }
+        }
+
+        // validate vehicle numeric fields (note: filledLiters and date are optional)
+        for(const v of vehicles){
+          const vid = String(v.vehicleID);
+          const am = document.getElementById(`am_${vid}`);
+          const pm = document.getElementById(`pm_${vid}`);
+          const fuel = document.getElementById(`fuel_${vid}`);
+          const trips = document.getElementById(`trips_${vid}`);
+          const sludge = document.getElementById(`sludge_${vid}`);
+
+          for(const el of [am,pm,fuel,trips,sludge]){
+            if(!el) continue;
+            if(!numericValid(el.value)){
+              alert("Invalid number in vehicle fields. Use digits and '.' only (no commas or colons).");
+              el.focus();
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Submit";
+              return;
+            }
+          }
+          // lastFuelFilledDate and filledLiters are optional by your instruction → no validation here
+        }
+
+        // Build plant payload
+        const plantPayload = {};
+        const sel = document.querySelector('input[name="solarIntegration"]:checked');
+        plantPayload.solarIntegration = sel ? (sel.value === "true") : null;
+
+        plantFieldDefs.forEach(f=>{
+          if(f.type === "radio") return;
+          const el = document.getElementById(f.id);
+          if(!el || el.disabled){
+            plantPayload[f.id] = null;
+            return;
+          }
+          if(f.id === "remarks"){
+            plantPayload.remarks = el.value.trim() === "" ? null : el.value;
+            return;
+          }
+          plantPayload[f.id] = el.value.trim() === "" ? null : Number(el.value.trim());
         });
 
-        function enterNavHandler(e) {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                const visible = Array.from(document.querySelectorAll("input:not([type=radio]), textarea")).filter(el => el.offsetParent !== null);
-                const idx = visible.indexOf(e.target);
-                const next = visible[idx + 1];
-                if (next) next.focus();
-            }
+        plantPayload.operationDate = date;
+
+        if(privateToggle.checked){
+          plantPayload.privateVehicle = true;
+          plantPayload.noOfTripsPrivateVehicle = privateTripsEl.value.trim() === "" ? null : Number(privateTripsEl.value.trim());
+          plantPayload.sludgeCollectPrivateVehicle = privateSludgeEl.value.trim() === "" ? null : Number(privateSludgeEl.value.trim());
+        } else {
+          plantPayload.privateVehicle = false;
+          plantPayload.noOfTripsPrivateVehicle = 0;
+          plantPayload.sludgeCollectPrivateVehicle = 0;
         }
-    }
 
-    // initial load
-    loadOperation().then(loadVehicleInputs);
+        const solarYes = plantPayload.solarIntegration === true;
+        if(!solarYes){
+          plantPayload.powerReadingAmExport = null;
+          plantPayload.powerReadingPmExport = null;
+        }
 
+        // send plant PUT
+        try{
+          const resp = await fetch(endpoints.plantPut(plantID, date), {
+            method: "PUT",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(plantPayload)
+          });
+          if(!resp.ok){
+            const txt = await resp.text();
+            alert("Error saving plant operation:\n" + txt);
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit";
+            return;
+          }
+        } catch(e){
+          alert("Network error saving plant operation.");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit";
+          return;
+        }
+
+        // send vehicle PUTs one-by-one
+        try{
+          for(const v of vehicles){
+            const vid = String(v.vehicleID);
+            const lastFuel = document.getElementById(`lastFuel_${vid}`);
+            const lastFuelDate = document.getElementById(`lastFuelDate_${vid}`);
+            const filledLitersEl = document.getElementById(`filledLiters_${vid}`);
+
+            const filledLitersVal = (lastFuel && lastFuel.checked && filledLitersEl && String(filledLitersEl.value).trim() !== "")
+                ? Number(filledLitersEl.value.trim())
+                : null;
+
+            const payload = {
+              operationDate: date,
+              vehicleReadingAm: (document.getElementById(`am_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`am_${vid}`).value.trim())),
+              vehicleReadingPm: (document.getElementById(`pm_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`pm_${vid}`).value.trim())),
+              vehicleFuelLevel: (document.getElementById(`fuel_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`fuel_${vid}`).value.trim())),
+              lastFuelFilled: !!(lastFuel && lastFuel.checked),
+              lastFuelFilledDate: (lastFuel && lastFuel.checked && lastFuelDate && String(lastFuelDate.value).trim() !== "") ? lastFuelDate.value : null,
+              filledLiters: filledLitersVal,
+              noOfTrips: (document.getElementById(`trips_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`trips_${vid}`).value.trim())),
+              sludgeCollect: (document.getElementById(`sludge_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`sludge_${vid}`).value.trim()))
+            };
+
+            const vr = await fetch(endpoints.vehicleOpPut(plantID, v.vehicleID, date), {
+              method: "PUT",
+              headers: {"Content-Type":"application/json"},
+              body: JSON.stringify(payload)
+            });
+            if(!vr.ok){
+              const t = await vr.text();
+              alert(`Error saving vehicle ${v.vehicleNumber}:\n${t}`);
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Submit";
+              return;
+            }
+          }
+        } catch(e){
+          alert("Network error saving vehicle operations.");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit";
+          return;
+        }
+
+        alert("✔ Operation updated successfully!");
+        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+      }
+
+      /* ================== UTILITIES & EVENTS ================== */
+      function bindStatusWatcher(){
+        function tick(){ setTimeout(()=> setStatusBadge(computeCompleteness()), 0); }
+        document.addEventListener('input', tick);
+        document.addEventListener('change', tick);
+      }
+
+      function attachEnterNav(){
+        const all = Array.from(document.querySelectorAll("input:not([type=radio]), textarea")).filter(el => el.offsetParent !== null);
+        all.forEach(el => {
+          el.removeEventListener('keydown', enterHandler);
+          el.addEventListener('keydown', enterHandler);
+        });
+        function enterHandler(e){
+          if(e.key === "Enter"){
+            e.preventDefault();
+            const visible = Array.from(document.querySelectorAll("input:not([type=radio]), textarea")).filter(el => el.offsetParent !== null);
+            const idx = visible.indexOf(e.target);
+            const next = visible[idx+1];
+            if(next) next.focus();
+          }
+        }
+      }
+
+      // events
+      submitBtn.addEventListener('click', onSubmit);
+      backBtn.addEventListener('click', ()=> window.location.href = `index.html?date=${encodeURIComponent(date)}`);
+
+      privateToggle.addEventListener('change', ()=>{
+        const yes = privateToggle.checked;
+        privateTripsEl.disabled = !yes;
+        privateSludgeEl.disabled = !yes;
+        if(!yes){
+          privateTripsEl.value = "";
+          privateSludgeEl.value = "";
+        }
+        setStatusBadge(computeCompleteness());
+      });
+
+      // initial load
+      (async function init(){
+        await loadPlantOperation();
+        await loadVehiclesAndOps();
+        privateTripsEl.disabled = !privateToggle.checked;
+        privateSludgeEl.disabled = !privateToggle.checked;
+        attachEnterNav();
+        bindStatusWatcher();
+        setStatusBadge(computeCompleteness());
+      })();
+
+      // live completeness recompute
+      document.addEventListener('input', ()=> setStatusBadge(computeCompleteness()));
+      document.addEventListener('change', ()=> setStatusBadge(computeCompleteness()));
+
+    })();
 </script>
 </body>
 </html>

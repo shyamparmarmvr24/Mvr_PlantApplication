@@ -1,6 +1,7 @@
 package com.mvr.plant.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -53,8 +54,9 @@ public class VehicleInformation
 
     private Boolean gpsStatus;
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    //@JsonManagedReference
+    @JsonIgnore
     private List<VehicleOperation> vehicleOp = new ArrayList<>();
 
     @CreatedDate

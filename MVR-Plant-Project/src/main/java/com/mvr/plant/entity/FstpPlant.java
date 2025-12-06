@@ -1,6 +1,7 @@
 //FstpPlant
 package com.mvr.plant.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -101,22 +102,29 @@ public class FstpPlant
     @Column(name = "NoOfVehicle")
     private Integer noOfVehicle;
 
-    @Column(name = "NoOfEmployees")
-    private Integer noOfEmployees;
+//    @Column(name = "NoOfEmployees")
+//    private Integer noOfEmployees;
+    public int getNoOfEmployees()
+    {return plantEmployees != null ? plantEmployees.size() : 0;}
 
-    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
-    @JsonManagedReference
+
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    //@JsonManagedReference
+    @JsonIgnore
     private List<PlantOperation> operations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    //@JsonManagedReference
+    @JsonIgnore
     private List<LaboratoryOperation> labOperations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    //@JsonManagedReference
+    @JsonIgnore
     private List<PlantEmployee> plantEmployees = new ArrayList<>();
 
-    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    //@JsonManagedReference
+    @JsonIgnore
     private List<VehicleInformation> vehicleInfo = new ArrayList<>();
 }

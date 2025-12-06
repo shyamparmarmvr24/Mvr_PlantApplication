@@ -17,4 +17,7 @@ public interface IPlantRepository extends JpaRepository<FstpPlant,Long>
     @Query("SELECT p FROM FstpPlant p WHERE p.plantID = :plantID")
     Optional<FstpPlant> findPlantByPlantID(@Param("plantID") Long plantID);
 
+    @Query("SELECT p FROM FstpPlant p WHERE p.mnit = true")
+    List<FstpPlant> getAllPlantsWhereMnitIsTrue();
+
 }

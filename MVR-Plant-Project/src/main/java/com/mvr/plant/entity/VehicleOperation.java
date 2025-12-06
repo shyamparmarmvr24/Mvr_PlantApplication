@@ -41,13 +41,22 @@ public class VehicleOperation
 
     private Double vehicleFuelLevel;
 
+    private Boolean lastFuelFilled;
+
+    private LocalDate lastFuelFilledDate;
+
+    private Double filledLiters;
+
+    private Integer noOfTrips;
+
+    private Double sludgeCollect;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-
 
     @PrePersist
     void onCreate() {

@@ -40,7 +40,7 @@ public class PlantOperation
 
     private Double sludgeReceived;
 
-    private Integer noOfTrips;
+    private Integer totalNoOfTrips;
 
     private Double sludgeProcessed;
 
@@ -58,10 +58,6 @@ public class PlantOperation
 
     private Double powerReadingPmExport;
 
-    private Double powerReadingAm;
-
-    private Double powerReadingPm;
-
     private Double powerConsumed;
 
     private Double dgReadingAm;
@@ -76,7 +72,17 @@ public class PlantOperation
 
     private Double polymerUsage;
 
+    private Double polymerStock;
+
     private Double pillets;
+
+    private Double pilletsStock;
+
+    private Boolean privateVehicle;
+
+    private Integer noOfTripsPrivateVehicle;
+
+    private Double sludgeCollectPrivateVehicle;
 
     @Column(length = 500)
     private String remarks;
@@ -87,7 +93,6 @@ public class PlantOperation
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-
 
     @PrePersist
     void onCreate() {

@@ -1,6 +1,7 @@
 package com.mvr.plant.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -49,8 +50,9 @@ public class PlantEmployee
     @Column(nullable = false)
     private LocalDate dateOfJoining;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    //@JsonManagedReference
+    @JsonIgnore
     private List<PlantEmployeeOperation> plantEmployeesOp = new ArrayList<>();
 
     @CreatedDate

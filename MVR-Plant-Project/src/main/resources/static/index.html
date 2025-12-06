@@ -224,6 +224,12 @@
         <button class="addBtn" onclick="window.location.href='create-plant.html'" style="background:#16a34a;">
             Add Plant
         </button>
+        <button class="addBtn"
+                onclick="window.location.href='report.html?date=' + document.getElementById('reportDate').value"
+                style="background:#2563eb;">
+            Generate Report
+        </button>
+
     </div>
 
     <table>
@@ -415,7 +421,16 @@
                     const r = await fetch(`/api/vehicle-operations/${v.vehicleID}?date=${date}`);
                     const t = await r.text();
                     const vo = (!t || t.trim() === "null") ? {} : JSON.parse(t);
-                    return { am: vo.vehicleReadingAm, pm: vo.vehicleReadingPm, fuel: vo.vehicleFuelLevel };
+                    return {
+                           am: vo.vehicleReadingAm,
+                           pm: vo.vehicleReadingPm,
+                           fuel: vo.vehicleFuelLevel,
+                           lastFuelFilled: vo.lastFuelFilled,
+                           lastFuelFilledDate: vo.lastFuelFilledDate,
+                           trips: vo.noOfTrips,
+                           sludge: vo.sludgeCollect
+                    };
+
                 } catch {
                     return { am: null, pm: null, fuel: null };
                 }
@@ -427,54 +442,103 @@
             return "update";
         }
     }
+function calcPlantStatus(op, vehicleOps) {
 
-    function calcPlantStatus(op, vehicleOps) {
-        const opIsObject = op && typeof op === "object" && Object.keys(op).length > 0;
-        if (!opIsObject && (!Array.isArray(vehicleOps) || vehicleOps.length === 0)) return "update";
+    if (!op || typeof op !== "object") return "update";
 
-        const solar = op.solarIntegration;
+    let total = 0;
+    let filled = 0;
 
-        const baseFields = [
-            "sludgeTankLevelAm","sludgeTankLevelPm","sludgeReceived","noOfTrips",
-            "sludgeProcessed","biocharProduced","plantRunningHrs","solarIntegration",
-            "dgReadingAm","dgReadingPm","dgDiesalPercentageAm","dgDiesalPercentagePm",
-            "polymerUsage","pillets"
+    /* ------------------ ALWAYS count these plant fields ------------------ */
+    const alwaysPlant = [
+        "sludgeTankLevelAm",
+        "sludgeTankLevelPm",
+        "sludgeProcessed",
+        "biocharProduced",
+        "plantRunningHrs",
+        "dgReadingAm",
+        "dgReadingPm",
+        "dgDiesalPercentageAm",
+        "dgDiesalPercentagePm",
+        "dgRunHours",
+        "polymerUsage",
+        "polymerStock",
+        "pillets",
+        "pilletsStock"
+    ];
+
+    alwaysPlant.forEach(f => {
+        total++;
+        if (op[f] !== null && op[f] !== undefined && op[f] !== "") filled++;
+    });
+
+    /* ------------------ Solar Integration logic ------------------ */
+    const solar = op.solarIntegration;
+
+    // radio always counted
+    total++;
+    if (solar === true || solar === false) filled++;
+
+    if (solar === true) {
+        const solarFields = [
+            "powerReadingAmImport",
+            "powerReadingAmExport",
+            "powerReadingPmImport",
+            "powerReadingPmExport"
         ];
-
-        const solarYesExtra = [
-            "powerReadingAmImport","powerReadingAmExport",
-            "powerReadingPmImport","powerReadingPmExport"
-        ];
-
-        const solarNoExtra = [
-            "powerReadingAm","powerReadingPm"
-        ];
-
-        let fields = [...baseFields];
-        if (solar === true) fields = fields.concat(solarYesExtra);
-        if (solar === false) fields = fields.concat(solarNoExtra);
-
-        let filled = 0;
-
-        fields.forEach(f => {
-            const v = op ? op[f] : null;
-            if (v !== null && v !== undefined && v !== "") filled++;
+        solarFields.forEach(f => {
+            total++;
+            if (op[f] !== null && op[f] !== "") filled++;
         });
 
-        if (Array.isArray(vehicleOps)) {
-            vehicleOps.forEach(v => {
-                if (v.am) filled++;
-                if (v.pm) filled++;
-                if (v.fuel) filled++;
-            });
-        }
-
-        const total = fields.length + (vehicleOps.length * 3);
-
-        if (filled === 0) return "update";
-        if (filled < total) return "pending";
-        return "view";
+    } else if (solar === false) {
+        const solarNo = [
+            "powerReadingAmImport",
+            "powerReadingPmImport"
+        ];
+        solarNo.forEach(f => {
+            total++;
+            if (op[f] !== null && op[f] !== "") filled++;
+        });
     }
+
+    /* ------------------ Private Vehicle ------------------ */
+    if (op.privateVehicle === true) {
+        total += 2;
+        if (op.noOfTripsPrivateVehicle != null) filled++;
+        if (op.sludgeCollectPrivateVehicle != null) filled++;
+    }
+    // if false → do not count
+
+    /* ------------------ Vehicle Operation Fields ------------------ */
+    if (Array.isArray(vehicleOps)) {
+        vehicleOps.forEach(v => {
+            // always counted fields
+            const base = [
+                v.am, v.pm, v.fuel, v.trips, v.sludge
+            ];
+
+            total += 5;
+            base.forEach(x => {
+                if (x !== null && x !== undefined) filled++;
+            });
+
+            // last fuel logic
+            if (v.lastFuelFilled === true) {
+                total += 2; // checkbox + date
+                filled++;   // checkbox is filled
+
+                if (v.lastFuelFilledDate != null) filled++;
+            }
+        });
+    }
+
+    /* ------------------ Final status logic ------------------ */
+    if (filled === 0) return "update";
+    if (filled < total) return "pending";
+    return "view";
+}
+
 
     async function getLabStatus(plantID, date) {
         try {
@@ -530,33 +594,39 @@
     /* ---------------------------- RENDERING ---------------------------- */
 
     async function makeRow(p, date) {
-        const plantOpStatus = await getPlantStatus(p.plantID, date);
-        const labOpStatus   = await getLabStatus(p.plantID, date);
-        const empOpStatus   = await getAttendanceStatus(p.plantID, date);
+    const plantOpStatus = await getPlantStatus(p.plantID, date);
+    const labOpStatus   = await getLabStatus(p.plantID, date);
+    const empOpStatus   = await getAttendanceStatus(p.plantID, date);
 
-        const color = getPlantInfoStatus(p);
+    const color = getPlantInfoStatus(p);
 
-        return `
-            <tr>
-                <td>${p.serialNo}</td>
-                <td>${p.plantID}</td>
-                <td class="${color}">${p.plantName}</td>
-                <td>${p.kld}</td>
-                <td>${p.zones}</td>
+    return `
+        <tr>
+            <td>${p.serialNo}</td>
+            <td>${p.plantID}</td>
+            <td class="${color}">${p.plantName}</td>
+            <td>${p.kld}</td>
+            <td>${p.zones}</td>
 
-                <td><button class="btn-status ${plantOpStatus}"
-                    onclick="openPlantOperation(${p.plantID}, '${date}', '${plantOpStatus}')">
-                    ${plantOpStatus}</button></td>
+            <td><button class="btn-status ${plantOpStatus}"
+                onclick="openPlantOperation(${p.plantID}, '${date}', '${plantOpStatus}')">
+                ${plantOpStatus}</button></td>
 
-                <td><button class="btn-status ${labOpStatus}"
-                    onclick="openLabOperation(${p.plantID}, '${date}', '${labOpStatus}')">
-                    ${labOpStatus}</button></td>
+            <td>
+                <button class="btn-status ${labOpStatus}"
+                    onclick="openLabOperation(${p.plantID}, '${date}', '${labOpStatus}')"
+                    ${p.codAndBodSenserDate == null ? "disabled style='background:#9ca3af; cursor:not-allowed'" : ""}>
+                    ${labOpStatus}
+                </button>
+            </td>
 
-                <td><button class="btn-status ${empOpStatus}"
-                    onclick="openAttendance(${p.plantID}, '${date}', '${empOpStatus}')">
-                    ${empOpStatus}</button></td>
-            </tr>`;
-    }
+            <td><button class="btn-status ${empOpStatus}"
+                onclick="openAttendance(${p.plantID}, '${date}', '${empOpStatus}')">
+                ${empOpStatus}</button></td>
+        </tr>
+    `;
+}
+
 
     async function renderTable(date) {
         await safeRender(date);  // 🚀 USE SAFE RENDER

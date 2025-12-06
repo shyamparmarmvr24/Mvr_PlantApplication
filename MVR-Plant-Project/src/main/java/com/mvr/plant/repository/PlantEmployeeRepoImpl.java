@@ -3,9 +3,11 @@ import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.PlantEmployee;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
@@ -15,6 +17,9 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
 
     @Autowired
     private IPlantRepository plantRepo;
+
+    @Autowired
+    private IPlantEmployeeOperationRepo empOpRepo;
 
     @Override
     @Transactional
@@ -60,5 +65,42 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
         return "Employee Data Updated Successfully";
     }
 
+    @Override
+    @Transactional   // ensure both deletes are part of one transaction
+    public String deleteEmployeeByEmpId(Integer empId)
+    {
+      Optional<PlantEmployee> emp = empRepo.findById(empId);
+      if (emp.isPresent()) {
+        try {
+            // delete child operations first (fast set-based delete)
+            empOpRepo.deleteByEmployeeId(empId);
+
+            // now delete employee
+            empRepo.deleteById(empId);
+            return "Employee Deleted Successfully";
+        } catch (DataIntegrityViolationException ex) {
+            // in case some other FK prevents delete
+            return "Cannot delete employee " + empId + " due to related data. Remove dependent records first.";
+        } catch (Exception ex) {
+            // log and return a friendly message
+            // logger.error("deleteEmployee failed", ex);
+            return "Unexpected error while deleting employee " + empId + ".";
+        }
+        }
+    return "Employee Not Found For Id " + empId;
+   }
 
 }
+
+
+//    @Override
+//    public String deleteEmployeeByEmpId(Integer empId)
+//    {
+//        Optional<PlantEmployee> emp = empRepo.findById(empId);
+//        if(emp.isPresent())
+//        {
+//            empRepo.deleteById(empId);
+//            return "Employee Deleted Successfully";
+//        }
+//        return "Employee Not Found For Id "+empId;
+//    }

@@ -177,8 +177,8 @@
             <th>Employee ID</th>
             <th>Name</th>
             <th>Designation</th>
-            <th>Attendance AM</th>
-            <th>Attendance PM</th>
+            <th>Morning Attendance</th>
+            <th>Evening Attendance</th>
         </tr>
         </thead>
 
@@ -238,13 +238,13 @@
                     <td>${emp.designation}</td>
 
                     <td>
-                        <button class="btn-yes" onclick="selectAM(${emp.employeeId}, true)">Yes</button>
-                        <button class="btn-no" onclick="selectAM(${emp.employeeId}, false)">No</button>
+                        <button class="btn-yes" onclick="selectAM(${emp.employeeId}, true)">Present</button>
+                        <button class="btn-no" onclick="selectAM(${emp.employeeId}, false)">Absent</button>
                     </td>
 
                     <td>
-                        <button class="btn-yes" onclick="selectPM(${emp.employeeId}, true)">Yes</button>
-                        <button class="btn-no" onclick="selectPM(${emp.employeeId}, false)">No</button>
+                        <button class="btn-yes" onclick="selectPM(${emp.employeeId}, true)">Present</button>
+                        <button class="btn-no" onclick="selectPM(${emp.employeeId}, false)">Absent</button>
                     </td>
                 </tr>
             `);

@@ -1,67 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="https://mvrtech.org/MVR_Company_Logo%20copy.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Update Laboratory Operation</title>
 
     <style>
         body {
-            font-family:'Segoe UI',sans-serif;
-            background:#f5f7fa;
-            margin:0; padding:0;
-            display:flex;
-            justify-content:center;
+            font-family: "Segoe UI", sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            display: flex;
+            justify-content: center;
         }
+
         .card {
-            background:white;
-            padding:28px;
-            border-radius:12px;
-            box-shadow:0 10px 25px rgba(0,0,0,0.08);
-            max-width:900px;
-            width:100%;
-            margin:20px;
-        }
-        h2 { text-align:center; color:#0369a1; margin-bottom:8px; }
-        .top-info { text-align:center; font-weight:700; margin-bottom:14px; }
-
-        table {
-            width:100%;
-            border-collapse:collapse;
-            margin-top:8px;
-        }
-        table th, table td {
-            border:1px solid #e6eef6;
-            padding:12px;
-        }
-        table th {
-            background:#0369a1;
-            color:white;
-            text-align:left;
-            width:260px;
-            font-size:15px;
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            max-width: 1100px;
+            width: 100%;
+            margin: 20px;
         }
 
-        .input-box {
-            width:100%;
-            padding:8px 10px;
-            border-radius:6px;
-            border:1px solid #ccc;
-            font-size:15px;
+        h2 {
+            text-align: center;
+            color: #0369a1;
+            margin-bottom: 10px;
         }
 
-        .buttons { text-align:center; margin-top:18px; }
+        .top-info {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        /* ================= TABLE ================= */
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table.lab-table {
+            width: 100%;
+            min-width: 950px;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th {
+            background: #0369a1;
+            color: white;
+            padding: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        td {
+            border: 1px solid #e6eef6;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .input {
+            width: 100%;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+
+        /* ================= FLOW ================= */
+        .flow-row {
+            display: flex;
+            gap: 16px;
+            margin-top: 18px;
+            align-items: center;
+            flex-wrap: nowrap; /* 🔥 keeps inputs side by side */
+        }
+        .flow-row .input {
+                max-width: 180px;
+            }
+
+
+
+        .flow-row label {
+            font-weight: 700;
+            min-width: 220px;
+        }
+
+        /* ================= BUTTONS ================= */
+        .buttons {
+            text-align: center;
+            margin-top: 22px;
+        }
+
         .btn {
-            padding:10px 18px;
-            margin:0 8px;
-            border:none;
-            border-radius:6px;
-            font-size:15px;
-            cursor:pointer;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+            margin: 0 6px;
         }
-        .btn-save { background:#059669; color:white; }
-        .btn-back { background:#94a3b8; color:white; }
+
+        .btn-save { background: #059669; color: white; }
+        .btn-back { background: #94a3b8; color: white; }
     </style>
 </head>
 
@@ -73,13 +119,71 @@
 
     <div class="top-info" id="infoBox"></div>
 
-    <table>
-        <thead>
-        <tr><th>Field</th><th>Value</th></tr>
-        </thead>
-        <tbody id="fieldsBody"></tbody>
-    </table>
+    <!-- ================= LAB TABLE ================= -->
+    <div class="table-wrap">
+        <table class="lab-table">
+            <thead>
+            <tr>
+                <th>Sample</th>
+                <th>COD (mg/L)</th>
+                <th>BOD (mg/L)</th>
+                <th>TN (mg/L)</th>
+                <th>Temperature (°C)</th>
+                <th>TSS (mg/L)</th>
+                <th>PH (pH)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><b>10:00 AM</b></td>
+                <td><input id="codReading1" class="input" placeholder="Enter COD 1"></td>
+                <td><input id="bodReading1" class="input" placeholder="Enter BOD 1"></td>
+                <td><input id="thReading1" class="input" placeholder="Enter TN 1"></td>
+                <td><input id="temperatureReading1" class="input" placeholder="Enter Temp 1"></td>
+                <td><input id="tssReading1" class="input" placeholder="Enter TSS 1"></td>
+                <td><input id="phReading1" class="input" placeholder="Enter PH 1"></td>
+            </tr>
 
+            <tr>
+                <td><b>12:00 PM</b></td>
+                <td><input id="codReading2" class="input" placeholder="Enter COD 2"></td>
+                <td><input id="bodReading2" class="input" placeholder="Enter BOD 2"></td>
+                <td><input id="thReading2" class="input" placeholder="Enter TN 2"></td>
+                <td><input id="temperatureReading2" class="input" placeholder="Enter Temp 2"></td>
+                <td><input id="tssReading2" class="input" placeholder="Enter TSS 2"></td>
+                <td><input id="phReading2" class="input" placeholder="Enter PH 2"></td>
+            </tr>
+
+            <tr>
+                <td><b>02:30 PM</b></td>
+                <td><input id="codReading3" class="input" placeholder="Enter COD 3"></td>
+                <td><input id="bodReading3" class="input" placeholder="Enter BOD 3"></td>
+                <td><input id="thReading3" class="input" placeholder="Enter TN 3"></td>
+                <td><input id="temperatureReading3" class="input" placeholder="Enter Temp 3"></td>
+                <td><input id="tssReading3" class="input" placeholder="Enter TSS 3"></td>
+                <td><input id="phReading3" class="input" placeholder="Enter PH 3"></td>
+            </tr>
+
+            <tr>
+                <td><b>05:00 PM</b></td>
+                <td><input id="codReading4" class="input" placeholder="Enter COD 4"></td>
+                <td><input id="bodReading4" class="input" placeholder="Enter BOD 4"></td>
+                <td><input id="thReading4" class="input" placeholder="Enter TN 4"></td>
+                <td><input id="temperatureReading4" class="input" placeholder="Enter Temp 4"></td>
+                <td><input id="tssReading4" class="input" placeholder="Enter TSS 4"></td>
+                <td><input id="phReading4" class="input" placeholder="Enter PH 4"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ================= FLOW METER ================= -->
+    <div class="flow-row">
+        <label>Flow Meter Reading (m³/h)</label>
+        <input id="flowMeterReadingAm" class="input" placeholder="Enter Morning Reading">
+        <input id="flowMeterReadingPm" class="input" placeholder="Enter Evening Reading">
+    </div>
+    <!-- ================= BUTTONS ================= -->
     <div class="buttons">
         <button class="btn btn-save" id="saveBtn">Save</button>
         <button class="btn btn-back" id="backBtn">Back</button>
@@ -88,146 +192,65 @@
 </div>
 
 <script>
-
-    // -------------------------------------------
-    // URL PARAMETERS
-    // -------------------------------------------
     const params = new URLSearchParams(window.location.search);
     const plantID = params.get("plantID");
     const date = params.get("date");
 
     document.getElementById("infoBox").innerHTML =
-        `Date: <span style="color:#f97316">${date}</span>
-         &nbsp; | &nbsp;
+        `Date: <span style="color:#f97316">${date}</span> |
          Plant ID: <span style="color:#059669">${plantID}</span>`;
 
     document.getElementById("backBtn").onclick = () => {
         window.location.href = `index.html?date=${encodeURIComponent(date)}`;
     };
 
-    // -------------------------------------------
-    // LAB FIELDS
-    // -------------------------------------------
     const fields = [
-        {id:"cod", label:"COD"},
-        {id:"bod", label:"BOD"},
-        {id:"th", label:"TH"},
-        {id:"temperature", label:"Temperature"},
-        {id:"tss", label:"TSS"},
-        {id:"ph", label:"PH"},
-        {id:"velocity", label:"Velocity"},
-        {id:"cumulativeFlow", label:"Cumulative Flow"},
-        {id:"flowMeterReadingAm", label:"Flow Meter Reading AM"},
-        {id:"flowMeterReadingPm", label:"Flow Meter Reading PM"}
+        "codReading1","codReading2","codReading3","codReading4",
+        "bodReading1","bodReading2","bodReading3","bodReading4",
+        "thReading1","thReading2","thReading3","thReading4",
+        "temperatureReading1","temperatureReading2","temperatureReading3","temperatureReading4",
+        "tssReading1","tssReading2","tssReading3","tssReading4",
+        "phReading1","phReading2","phReading3","phReading4",
+        "flowMeterReadingAm","flowMeterReadingPm"
     ];
 
-    let currentLab = {};
-    const fieldsBody = document.getElementById("fieldsBody");
-
-    // -------------------------------------------
-    // LOAD EXISTING LAB DATA
-    // -------------------------------------------
-    async function loadOperation() {
+    async function loadLab() {
         const res = await fetch(`/api/laboperations/plant/${plantID}?date=${date}`);
-        const text = await res.text();
-        currentLab = text && text.trim() ? JSON.parse(text) : {};
-        renderFields();
-    }
-
-    // -------------------------------------------
-    // RENDER INPUT FIELDS + ENTER NAVIGATION
-    // -------------------------------------------
-    function renderFields() {
-        fieldsBody.innerHTML = "";
-
-        fields.forEach((field, index) => {
-            const tr = document.createElement("tr");
-
-            const labelTd = document.createElement("td");
-            labelTd.textContent = field.label;
-
-            const valTd = document.createElement("td");
-
-            const input = document.createElement("input");
-            input.className = "input-box";
-            input.id = field.id;
-            input.value = currentLab[field.id] ?? "";
-
-            // Enter key navigation
-            input.addEventListener("keydown", e => {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    const next = fields[index + 1];
-                    if (next) document.getElementById(next.id).focus();
-                    else document.getElementById("saveBtn").click();
-                }
-            });
-
-            valTd.appendChild(input);
-            tr.appendChild(labelTd);
-            tr.appendChild(valTd);
-            fieldsBody.appendChild(tr);
-        });
-
-        document.getElementById(fields[0].id).focus();
-    }
-
-    // -------------------------------------------
-    // SAVE LAB DATA (with FIXED VALIDATION)
-    // -------------------------------------------
-    document.getElementById("saveBtn").onclick = async () => {
-
-        // Validate number fields (comma/colon fix)
-        function invalidNumber(val) {
-            if (val === "" || val === null) return false;
-            return !/^\d+(\.\d+)?$/.test(val);
-        }
-
-        for (const f of fields) {
-            const el = document.getElementById(f.id);
-            const v = el.value.trim();
-
-            if (invalidNumber(v)) {
-                alert(`Invalid value in: ${f.label}\nUse only numbers (0-9) and dot (.)`);
-                el.focus();
-                return; // STOP submit
-            }
-        }
-
-        // Build payload
-        const data = {};
+        if (!res.ok) return;
+        const data = await res.json();
         fields.forEach(f => {
-            const input = document.getElementById(f.id);
-            data[f.id] = input.value === "" ? null : input.value;
+            if (data && data[f] !== null && data[f] !== undefined) {
+                document.getElementById(f).value = data[f];
+            }
         });
+    }
 
-        // Perform PUT request
-        let response;
-        try {
-            response = await fetch(`/api/laboperations/${plantID}?date=${date}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-        } catch (e) {
-            alert("Network error while saving lab data.");
-            return;
-        }
+    document.getElementById("saveBtn").onclick = async () => {
+    const payload = { operationDate: date };
 
-        // ❌ If backend rejects → stop redirect and show real error
-        if (!response.ok) {
-            const errText = await response.text();
-            alert("❌ Lab Operation not saved:\n" + errText);
-            return;
-        }
+    fields.forEach(f => {
+        const el = document.getElementById(f);
+        const v = el.value.trim();
 
-        // SUCCESS
-        alert("✔ Laboratory Operation Updated Successfully!");
-        window.location.href = `index.html?date=${encodeURIComponent(date)}`;
-    };
+        payload[f] = v === "" ? null : (isNaN(Number(v)) ? null : Number(v));
+    });
 
-    loadOperation();
+    const res = await fetch(`/api/laboperations/${plantID}?date=${date}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
 
+    if (!res.ok) {
+        // ❌ NO validation error shown unless backend fails
+        return;
+    }
+
+    alert("✔ Laboratory Operation Updated Successfully!");
+    window.location.href = `index.html?date=${encodeURIComponent(date)}`;
+};
+
+    loadLab();
 </script>
 
 </body>
