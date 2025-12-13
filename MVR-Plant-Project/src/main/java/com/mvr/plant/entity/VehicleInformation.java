@@ -54,6 +54,45 @@ public class VehicleInformation
 
     private Boolean gpsStatus;
 
+    private String vehicleEngineNumber;
+
+    private String vehicleBatteryMake;
+
+    private String vehicleBatteryNumber;
+
+    private LocalDate vehicleBatteryPurchaseDate;
+
+    private LocalDate vehicleBatteryExpiryDate;
+
+    private String vehicleTyreFrontRightMake;
+
+    private String vehicleTyreFrontRightSerialNo;
+
+    private String vehicleTyreFrontLeftMake;
+
+    private String vehicleTyreFrontLeftSerialNo;
+
+    private String vehicleTyreRearRightInnerMake;
+
+    private String vehicleTyreRearRightInnerSerialNo;
+
+    private String vehicleTyreRearRightOuterMake;
+
+    private String vehicleTyreRearRightOuterSerialNo;
+
+    private String vehicleTyreRearLeftInnerMake;
+
+    private String vehicleTyreRearLeftInnerSerialNo;
+
+    private String vehicleTyreRearLeftOuterMake;
+
+    private String vehicleTyreRearLeftOuterSerialNo;
+
+    private String stepneyMake;
+
+    private String stepneySerialNo;
+
+
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     //@JsonManagedReference
     @JsonIgnore

@@ -788,6 +788,126 @@
                     </select>
                 </div>
             </div>
+
+            <div class="divider"></div>
+            <div class="section-title">Engine & Battery</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Engine Number</label>
+                    <input type="text" id="veh_${i}_engineNo">
+                </div>
+                <div class="form-group">
+                    <label>Battery Make</label>
+                    <input type="text" id="veh_${i}_batteryMake">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Battery Number</label>
+                    <input type="text" id="veh_${i}_batteryNo">
+                </div>
+                <div class="form-group">
+                    <label>Battery Purchase Date</label>
+                    <input type="date" id="veh_${i}_batteryPurchaseDate" max="${today}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Battery Expiry Date</label>
+                    <input type="date" id="veh_${i}_batteryExpiryDate">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-title">Tyre Details</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Front Right Tyre Make</label>
+                    <input type="text" id="veh_${i}_tfrMake">
+                </div>
+                <div class="form-group">
+                    <label>Front Right Tyre Serial</label>
+                    <input type="text" id="veh_${i}_tfrSerial">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Front Left Tyre Make</label>
+                    <input type="text" id="veh_${i}_tflMake">
+                </div>
+                <div class="form-group">
+                    <label>Front Left Tyre Serial</label>
+                    <input type="text" id="veh_${i}_tflSerial">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-title">Rear Tyres</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Rear Right Inner Tyre Make</label>
+                    <input type="text" id="veh_${i}_rrInnerMake">
+                </div>
+                <div class="form-group">
+                    <label>Rear Right Inner Tyre Serial</label>
+                    <input type="text" id="veh_${i}_rrInnerSerial">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Rear Right Outer Tyre Make</label>
+                    <input type="text" id="veh_${i}_rrOuterMake">
+                </div>
+                <div class="form-group">
+                    <label>Rear Right Outer Tyre Serial</label>
+                    <input type="text" id="veh_${i}_rrOuterSerial">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Rear Left Inner Tyre Make</label>
+                    <input type="text" id="veh_${i}_rlInnerMake">
+                </div>
+                <div class="form-group">
+                    <label>Rear Left Inner Tyre Serial</label>
+                    <input type="text" id="veh_${i}_rlInnerSerial">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Rear Left Outer Tyre Make</label>
+                    <input type="text" id="veh_${i}_rlOuterMake">
+                </div>
+                <div class="form-group">
+                    <label>Rear Left Outer Tyre Serial</label>
+                    <input type="text" id="veh_${i}_rlOuterSerial">
+                </div>
+            </div>
+
+
+            <div class="divider"></div>
+            <div class="section-title">Stepney</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Stepney Make</label>
+                    <input type="text" id="veh_${i}_stepneyMake">
+                </div>
+                <div class="form-group">
+                    <label>Stepney Serial No</label>
+                    <input type="text" id="veh_${i}_stepneySerial">
+                </div>
+            </div>
+
         `;
         vehicleContainer.appendChild(card);
     }
@@ -802,6 +922,32 @@
         document.getElementById(`veh_${i}_insDate`).value = v.insuranceDate || "";
         document.getElementById(`veh_${i}_insExpDate`).value = v.insuranceExpiryDate || "";
         document.getElementById(`veh_${i}_gpsStatus`).value = v.gpsStatus ? "yes" : "no";
+        document.getElementById(`veh_${i}_engineNo`).value = v.vehicleEngineNumber || "";
+        document.getElementById(`veh_${i}_batteryMake`).value = v.vehicleBatteryMake || "";
+        document.getElementById(`veh_${i}_batteryNo`).value = v.vehicleBatteryNumber || "";
+        document.getElementById(`veh_${i}_batteryPurchaseDate`).value = v.vehicleBatteryPurchaseDate || "";
+        document.getElementById(`veh_${i}_batteryExpiryDate`).value = v.vehicleBatteryExpiryDate || "";
+
+        document.getElementById(`veh_${i}_tfrMake`).value = v.vehicleTyreFrontRightMake || "";
+        document.getElementById(`veh_${i}_tfrSerial`).value = v.vehicleTyreFrontRightSerialNo || "";
+        document.getElementById(`veh_${i}_tflMake`).value = v.vehicleTyreFrontLeftMake || "";
+        document.getElementById(`veh_${i}_tflSerial`).value = v.vehicleTyreFrontLeftSerialNo || "";
+        document.getElementById(`veh_${i}_rrInnerMake`).value = v.vehicleTyreRearRightInnerMake || "";
+        document.getElementById(`veh_${i}_rrInnerSerial`).value = v.vehicleTyreRearRightInnerSerialNo || "";
+
+        document.getElementById(`veh_${i}_rrOuterMake`).value = v.vehicleTyreRearRightOuterMake || "";
+        document.getElementById(`veh_${i}_rrOuterSerial`).value = v.vehicleTyreRearRightOuterSerialNo || "";
+
+        document.getElementById(`veh_${i}_rlInnerMake`).value = v.vehicleTyreRearLeftInnerMake || "";
+        document.getElementById(`veh_${i}_rlInnerSerial`).value = v.vehicleTyreRearLeftInnerSerialNo || "";
+
+        document.getElementById(`veh_${i}_rlOuterMake`).value = v.vehicleTyreRearLeftOuterMake || "";
+        document.getElementById(`veh_${i}_rlOuterSerial`).value = v.vehicleTyreRearLeftOuterSerialNo || "";
+
+
+        document.getElementById(`veh_${i}_stepneyMake`).value = v.stepneyMake || "";
+        document.getElementById(`veh_${i}_stepneySerial`).value = v.stepneySerialNo || "";
+
     });
 
     goToStep(4);
@@ -966,7 +1112,32 @@
                 dateOfRegistration: document.getElementById(`veh_${i}_regDate`)?.value || null,
                 insuranceDate: document.getElementById(`veh_${i}_insDate`)?.value || null,
                 insuranceExpiryDate: document.getElementById(`veh_${i}_insExpDate`)?.value || null,
-                gpsStatus: document.getElementById(`veh_${i}_gpsStatus`)?.value === "yes"
+                gpsStatus: document.getElementById(`veh_${i}_gpsStatus`)?.value === "yes",
+                vehicleEngineNumber: document.getElementById(`veh_${i}_engineNo`)?.value || null,
+                vehicleBatteryMake: document.getElementById(`veh_${i}_batteryMake`)?.value || null,
+                vehicleBatteryNumber: document.getElementById(`veh_${i}_batteryNo`)?.value || null,
+                vehicleBatteryPurchaseDate: document.getElementById(`veh_${i}_batteryPurchaseDate`)?.value || null,
+                vehicleBatteryExpiryDate: document.getElementById(`veh_${i}_batteryExpiryDate`)?.value || null,
+
+                vehicleTyreFrontRightMake: document.getElementById(`veh_${i}_tfrMake`)?.value || null,
+                vehicleTyreFrontRightSerialNo: document.getElementById(`veh_${i}_tfrSerial`)?.value || null,
+                vehicleTyreFrontLeftMake: document.getElementById(`veh_${i}_tflMake`)?.value || null,
+                vehicleTyreFrontLeftSerialNo: document.getElementById(`veh_${i}_tflSerial`)?.value || null,
+                vehicleTyreRearRightInnerMake: document.getElementById(`veh_${i}_rrInnerMake`)?.value || null,
+                vehicleTyreRearRightInnerSerialNo: document.getElementById(`veh_${i}_rrInnerSerial`)?.value || null,
+
+                vehicleTyreRearRightOuterMake: document.getElementById(`veh_${i}_rrOuterMake`)?.value || null,
+                vehicleTyreRearRightOuterSerialNo: document.getElementById(`veh_${i}_rrOuterSerial`)?.value || null,
+
+                vehicleTyreRearLeftInnerMake: document.getElementById(`veh_${i}_rlInnerMake`)?.value || null,
+                vehicleTyreRearLeftInnerSerialNo: document.getElementById(`veh_${i}_rlInnerSerial`)?.value || null,
+
+                vehicleTyreRearLeftOuterMake: document.getElementById(`veh_${i}_rlOuterMake`)?.value || null,
+                vehicleTyreRearLeftOuterSerialNo: document.getElementById(`veh_${i}_rlOuterSerial`)?.value || null,
+
+                stepneyMake: document.getElementById(`veh_${i}_stepneyMake`)?.value || null,
+                stepneySerialNo: document.getElementById(`veh_${i}_stepneySerial`)?.value || null
+
             });
         }
         return vehicles;

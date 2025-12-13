@@ -472,35 +472,37 @@ function calcPlantStatus(op, vehicleOps) {
         if (op[f] !== null && op[f] !== undefined && op[f] !== "") filled++;
     });
 
-    /* ------------------ Solar Integration logic ------------------ */
-    const solar = op.solarIntegration;
+    /* ------------------ Solar logic (FROM PLANT MASTER) ------------------ */
+       const plantSolar = originalPlants.find(p => p.plantID === op.plantID)?.solar === true;
 
-    // radio always counted
-    total++;
-    if (solar === true || solar === false) filled++;
-
-    if (solar === true) {
-        const solarFields = [
-            "powerReadingAmImport",
-            "powerReadingAmExport",
-            "powerReadingPmImport",
-            "powerReadingPmExport"
-        ];
-        solarFields.forEach(f => {
+        /* Import readings ALWAYS counted */
+        ["powerReadingAmImport", "powerReadingPmImport"].forEach(f => {
             total++;
-            if (op[f] !== null && op[f] !== "") filled++;
+            if (op[f] !== null && op[f] !== undefined) filled++;
         });
 
-    } else if (solar === false) {
-        const solarNo = [
-            "powerReadingAmImport",
-            "powerReadingPmImport"
-        ];
-        solarNo.forEach(f => {
-            total++;
-            if (op[f] !== null && op[f] !== "") filled++;
-        });
-    }
+        /* Export readings ONLY if solar = true */
+        if (plantSolar) {
+            ["powerReadingAmExport", "powerReadingPmExport"].forEach(f => {
+                total++;
+                if (op[f] !== null && op[f] !== undefined) filled++;
+            });
+        }
+
+        /* ------------------ Power Bill logic ------------------ */
+
+        /* Checkbox ALWAYS counted */
+        total++;
+        if (op.powerBill === true || op.powerBill === false) filled++;
+
+        /* Bill fields ONLY if power bill = YES */
+        if (op.powerBill === true) {
+            ["lastBillDate", "TotalNoOfUnits", "totalBillAmount"].forEach(f => {
+                total++;
+                if (op[f] !== null && op[f] !== undefined) filled++;
+            });
+        }
+
 
     /* ------------------ Private Vehicle ------------------ */
     if (op.privateVehicle === true) {

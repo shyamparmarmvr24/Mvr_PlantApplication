@@ -48,7 +48,7 @@ public class PlantOperation
 
     private Double plantRunningHrs;
 
-    private Boolean solarIntegration;
+    //private Boolean solarIntegration;
 
     private Double powerReadingAmImport;
 
@@ -57,6 +57,14 @@ public class PlantOperation
     private Double powerReadingPmImport;
 
     private Double powerReadingPmExport;
+
+    private Boolean powerBill;
+
+    private LocalDate lastBillDate;
+
+    private Double TotalNoOfUnits;
+
+    private Double totalBillAmount;
 
     private Double powerConsumed;
 

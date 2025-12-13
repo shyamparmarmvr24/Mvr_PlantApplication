@@ -65,7 +65,6 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         if (plantOp.getSludgeProcessed() != null) count++;
         if (plantOp.getBiocharProduced() != null) count++;
         if (plantOp.getPlantRunningHrs() != null) count++;
-        if (plantOp.getSolarIntegration() != null) count++;
         if (plantOp.getPowerReadingAmImport() != null) count++;
         if (plantOp.getPowerReadingAmExport() != null) count++;
         if (plantOp.getPowerReadingPmImport() != null) count++;
@@ -77,10 +76,14 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         if (plantOp.getPolymerUsage() != null) count++;
         if (plantOp.getPillets() != null) count++;
         if (plantOp.getPilletsStock() != null) count++;
-        if (plantOp.getPolymerStock() != null) count++;//18
+        if (plantOp.getPolymerStock() != null) count++;
         if(plantOp.getPrivateVehicle() != null) count++;
         if(plantOp.getNoOfTripsPrivateVehicle() != null) count++;
         if(plantOp.getSludgeCollectPrivateVehicle() != null) count++;
+        if(plantOp.getPowerBill() != null) count++;
+        if(plantOp.getLastBillDate() != null) count++;
+        if(plantOp.getTotalNoOfUnits() != null) count++;
+        if(plantOp.getTotalBillAmount() != null) count++;
 
         existing.setPrivateVehicle(plantOp.getPrivateVehicle());
         existing.setNoOfTripsPrivateVehicle(plantOp.getNoOfTripsPrivateVehicle());
@@ -91,39 +94,18 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         existing.setSludgeTankLevelPm(plantOp.getSludgeTankLevelPm());
 
 
-//        // 🔥 FETCH ALL VEHICLE OPERATIONS FOR THAT DATE
-//        List<VehicleOperation> allVehicles = vehicleOpRepo.findByPlantIdAndDate(plantId, date);
-
-//        for (VehicleOperation vo : allVehicles) {
-//            if (vo == null) continue;
-//
-//            // Always count normal trips + sludge
-//            totalTrips += vo.getNoOfTrips() == null ? 0 : vo.getNoOfTrips();
-//            totalSludge += vo.getSludgeCollect() == null ? 0 : vo.getSludgeCollect();
-//            // If private, count extra fields
-//        }
-
-//        double totalSludge = 0.0;
-//        int totalTrips = 0;
-//
-//        boolean isPrivate = Boolean.TRUE.equals(plantOp.getPrivateVehicle());
-//        if (isPrivate) {
-//            totalTrips += plantOp.getNoOfTripsPrivateVehicle() == null ? 0 : plantOp.getNoOfTripsPrivateVehicle();
-//            totalSludge += plantOp.getSludgeCollectPrivateVehicle() == null ? 0 : plantOp.getSludgeCollectPrivateVehicle();
-//        }
-//
-//        // UPDATE PLANT TOTALS
-//        existing.setTotalNoOfTrips(totalTrips);
-//        existing.setSludgeReceived(totalSludge);
-
         existing.setSludgeProcessed(plantOp.getSludgeProcessed());
         existing.setBiocharProduced(plantOp.getBiocharProduced());
         existing.setPlantRunningHrs(plantOp.getPlantRunningHrs());
-        existing.setSolarIntegration(plantOp.getSolarIntegration());
         existing.setPowerReadingAmImport(plantOp.getPowerReadingAmImport());
         existing.setPowerReadingAmExport(plantOp.getPowerReadingAmExport());
         existing.setPowerReadingPmImport(plantOp.getPowerReadingPmImport());
         existing.setPowerReadingPmExport(plantOp.getPowerReadingPmExport());
+
+        existing.setPowerBill(plantOp.getPowerBill());
+        existing.setLastBillDate(plantOp.getLastBillDate());
+        existing.setTotalNoOfUnits(plantOp.getTotalNoOfUnits());
+        existing.setTotalBillAmount(plantOp.getTotalBillAmount());
 
         if (plantOp.getPowerReadingAmImport() != null && plantOp.getPowerReadingPmImport() != null) {
             existing.setPowerConsumed(Math.abs(plantOp.getPowerReadingPmImport() - plantOp.getPowerReadingAmImport()));

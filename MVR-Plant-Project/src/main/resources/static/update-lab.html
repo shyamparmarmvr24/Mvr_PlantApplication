@@ -196,9 +196,25 @@
     const plantID = params.get("plantID");
     const date = params.get("date");
 
+    async function loadPlantInfo() {
+    let plantName = "-";
+
+    try {
+        const res = await fetch(`/api/plants/${plantID}`);
+        if (res.ok) {
+            const plant = await res.json();
+            plantName = plant.plantName || "-";
+        }
+    } catch (e) {
+        console.error("Failed to load plant name", e);
+    }
+
     document.getElementById("infoBox").innerHTML =
         `Date: <span style="color:#f97316">${date}</span> |
-         Plant ID: <span style="color:#059669">${plantID}</span>`;
+         Plant ID: <span style="color:#059669">${plantID}</span> |
+         Plant Name: <span style="color:#0369a1">${plantName}</span>`;
+}
+
 
     document.getElementById("backBtn").onclick = () => {
         window.location.href = `index.html?date=${encodeURIComponent(date)}`;
@@ -250,7 +266,9 @@
     window.location.href = `index.html?date=${encodeURIComponent(date)}`;
 };
 
+    loadPlantInfo();
     loadLab();
+
 </script>
 
 </body>

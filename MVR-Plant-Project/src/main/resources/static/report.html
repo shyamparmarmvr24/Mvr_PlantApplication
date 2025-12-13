@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
@@ -7,7 +8,6 @@
     <style>
         /* ================= ROOT ================= */
         :root{
-
           --bg:#f4f7fc;
           --card:#ffffff;
           --accent:#b31818;
@@ -22,9 +22,8 @@
         body{
           margin:18px;
           background:var(--bg);
-<!--          font-family:"Segoe UI", Roboto, Arial, sans-serif;-->
           color:#000;
-           font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif;
         }
 
         #reportRoot{width:100%}
@@ -36,6 +35,18 @@
           justify-content:space-between;
           align-items:flex-start;
           margin-bottom:10px;
+        }
+        /* force header alignment consistency */
+        .header .left{
+          justify-content:flex-start;
+        }
+
+        .header .title-block{
+          text-align:center;
+        }
+
+        .header .right{
+          text-align:right;
         }
 
         .left{display:flex;align-items:center;gap:18px;flex:1}
@@ -67,6 +78,7 @@
           border:0;
           padding:8px 12px;
           border-radius:6px;
+          cursor:pointer;
         }
 
         .btn.ghost{
@@ -79,31 +91,29 @@
 
         /* ================= TABLE ================= */
         table{
-
           width:100%;
           border-collapse:collapse;
           table-layout:fixed;
           background:#fff;
           border:1.5px solid #000;
-           font-family: 'Times New Roman', Times, serif;
-<!--          font-family:"Segoe UI", Roboto, Arial, sans-serif;-->
+          font-family: 'Times New Roman', Times, serif;
         }
 
         /* ===== HEADER (SCREEN + PRINT CONSISTENT) ===== */
         thead th{
-<!--          font-family:"Segoe UI", Roboto, Arial, sans-serif !important;-->
-           font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif;
           font-weight:600;
-          font-size:12px;
-          height:38px;
-          line-height:1.15;
+          font-size:11px;
+          height:auto;
+          min-height:45px;
+          line-height:1.3;
           text-align:center;
           vertical-align:middle;
           border:1px solid #000;
           border-bottom:2px solid #000;
           white-space:normal;
-          word-break:keep-all;
-          padding:6px 4px;
+          padding:6px 3px;
+          overflow:visible;
         }
 
         /* ===== BODY CELLS ===== */
@@ -114,13 +124,12 @@
           padding:6px 4px;
           text-align:center;
           vertical-align:middle;
-           font-family: 'Times New Roman', Times, serif;
-<!--          font-family:"Segoe UI", Roboto, Arial, sans-serif;-->
+          font-family: 'Times New Roman', Times, serif;
         }
 
         /* numeric tightening */
         td.center,
-        td.center{
+        th.center{
           padding-left:2px !important;
           padding-right:2px !important;
           white-space:nowrap;
@@ -146,7 +155,7 @@
         /* ================= COLUMN WIDTHS ================= */
         col.col-sid{width:4%}
         col.col-district{width:8%}
-        col.col-plant{width:14%}
+        col.col-plant{width:12%}
         col.col-kld{width:3.5%}
         col.col-before,
         col.col-rec,
@@ -167,6 +176,44 @@
           line-height:1.1;
         }
 
+        /* ================= EXPORT CONSISTENCY ================= */
+        .export-mode {
+          background: #fff !important;
+        }
+
+        .export-mode .controls,
+        .export-mode .no-print {
+          display: none !important;
+        }
+
+        .export-mode table,
+        .export-mode thead,
+        .export-mode tbody,
+        .export-mode tfoot,
+        .export-mode th,
+        .export-mode td {
+          font-family: 'Times New Roman', Times, serif !important;
+          font-size: 9.5px !important;
+          line-height: 1.1 !important;
+          font-weight: 400 !important;
+          color: #000 !important;
+          border: 1px solid #000 !important;
+        }
+
+        .export-mode thead th {
+          font-weight: 600 !important;
+          border-bottom: 2px solid #000 !important;
+        }
+
+        .export-mode tfoot td {
+          font-weight: 600 !important;
+        }
+
+        .export-mode .table-wrap {
+          overflow: visible !important;
+          max-height: none !important;
+        }
+
         /* ================= PRINT ================= */
         @media print{
           @page{size:A4 landscape;margin:6mm}
@@ -178,62 +225,26 @@
 
           .controls,.no-print{display:none}
 
-<!--          table th,-->
-<!--          table td{-->
-<!--            font-size:9.5px;-->
-<!--            padding:3px 4px;-->
-<!--            border:1px solid #000;-->
-<!--            text-align:center;-->
-<!--            vertical-align:middle;-->
-<!--          }-->
+          table,
+          thead,
+          tbody,
+          tfoot,
+          th,
+          td{
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 9.5px !important;
+            line-height: 1.1 !important;
+            font-weight: 400;
+          }
 
-<!--          tr,td,th{-->
-<!--            page-break-inside:avoid;-->
-<!--            break-inside:avoid;-->
-<!--          }-->
-                table,
-                  thead,
-                  tbody,
-                  tfoot,
-                  th,
-                  td{
-                   font-family: 'Times New Roman', Times, serif;
-<!--                    font-family: "Segoe UI", Roboto, Arial, sans-serif !important;-->
-                    font-size: 9.5px !important;
-                    line-height: 1.1 !important;
-                    font-weight: 400;
-                  }
-                  thead th{
-                    font-weight: 600 !important;
-                  }
+          thead th{
+            font-weight: 600 !important;
+          }
 
           *{
             -webkit-print-color-adjust:exact;
             color-adjust:exact;
           }
-                      /* ================= FORCE PRINT STYLE (PDF + EXCEL) ================= */
-            .force-print table,
-            .force-print thead,
-            .force-print tbody,
-            .force-print tfoot,
-            .force-print th,
-            .force-print td{
-              font-family: 'Times New Roman', Times, serif !important;
-              font-size: 9.5px !important;
-              line-height: 1.1 !important;
-              font-weight: 400 !important;
-              color: #000 !important;
-            }
-
-            .force-print thead th{
-              font-weight: 600 !important;
-              border-bottom: 2px solid #000 !important;
-            }
-
-            .force-print .controls,
-            .force-print .no-print{
-              display: none !important;
-            }
         }
     </style>
 
@@ -245,7 +256,7 @@
     <div class="container">
         <div class="header">
             <div class="left">
-                <img id="logoImg" class="logo" src="https://mvr-attendance.web.app/MVR_Company_Logo%20copy.png" alt="MVR Logo" />
+                <img id="logoImg" class="logo" src="mvrlogo.png" alt="MVR Logo" />
                 <div class="title-block">
                     <h1>MVR TECHNOLOGY</h1>
                     <div class="addr">
@@ -269,17 +280,15 @@
             <div class="controls no-print">
                 <input id="dateInput" type="date"/>
                 <button id="loadBtn" class="btn">Load</button>
-                <button id="csvBtn" class="btn">Download CSV</button>
+                <button id="excelBtn" class="btn">Download Excel</button>
                 <button id="downloadPdfBtn" class="btn">Download PDF</button>
                 <button id="printBtn" class="btn ghost">Print</button>
-
             </div>
 
             <div id="notice" style="color:#b00;margin-bottom:8px;font-size:13px"></div>
 
             <div class="table-wrap" id="tableWrap">
                 <table id="opsTable" aria-live="polite">
-                    <!-- colgroup gives the browser width hints so layout is stable -->
                     <colgroup>
                         <col class="col-sid">
                         <col class="col-district">
@@ -301,14 +310,14 @@
                         <th>District</th>
                         <th>Plant name</th>
                         <th class="center">KLD</th>
-                        <th class="center">Before STL (L)</th>
-                        <th class="center">Sludge Received (L)</th>
-                        <th class="center">Sludge Processsed (L)</th>
-                        <th class="center">After STL (L)</th>
-                        <th class="center">Plant run hrs</th>
-                        <th class="center">Biochar quantity (kgs)</th>
-                        <th class="center">Power (kWh)</th>
-                        <th class="center">DG Readings</th>
+                        <th class="center">Before STL<br/>(L)</th>
+                        <th class="center">Sludge<br/>Received (L)</th>
+                        <th class="center">Sludge<br/>Processsed (L)</th>
+                        <th class="center">After STL<br/>(L)</th>
+                        <th class="center">Plant run<br/>hrs</th>
+                        <th class="center">Biochar<br/>quantity (kgs)</th>
+                        <th class="center">Power<br/>(kWh)</th>
+                        <th class="center">DG<br/>Readings</th>
                         <th>Remarks</th>
                     </tr>
                     </thead>
@@ -323,390 +332,583 @@
 </div>
 
 <script>
-    /* ---------------- CONFIG ---------------- */
-    const API_BASE = 'http://172.18.99.96:8080/api/operations/date?date=';
-    const PLANT_API = 'http://172.18.99.96:8080/api/plants';
+    (function() {
+        'use strict';
 
-    const dateInput = document.getElementById('dateInput');
-    const loadBtn   = document.getElementById('loadBtn');
-    const csvBtn    = document.getElementById('csvBtn');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    const printBtn  = document.getElementById('printBtn');
-    const opsBody   = document.getElementById('opsBody');
-    const opsFoot   = document.getElementById('opsFoot');
-    const reportDateEl = document.getElementById('reportDate');
-    const fetchedAtEl  = document.getElementById('fetchedAt');
-    const noticeEl     = document.getElementById('notice');
-    const tableWrap = document.getElementById('tableWrap');
-    const reportRoot = document.getElementById('reportRoot');
+        const API_BASE = 'http://172.18.99.96:8080/api/operations/date?date=';
+        const PLANT_API = 'http://172.18.99.96:8080/api/plants';
 
-    /* ---------------- HELPERS ---------------- */
-function formatNumberNice(v){
-  if (v === null || v === undefined || v === '') return '-';
+        const dateInput = document.getElementById('dateInput');
+        const loadBtn = document.getElementById('loadBtn');
+        const excelBtn = document.getElementById('excelBtn');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const printBtn = document.getElementById('printBtn');
+        const opsBody = document.getElementById('opsBody');
+        const opsFoot = document.getElementById('opsFoot');
+        const reportDateEl = document.getElementById('reportDate');
+        const fetchedAtEl = document.getElementById('fetchedAt');
+        const noticeEl = document.getElementById('notice');
+        const tableWrap = document.getElementById('tableWrap');
+        const reportRoot = document.getElementById('reportRoot');
 
-  const n = Number(v);
-  if (isNaN(n)) return v;
-
-  // round to max 2 decimals
-  const rounded = Math.round(n * 100) / 100;
-
-  // Indian number formatting
-  return rounded.toLocaleString('en-IN', {
-    minimumFractionDigits: Number.isInteger(rounded) ? 0 : 2,
-    maximumFractionDigits: 2
-  });
-}
-
-    function csvNumber(v){ const n = Number(v); return isNaN(n)?'':n; }
-    function isoDateToDisplay(d){
-      if(!d) return '';
-      const dt = new Date(d);
-      if(isNaN(dt)) return d;
-      const yyyy = dt.getFullYear(), mm = String(dt.getMonth()+1).padStart(2,'0'), dd = String(dt.getDate()).padStart(2,'0');
-      return `${dd}/${mm}/${yyyy}`;
-    }
-
-    /* ---------------- PLANT MASTER ---------------- */
-    window.__plantMap = {};
-    async function fetchPlantMaster(){
-      try{
-        const resp = await fetch(PLANT_API, {cache:'no-store'});
-        if(!resp.ok) throw new Error('HTTP ' + resp.status);
-        const list = await resp.json();
-        if(!Array.isArray(list)) return;
-
-        // ONLY include plants that have permanentPower === true (or permanent_power === true)
-        list.forEach(item => {
-          const permanent = (item.permanentPower !== undefined) ? item.permanentPower
-                          : (item.permanent_power !== undefined) ? item.permanent_power
-                          : null;
-          if(permanent !== true) return; // skip non-permanent-power plants
-
-          const id = getBest(item.plantID, item.plantId, item.id, item.plant_id);
-          if(id === null || id === undefined) return;
-          const idStr = String(id);
-          const name = getBest(item.plantName, item.name, item.plant_name, item.plant) ?? '';
-          const district = getBest(item.district, item.stateCode, item.District) ?? '';
-          const kld = getBest(item.kld, item.KLD) ?? '';
-          window.__plantMap[idStr] = { name: String(name), district: String(district), kld: String(kld) };
-        });
-        console.info('Plant master loaded (permanentPower only):', Object.keys(window.__plantMap).length, 'entries');
-      }catch(err){
-        console.warn('Plant master fetch failed:', err);
-        noticeEl.textContent = 'Warning: could not fetch plant master (CORS/network). Plant names will show plantId fallback.';
-        setTimeout(()=> noticeEl.textContent = '',4000);
-      }
-    }
-
-    function getBest(...cands){
-      for(const v of cands){
-        if(v !== undefined && v !== null && String(v).trim() !== '') return v;
-      }
-      return null;
-    }
-
-    function getOpField(op,...keys){
-      for(const k of keys) if(op[k] !== undefined && op[k] !== null) return op[k];
-      return null;
-    }
-
-    /* ---------------- ROW EXTRACTION — direct field mapping (no formulas) ---------------- */
-    function extractRow(item){
-      const op = item.operation ?? item;
-      const plantId = getBest(item.plantId, item.plantID, item.plant_id, op.plantId, op.plantID);
-      const meta = (plantId !== undefined && plantId !== null) ? window.__plantMap[String(plantId)] : null;
-
-      const district = getBest(meta?.district, getOpField(op,'district','District','stateCode'), '-');
-      const plantName = getBest(meta?.name, getOpField(op,'plantName','plant','PlantName','name'), plantId) ?? (plantId ?? '-');
-      const kld = getBest(meta?.kld, getOpField(op,'kld','KLD'), '-');
-
-      const beforeSTL = getOpField(op, 'sludgeTankLevelAm', 'sludgeTankLevelAM', 'sludge_tank_level_am');
-      const sludgeReceived = getOpField(op, 'sludgeReceived', 'sludge_received');
-      const sludgeProcessed = getOpField(op, 'sludgeProcessed', 'sludge_processed');
-      const afterSTL = getOpField(op, 'sludgeTankLevelPm', 'sludgeTankLevelPM', 'sludge_tank_level_pm');
-
-      const plantRunHrs = getOpField(op, 'plantRunningHrs', 'plant_run_hrs', 'plantRunHrs');
-      const biocharProduced = getOpField(op, 'biocharProduced', 'biochar_quantity');
-      const power = (op.powerConsumed !== undefined && op.powerConsumed !== null) ? op.powerConsumed : getOpField(op, 'powerKwh', 'power');
-      const dgHours = getOpField(op, 'dgRunHours', 'dg_run_hours', 'dgRunHrs', 'dg_runhrs');
-      const remarks = getOpField(op, 'remarks', 'Remarks', 'note');
-
-      return {
-        plantId,
-        district,
-        plantName,
-        kld,
-        beforeSTL,
-        sludgeReceived,
-        sludgeProcessed,
-        afterSTL,
-        plantRunHrs,
-        biocharProduced,
-        power,
-        dgHours,
-        remarks
-      };
-    }
-
-    /* ---------------- RENDER (with totals) ---------------- */
-    function clearTable(){
-      opsBody.innerHTML = '<tr><td colspan="13" class="center" style="padding:28px 10px;color:var(--muted)">No data loaded — choose a date and click Load</td></tr>';
-      opsFoot.innerHTML = '';
-      reportDateEl.textContent = '—';
-      fetchedAtEl.textContent = '—';
-      window.__lastFetchedRows = [];
-      reportRoot.classList.remove('compact-print');
-      tableWrap.style.overflow = '';
-      tableWrap.style.maxHeight = '';
-    }
-
-    function makePrintableView(){
-      tableWrap.style.overflow = 'visible';
-      tableWrap.style.maxHeight = 'none';
-      reportRoot.classList.add('compact-print');
-      noticeEl.textContent = 'Table expanded for printing — use browser Zoom to fit to A4 if needed.';
-      setTimeout(()=> noticeEl.textContent = '', 4000);
-    }
-
-    function toNumber(v){
-  if(v === null || v === undefined || v === '') return 0;
-  const n = Number(String(v).replace(/,/g,''));
-  return isNaN(n) ? 0 : n;   // ✅ NO rounding here
-}
-
-    function renderData(data){
-      let items = [];
-      if(Array.isArray(data)) items = data;
-      else if(data && (data.operation || data.plantId)) items = [data];
-      else if(typeof data === 'object') items = [data];
-      else { clearTable(); return; }
-
-      // FILTER: keep only operations which belong to permanent-power plants (present in __plantMap)
-      items = items.filter(it => {
-        const op = it.operation ?? it;
-        const id = getBest(it.plantId, it.plantID, it.plant_id, op.plantId, op.plantID);
-        if(id === null || id === undefined) return false;
-        return window.__plantMap[String(id)] !== undefined;
-      });
-
-      const extracted = items.map(it => {
-        const r = extractRow(it);
-        const numericPlantId = Number(getBest(r.plantId, it.plantId, it.plantID, it.plant_id)) || Number.POSITIVE_INFINITY;
-        return { ...r, numericPlantId };
-      });
-
-      extracted.sort((a,b) => (a.numericPlantId - b.numericPlantId) || String(a.plantName).localeCompare(String(b.plantName)));
-
-      opsBody.innerHTML = '';
-      const rowsForCsv = [];
-
-      let totalBefore = 0;
-      let totalReceived = 0;
-      let totalProcessed = 0;
-      let totalAfter = 0;
-      let totalRunHrs = 0;
-      let totalBiochar = 0;
-
-      extracted.forEach((r, i) => {
-        const serial = i + 1;
-
-        let plantIdDisplay = '-';
-        if (r.plantId !== undefined && r.plantId !== null && String(r.plantId).trim() !== '') {
-          plantIdDisplay = String(r.plantId);
-        } else if (Number.isFinite(r.numericPlantId) && r.numericPlantId !== Number.POSITIVE_INFINITY) {
-          plantIdDisplay = String(r.numericPlantId);
+        function formatNumberNice(v) {
+            if (v === null || v === undefined || v === '') return '-';
+            const n = Number(v);
+            if (isNaN(n)) return v;
+            const rounded = Math.round(n * 100) / 100;
+            return rounded.toLocaleString('en-IN', {
+                minimumFractionDigits: Number.isInteger(rounded) ? 0 : 2,
+                maximumFractionDigits: 2
+            });
         }
 
-        totalBefore += toNumber(r.beforeSTL);
-        totalReceived += toNumber(r.sludgeReceived);
-        totalProcessed += toNumber(r.sludgeProcessed);
-        totalAfter += toNumber(r.afterSTL);
-        totalRunHrs += toNumber(r.plantRunHrs);
-        totalBiochar += toNumber(r.biocharProduced);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="center">${serial}/${plantIdDisplay}</td>
-          <td>${r.district ?? '-'}</td>
-          <td class="plant-name" title="${(r.plantName ?? '-') }">${r.plantName ?? '-'}</td>
-          <td class="center">${r.kld ?? '-'}</td>
-
-          <td class="center">${r.beforeSTL !== undefined && r.beforeSTL !== null ? formatNumberNice(r.beforeSTL) : '-'}</td>
-          <td class="center">${r.sludgeReceived !== undefined && r.sludgeReceived !== null ? formatNumberNice(r.sludgeReceived) : '-'}</td>
-          <td class="center">${r.sludgeProcessed !== undefined && r.sludgeProcessed !== null ? formatNumberNice(r.sludgeProcessed) : '-'}</td>
-          <td class="center">${r.afterSTL !== undefined && r.afterSTL !== null ? formatNumberNice(r.afterSTL) : '-'}</td>
-
-          <td class="center">${r.plantRunHrs !== undefined && r.plantRunHrs !== null ? r.plantRunHrs : '-'}</td>
-          <td class="center">${r.biocharProduced !== undefined && r.biocharProduced !== null ? formatNumberNice(r.biocharProduced) : '-'}</td>
-          <td class="center">${r.power !== undefined && r.power !== null ? formatNumberNice(r.power) : '-'}</td>
-          <td class="center">${r.dgHours !== undefined && r.dgHours !== null ? formatNumberNice(r.dgHours) : '-'}</td>
-
-          <td class="remarks">${r.remarks ?? '-'}</td>
-        `;
-        opsBody.appendChild(tr);
-
-        rowsForCsv.push({
-          serial, plantId: plantIdDisplay,
-          district: r.district, plantName: r.plantName, kld: r.kld,
-          beforeSTL: r.beforeSTL, sludgeReceived: r.sludgeReceived, sludgeProcessed: r.sludgeProcessed,
-          afterSTL: r.afterSTL, plantRunHrs: r.plantRunHrs, biocharProduced: r.biocharProduced,
-          power: r.power, dgHours: r.dgHours, remarks: r.remarks
-        });
-      });
-
-      opsFoot.innerHTML = `
-        <tr>
-          <td class="center" colspan="4">TOTAL</td>
-          <td class="center">${formatNumberNice(totalBefore)}</td>
-          <td class="center">${formatNumberNice(totalReceived)}</td>
-          <td class="center">${formatNumberNice(totalProcessed)}</td>
-          <td class="center">${formatNumberNice(totalAfter)}</td>
-         <td class="center">${formatNumberNice(totalRunHrs)}</td>
-          <td class="center">${formatNumberNice(totalBiochar)}</td>
-          <td class="center">-</td>
-          <td class="center">-</td>
-          <td></td>
-        </tr>`;
-
-      window.__lastFetchedRows = rowsForCsv;
-      makePrintableView();
-    }
-        function downloadExcel(){
-  // ✅ FORCE PRINT STYLE
-  reportRoot.classList.add('force-print');
-
-  const html = `
-    <html>
-      <head>
-        <meta charset="UTF-8">
-      </head>
-      <body>
-        ${document.getElementById('opsTable').outerHTML}
-      </body>
-    </html>
-  `;
-
-  const blob = new Blob([html], {
-    type: 'application/vnd.ms-excel'
-  });
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-
-  a.href = url;
-  a.download = `plant-operations-${dateInput.value || new Date().toISOString().slice(0,10)}.xls`;
-
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  URL.revokeObjectURL(url);
-  reportRoot.classList.remove('force-print');
-}
-    /* ---------------- CSV ---------------- */
-    function toCSV(rows){
-      const hdr = ['S/ID','PlantId','District','Plant name','KLD','Before STL (L)','Sludge Received (L)','Sludge Processsed (L)','After STL (L)','Plant run hrs','Biochar quantity (kgs)','Power(kWh)','DG Run Hours','Remarks'];
-      const lines = [hdr.join(',')];
-      rows.forEach(r=>{
-        const row = [
-          `${r.serial}/${r.plantId}`,
-          `"${(r.plantId ?? '').toString().replace(/"/g,'""')}"`,
-          `"${(r.district ?? '').toString().replace(/"/g,'""')}"`,
-          `"${(r.plantName ?? '').toString().replace(/"/g,'""')}"`,
-          (r.kld ?? ''),
-          csvNumber(r.beforeSTL),
-          csvNumber(r.sludgeReceived),
-          csvNumber(r.sludgeProcessed),
-          csvNumber(r.afterSTL),
-          `"${(r.plantRunHrs ?? '').toString().replace(/"/g,'""')}"`,
-          csvNumber(r.biocharProduced),
-          csvNumber(r.power),
-          csvNumber(r.dgHours),
-          `"${(r.remarks ?? '').toString().replace(/"/g,'""')}"` ];
-        lines.push(row.join(','));
-      });
-      return '\uFEFF' + lines.join('\n');
-    }
-
-    /* ---------------- FETCH ---------------- */
-    async function loadForDate(dateStr){
-      noticeEl.textContent = '';
-      opsBody.innerHTML = '<tr><td colspan="13" class="center" style="padding:20px 10px;color:var(--muted)">Loading…</td></tr>';
-      reportDateEl.textContent = isoDateToDisplay(dateStr) || '—';
-      try{
-        const resp = await fetch(API_BASE + encodeURIComponent(dateStr), {cache:'no-store'});
-        if(!resp.ok){
-          const txt = await resp.text();
-          throw new Error('HTTP '+resp.status+' — '+txt);
+        function csvNumber(v) {
+            const n = Number(v);
+            return isNaN(n) ? '' : n;
         }
-        const data = await resp.json();
-        renderData(data);
-        fetchedAtEl.textContent = new Date().toLocaleString();
-      }catch(err){
-        opsBody.innerHTML = `<tr><td colspan="13" class="center" style="padding:20px 10px;color:#b00">Failed to fetch: ${err.message}</td></tr>`;
-        noticeEl.textContent = 'If you see a CORS error, host this page on the same origin or enable CORS on the API server.';
-        fetchedAtEl.textContent = '-';
-        console.error(err);
-      }
-    }
 
-    loadBtn.addEventListener('click', async ()=>{
-      const dateVal = dateInput.value;
-      if(!dateVal){ alert('Please pick a date (YYYY-MM-DD)'); return; }
-      await fetchPlantMaster();
-      await loadForDate(dateVal);
-    });
+        function isoDateToDisplay(d) {
+            if (!d) return '';
+            const dt = new Date(d);
+            if (isNaN(dt)) return d;
+            const yyyy = dt.getFullYear();
+            const mm = String(dt.getMonth() + 1).padStart(2, '0');
+            const dd = String(dt.getDate()).padStart(2, '0');
+            return dd + '/' + mm + '/' + yyyy;
+        }
 
-    csvBtn.addEventListener('click', ()=>{
-      const rows = window.__lastFetchedRows;
-      if(!rows || rows.length===0){ alert('No data to download. Load a date first.'); return; }
-      const csv = toCSV(rows);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url;
-      const dateStr = dateInput.value || (new Date()).toISOString().slice(0,10);
-      a.download = `plant-operations-${dateStr}.csv`;
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    });
+        window.__plantMap = {};
 
-   /* ---------- Download PDF (A4 landscape) ---------- */
-async function downloadPdf(){
-  if(typeof html2pdf === 'undefined'){
-    noticeEl.textContent = 'PDF library unavailable';
-    setTimeout(()=> noticeEl.textContent = '',5000);
+        async function fetchPlantMaster() {
+            try {
+                const resp = await fetch(PLANT_API, { cache: 'no-store' });
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const list = await resp.json();
+                if (!Array.isArray(list)) return;
+
+                list.forEach(item => {
+                    const permanent = (item.permanentPower !== undefined) ? item.permanentPower : (item.permanent_power !== undefined) ? item.permanent_power : null;
+                    if (permanent !== true) return;
+
+                    const id = getBest(item.plantID, item.plantId, item.id, item.plant_id);
+                    if (id === null || id === undefined) return;
+                    const idStr = String(id);
+                    const name = getBest(item.plantName, item.name, item.plant_name, item.plant) || '';
+                    const district = getBest(item.district, item.stateCode, item.District) || '';
+                    const kld = getBest(item.kld, item.KLD) || '';
+                    window.__plantMap[idStr] = { name: String(name), district: String(district), kld: String(kld) };
+                });
+                console.info('Plant master loaded:', Object.keys(window.__plantMap).length, 'entries');
+            } catch (err) {
+                console.warn('Plant master fetch failed:', err);
+                noticeEl.textContent = 'Warning: could not fetch plant master.';
+                setTimeout(function() { noticeEl.textContent = ''; }, 4000);
+            }
+        }
+
+        function getBest() {
+            for (var i = 0; i < arguments.length; i++) {
+                var v = arguments[i];
+                if (v !== undefined && v !== null && String(v).trim() !== '') return v;
+            }
+            return null;
+        }
+
+        function getOpField(op) {
+            for (var i = 1; i < arguments.length; i++) {
+                var k = arguments[i];
+                if (op[k] !== undefined && op[k] !== null) return op[k];
+            }
+            return null;
+        }
+
+        function extractRow(item) {
+            const op = item.operation || item;
+            const plantId = getBest(item.plantId, item.plantID, item.plant_id, op.plantId, op.plantID);
+            const meta = (plantId !== undefined && plantId !== null) ? window.__plantMap[String(plantId)] : null;
+
+            const district = getBest(meta ? meta.district : null, getOpField(op, 'district', 'District', 'stateCode'), '-');
+            const plantName = getBest(meta ? meta.name : null, getOpField(op, 'plantName', 'plant', 'PlantName', 'name'), plantId) || (plantId || '-');
+            const kld = getBest(meta ? meta.kld : null, getOpField(op, 'kld', 'KLD'), '-');
+
+            const beforeSTL = getOpField(op, 'sludgeTankLevelAm', 'sludgeTankLevelAM', 'sludge_tank_level_am');
+            const sludgeReceived = getOpField(op, 'sludgeReceived', 'sludge_received');
+            const sludgeProcessed = getOpField(op, 'sludgeProcessed', 'sludge_processed');
+            const afterSTL = getOpField(op, 'sludgeTankLevelPm', 'sludgeTankLevelPM', 'sludge_tank_level_pm');
+
+            const plantRunHrs = getOpField(op, 'plantRunningHrs', 'plant_run_hrs', 'plantRunHrs');
+            const biocharProduced = getOpField(op, 'biocharProduced', 'biochar_quantity');
+            const power = (op.powerConsumed !== undefined && op.powerConsumed !== null) ? op.powerConsumed : getOpField(op, 'powerKwh', 'power');
+            const dgHours = getOpField(op, 'dgRunHours', 'dg_run_hours', 'dgRunHrs', 'dg_runhrs');
+            const remarks = getOpField(op, 'remarks', 'Remarks', 'note');
+
+            return {
+                plantId: plantId,
+                district: district,
+                plantName: plantName,
+                kld: kld,
+                beforeSTL: beforeSTL,
+                sludgeReceived: sludgeReceived,
+                sludgeProcessed: sludgeProcessed,
+                afterSTL: afterSTL,
+                plantRunHrs: plantRunHrs,
+                biocharProduced: biocharProduced,
+                power: power,
+                dgHours: dgHours,
+                remarks: remarks
+            };
+        }
+
+        function clearTable() {
+            opsBody.innerHTML = '<tr><td colspan="13" class="center" style="padding:28px 10px;color:var(--muted)">No data loaded — choose a date and click Load</td></tr>';
+            opsFoot.innerHTML = '';
+            reportDateEl.textContent = '—';
+            fetchedAtEl.textContent = '—';
+            window.__lastFetchedRows = [];
+            reportRoot.classList.remove('compact-print');
+            tableWrap.style.overflow = '';
+            tableWrap.style.maxHeight = '';
+        }
+
+        function makePrintableView() {
+            tableWrap.style.overflow = 'visible';
+            tableWrap.style.maxHeight = 'none';
+            reportRoot.classList.add('compact-print');
+            noticeEl.textContent = 'Table expanded for printing';
+            setTimeout(function() { noticeEl.textContent = ''; }, 4000);
+        }
+
+        function toNumber(v) {
+            if (v === null || v === undefined || v === '') return 0;
+            const n = Number(String(v).replace(/,/g, ''));
+            return isNaN(n) ? 0 : n;
+        }
+
+        function renderData(data) {
+            var items = [];
+            if (Array.isArray(data)) {
+                items = data;
+            } else if (data && (data.operation || data.plantId)) {
+                items = [data];
+            } else if (typeof data === 'object') {
+                items = [data];
+            } else {
+                clearTable();
+                return;
+            }
+
+            items = items.filter(function(it) {
+                const op = it.operation || it;
+                const id = getBest(it.plantId, it.plantID, it.plant_id, op.plantId, op.plantID);
+                if (id === null || id === undefined) return false;
+                return window.__plantMap[String(id)] !== undefined;
+            });
+
+            const extracted = items.map(function(it) {
+                const r = extractRow(it);
+                const numericPlantId = Number(getBest(r.plantId, it.plantId, it.plantID, it.plant_id)) || Number.POSITIVE_INFINITY;
+                r.numericPlantId = numericPlantId;
+                return r;
+            });
+
+            extracted.sort(function(a, b) {
+                const diff = a.numericPlantId - b.numericPlantId;
+                if (diff !== 0) return diff;
+                return String(a.plantName).localeCompare(String(b.plantName));
+            });
+
+            opsBody.innerHTML = '';
+            const rowsForCsv = [];
+
+            var totalBefore = 0;
+            var totalReceived = 0;
+            var totalProcessed = 0;
+            var totalAfter = 0;
+            var totalRunHrs = 0;
+            var totalBiochar = 0;
+
+            extracted.forEach(function(r, i) {
+                const serial = i + 1;
+
+                var plantIdDisplay = '-';
+                if (r.plantId !== undefined && r.plantId !== null && String(r.plantId).trim() !== '') {
+                    plantIdDisplay = String(r.plantId);
+                } else if (Number.isFinite(r.numericPlantId) && r.numericPlantId !== Number.POSITIVE_INFINITY) {
+                    plantIdDisplay = String(r.numericPlantId);
+                }
+
+                totalBefore += toNumber(r.beforeSTL);
+                totalReceived += toNumber(r.sludgeReceived);
+                totalProcessed += toNumber(r.sludgeProcessed);
+                totalAfter += toNumber(r.afterSTL);
+                totalRunHrs += toNumber(r.plantRunHrs);
+                totalBiochar += toNumber(r.biocharProduced);
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="center">' + serial + '/' + plantIdDisplay + '</td>' +
+                    '<td>' + (r.district || '-') + '</td>' +
+                    '<td class="plant-name" title="' + (r.plantName || '-') + '">' + (r.plantName || '-') + '</td>' +
+                    '<td class="center">' + (r.kld || '-') + '</td>' +
+                    '<td class="center">' + (r.beforeSTL !== undefined && r.beforeSTL !== null ? formatNumberNice(r.beforeSTL) : '-') + '</td>' +
+                    '<td class="center">' + (r.sludgeReceived !== undefined && r.sludgeReceived !== null ? formatNumberNice(r.sludgeReceived) : '-') + '</td>' +
+                    '<td class="center">' + (r.sludgeProcessed !== undefined && r.sludgeProcessed !== null ? formatNumberNice(r.sludgeProcessed) : '-') + '</td>' +
+                    '<td class="center">' + (r.afterSTL !== undefined && r.afterSTL !== null ? formatNumberNice(r.afterSTL) : '-') + '</td>' +
+                    '<td class="center">' + (r.plantRunHrs !== undefined && r.plantRunHrs !== null ? r.plantRunHrs : '-') + '</td>' +
+                    '<td class="center">' + (r.biocharProduced !== undefined && r.biocharProduced !== null ? formatNumberNice(r.biocharProduced) : '-') + '</td>' +
+                    '<td class="center">' + (r.power !== undefined && r.power !== null ? formatNumberNice(r.power) : '-') + '</td>' +
+                    '<td class="center">' + (r.dgHours !== undefined && r.dgHours !== null ? formatNumberNice(r.dgHours) : '-') + '</td>' +
+                    '<td class="remarks">' + (r.remarks || '-') + '</td>';
+                opsBody.appendChild(tr);
+
+                rowsForCsv.push({
+                    serial: serial,
+                    plantId: plantIdDisplay,
+                    district: r.district,
+                    plantName: r.plantName,
+                    kld: r.kld,
+                    beforeSTL: r.beforeSTL,
+                    sludgeReceived: r.sludgeReceived,
+                    sludgeProcessed: r.sludgeProcessed,
+                    afterSTL: r.afterSTL,
+                    plantRunHrs: r.plantRunHrs,
+                    biocharProduced: r.biocharProduced,
+                    power: r.power,
+                    dgHours: r.dgHours,
+                    remarks: r.remarks
+                });
+            });
+
+            opsFoot.innerHTML = '<tr>' +
+                '<td class="center" colspan="4">TOTAL</td>' +
+                '<td class="center">' + formatNumberNice(totalBefore) + '</td>' +
+                '<td class="center">' + formatNumberNice(totalReceived) + '</td>' +
+                '<td class="center">' + formatNumberNice(totalProcessed) + '</td>' +
+                '<td class="center">' + formatNumberNice(totalAfter) + '</td>' +
+                '<td class="center">' + formatNumberNice(totalRunHrs) + '</td>' +
+                '<td class="center">' + formatNumberNice(totalBiochar) + '</td>' +
+                '<td class="center">-</td>' +
+                '<td class="center">-</td>' +
+                '<td></td>' +
+                '</tr>';
+
+            window.__lastFetchedRows = rowsForCsv;
+            makePrintableView();
+        }
+
+        function toCSV(rows) {
+            const hdr = ['S/ID', 'PlantId', 'District', 'Plant name', 'KLD', 'Before STL (L)', 'Sludge Received (L)', 'Sludge Processsed (L)', 'After STL (L)', 'Plant run hrs', 'Biochar quantity (kgs)', 'Power(kWh)', 'DG Run Hours', 'Remarks'];
+            const lines = [hdr.join(',')];
+            rows.forEach(function(r) {
+                const row = [
+                    r.serial + '/' + r.plantId,
+                    '"' + (r.plantId || '').toString().replace(/"/g, '""') + '"',
+                    '"' + (r.district || '').toString().replace(/"/g, '""') + '"',
+                    '"' + (r.plantName || '').toString().replace(/"/g, '""') + '"',
+                    (r.kld || ''),
+                    csvNumber(r.beforeSTL),
+                    csvNumber(r.sludgeReceived),
+                    csvNumber(r.sludgeProcessed),
+                    csvNumber(r.afterSTL),
+                    '"' + (r.plantRunHrs || '').toString().replace(/"/g, '""') + '"',
+                    csvNumber(r.biocharProduced),
+                    csvNumber(r.power),
+                    csvNumber(r.dgHours),
+                    '"' + (r.remarks || '').toString().replace(/"/g, '""') + '"'
+                ];
+                lines.push(row.join(','));
+            });
+            return '\uFEFF' + lines.join('\n');
+        }
+
+        function downloadExcel() {
+            console.log('downloadExcel called');
+
+            if (!window.__lastFetchedRows || window.__lastFetchedRows.length === 0) {
+                alert('No data to download. Load a date first.');
+                return;
+            }
+
+            noticeEl.textContent = 'Generating Excel file...';
+
+            try {
+                reportRoot.classList.add('export-mode');
+                tableWrap.style.overflow = 'visible';
+                tableWrap.style.maxHeight = 'none';
+
+                // Get the logo as base64
+                const logoImg = document.getElementById('logoImg');
+                let logoBase64 = '';
+
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = logoImg.naturalWidth || 220;
+                    canvas.height = logoImg.naturalHeight || 80;
+                    ctx.drawImage(logoImg, 0, 0);
+                    logoBase64 = canvas.toDataURL('image/png');
+                } catch(e) {
+                    console.warn('Could not convert logo:', e);
+                    logoBase64 = logoImg.src;
+                }
+
+                const now = new Date();
+                const generatedTime = now.toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+
+                const reportDate = dateInput.value ? isoDateToDisplay(dateInput.value) : '—';
+
+                let tableRows = '';
+                window.__lastFetchedRows.forEach(function(r, i) {
+                    tableRows += '<tr>' +
+                        '<td>' + (i + 1) + '/' + r.plantId + '</td>' +
+                        '<td>' + (r.district || '-') + '</td>' +
+                        '<td>' + (r.plantName || '-') + '</td>' +
+                        '<td>' + (r.kld || '-') + '</td>' +
+                        '<td>' + (r.beforeSTL !== undefined && r.beforeSTL !== null ? formatNumberNice(r.beforeSTL) : '-') + '</td>' +
+                        '<td>' + (r.sludgeReceived !== undefined && r.sludgeReceived !== null ? formatNumberNice(r.sludgeReceived) : '-') + '</td>' +
+                        '<td>' + (r.sludgeProcessed !== undefined && r.sludgeProcessed !== null ? formatNumberNice(r.sludgeProcessed) : '-') + '</td>' +
+                        '<td>' + (r.afterSTL !== undefined && r.afterSTL !== null ? formatNumberNice(r.afterSTL) : '-') + '</td>' +
+                        '<td>' + (r.plantRunHrs !== undefined && r.plantRunHrs !== null ? r.plantRunHrs : '-') + '</td>' +
+                        '<td>' + (r.biocharProduced !== undefined && r.biocharProduced !== null ? formatNumberNice(r.biocharProduced) : '-') + '</td>' +
+                        '<td>' + (r.power !== undefined && r.power !== null ? formatNumberNice(r.power) : '-') + '</td>' +
+                        '<td>' + (r.dgHours !== undefined && r.dgHours !== null ? formatNumberNice(r.dgHours) : '-') + '</td>' +
+                        '<td>' + (r.remarks || '-') + '</td>' +
+                        '</tr>';
+                });
+
+                var totalBefore = 0, totalReceived = 0, totalProcessed = 0, totalAfter = 0, totalRunHrs = 0, totalBiochar = 0;
+                window.__lastFetchedRows.forEach(function(r) {
+                    totalBefore += toNumber(r.beforeSTL);
+                    totalReceived += toNumber(r.sludgeReceived);
+                    totalProcessed += toNumber(r.sludgeProcessed);
+                    totalAfter += toNumber(r.afterSTL);
+                    totalRunHrs += toNumber(r.plantRunHrs);
+                    totalBiochar += toNumber(r.biocharProduced);
+                });
+
+                const excelHtml = '<!DOCTYPE html>' +
+                    '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/1999/xhtml">' +
+                    '<head>' +
+                    '<meta charset="UTF-8">' +
+                    '<meta name="ProgId" content="Excel.Sheet">' +
+                    '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>' +
+                    '<x:Name>Plant Operations</x:Name>' +
+                    '<x:WorksheetOptions><x:Print><x:ValidPrinterInfo/></x:Print></x:WorksheetOptions>' +
+                    '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' +
+                    '<style>' +
+                    'body{font-family:"Times New Roman",Times,serif;margin:18px}' +
+                    '.header{width:100%;margin-bottom:15px}' +
+                    '.header table{width:100%;border:none}' +
+                    '.header td{border:none;vertical-align:top}' +
+                    '.logo{width:110px;height:auto}' +
+                    'h1{margin:0;font-size:28px;color:#b31818;font-weight:800;text-align:center}' +
+                    '.addr{font-size:12px;text-align:center;margin-top:6px}' +
+                    '.subtitle{font-size:12px;font-weight:700;text-align:center}' +
+                    '.right-info{text-align:right;font-size:13px}' +
+                    '.data-table{width:100%;border-collapse:collapse;border:2px solid #000;margin-top:10px}' +
+                    '.data-table th,.data-table td{border:1px solid #000;padding:4px;text-align:center;font-size:10px}' +
+                    '.data-table thead th{font-weight:600;border-bottom:2px solid #000;background-color:#f0f0f0}' +
+                    '.data-table tfoot td{font-weight:600;background-color:#f9f9f9}' +
+                    '</style>' +
+                    '</head><body>' +
+                   '<div class="header">' +
+                    '<table>' +
+
+                    /* ROW 1 */
+                    '<tr>' +
+                    '<td rowspan="3" style="width:15%; text-align:left">' +
+                    '<img src="' + logoBase64 + '" class="logo" alt="MVR Logo"/>' +
+                    '</td>' +
+
+                    '<td rowspan="3" style="width:60%; text-align:center">' +
+                    '<h1>MVR TECHNOLOGY</h1>' +
+                    '<div class="addr">' +
+                    '<div>#207, Gowra Fountainhead, Madhapur, Hitech City, Hyderabad-500081</div>' +
+                    '<div style="font-weight:600;margin-top:3px">email: mvrhydoffice@mvrtech.org</div>' +
+                    '<div class="subtitle">FSTP RAJASTHAN</div>' +
+                    '</div>' +
+                    '</td>' +
+
+                    '<td style="width:25%; text-align:center; font-weight:700; font-size:14px">' +
+                    'DAILY PLANT OPERATIONS REPORT' +
+                    '</td>' +
+                    '</tr>' +
+
+                    /* ROW 2 */
+                    '<tr>' +
+                    '<td style="text-align:right; font-size:13px">' +
+                    '<span style="color:#666">Report Date:</span> <strong>' + reportDate + '</strong>' +
+                    '</td>' +
+                    '</tr>' +
+
+                    /* ROW 3 */
+                    '<tr>' +
+                    '<td style="text-align:right; font-size:12px">' +
+                    '<span style="color:#666">Generated:</span> ' + generatedTime +
+                    '</td>' +
+                    '</tr>' +
+
+                    '</table>' +
+                    '</div>' +
+                    '<table class="data-table">' +
+                    '<thead><tr>' +
+                    '<th>S/ID</th><th>District</th><th>Plant name</th><th>KLD</th>' +
+                    '<th>Before STL<br/>(L)</th><th>Sludge<br/>Received (L)</th><th>Sludge<br/>Processsed (L)</th><th>After STL<br/>(L)</th>' +
+                    '<th>Plant run<br/>hrs</th><th>Biochar<br/>quantity (kgs)</th><th>Power<br/>(kWh)</th><th>DG<br/>Readings</th><th>Remarks</th>' +
+                    '</tr></thead>' +
+                    '<tbody>' + tableRows + '</tbody>' +
+                    '<tfoot><tr>' +
+                    '<td colspan="4" style="font-weight:600">TOTAL</td>' +
+                    '<td>' + formatNumberNice(totalBefore) + '</td>' +
+                    '<td>' + formatNumberNice(totalReceived) + '</td>' +
+                    '<td>' + formatNumberNice(totalProcessed) + '</td>' +
+                    '<td>' + formatNumberNice(totalAfter) + '</td>' +
+                    '<td>' + formatNumberNice(totalRunHrs) + '</td>' +
+                    '<td>' + formatNumberNice(totalBiochar) + '</td>' +
+                    '<td>-</td><td>-</td><td></td>' +
+                    '</tr></tfoot>' +
+                    '</table>' +
+                    '</body></html>';
+
+                const blob = new Blob(['\ufeff', excelHtml], {
+                    type: 'application/vnd.ms-excel;charset=utf-8'
+                });
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'plant-operations-' + (dateInput.value || new Date().toISOString().slice(0, 10)) + '.xls';
+
+                document.body.appendChild(a);
+                a.click();
+
+                setTimeout(function() {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+
+                noticeEl.textContent = 'Excel file downloaded successfully!';
+                setTimeout(function() { noticeEl.textContent = ''; }, 3000);
+
+            } catch(error) {
+                console.error('Excel generation error:', error);
+                alert('Error generating Excel: ' + error.message);
+                noticeEl.textContent = 'Excel generation failed';
+                setTimeout(function() { noticeEl.textContent = ''; }, 3000);
+            } finally {
+                reportRoot.classList.remove('export-mode');
+            }
+        }
+            async function downloadPdf() {
+  if (!window.__lastFetchedRows || window.__lastFetchedRows.length === 0) {
+    alert('No data to download.');
     return;
   }
 
-  // ✅ FORCE PRINT STYLE
-  reportRoot.classList.add('force-print');
+  // SAVE & REMOVE notice element BEFORE capture
+  const noticeParent = noticeEl.parentNode;
+  const noticeNext = noticeEl.nextSibling;
+  noticeParent.removeChild(noticeEl);
 
-  tableWrap.style.overflow = 'visible';
-  tableWrap.style.maxHeight = 'none';
+  try {
+    reportRoot.classList.add('export-mode');
 
-  const opt = {
-    margin: [6, 6, 6, 6],
-    filename: `plant-operations-${dateInput.value || new Date().toISOString().slice(0,10)}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 1.5, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-  };
+    const opt = {
+      margin: [6, 6, 6, 6],
+      filename: 'plant-operations-' + (dateInput.value || new Date().toISOString().slice(0,10)) + '.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'landscape'
+      }
+    };
 
-  try{
     await html2pdf().set(opt).from(reportRoot).save();
-  }finally{
-    reportRoot.classList.remove('force-print');
+  }
+  catch (e) {
+    alert('Error generating PDF: ' + e.message);
+  }
+  finally {
+    // RESTORE notice element AFTER PDF
+    if (noticeNext) {
+      noticeParent.insertBefore(noticeEl, noticeNext);
+    } else {
+      noticeParent.appendChild(noticeEl);
+    }
+
+    noticeEl.textContent = 'PDF generated successfully!';
+    reportRoot.classList.remove('export-mode');
   }
 }
 
 
-    if(downloadPdfBtn) downloadPdfBtn.addEventListener('click', downloadPdf);
-    printBtn.addEventListener('click', ()=> setTimeout(()=> window.print(), 120));
 
-    /* init */
-    (function init(){
-      dateInput.value = new Date().toISOString().slice(0,10);
-      fetchPlantMaster(); // best-effort
-      clearTable();
+        async function loadForDate(dateStr) {
+            noticeEl.textContent = '';
+            opsBody.innerHTML = '<tr><td colspan="13" class="center" style="padding:20px 10px;color:var(--muted)">Loading…</td></tr>';
+            reportDateEl.textContent = isoDateToDisplay(dateStr) || '—';
+            try {
+                const resp = await fetch(API_BASE + encodeURIComponent(dateStr), { cache: 'no-store' });
+                if (!resp.ok) {
+                    const txt = await resp.text();
+                    throw new Error('HTTP ' + resp.status + ' — ' + txt);
+                }
+                const data = await resp.json();
+                renderData(data);
+                fetchedAtEl.textContent = new Date().toLocaleString();
+            } catch (err) {
+                opsBody.innerHTML = '<tr><td colspan="13" class="center" style="padding:20px 10px;color:#b00">Failed to fetch: ' + err.message + '</td></tr>';
+                noticeEl.textContent = 'If you see a CORS error, enable CORS on the API server.';
+                fetchedAtEl.textContent = '-';
+                console.error(err);
+            }
+        }
+
+        loadBtn.addEventListener('click', async function() {
+            const dateVal = dateInput.value;
+            if (!dateVal) {
+                alert('Please pick a date');
+                return;
+            }
+            await fetchPlantMaster();
+            await loadForDate(dateVal);
+        });
+
+        if (excelBtn) {
+            excelBtn.addEventListener('click', function() {
+                console.log('Excel button clicked');
+                downloadExcel();
+            });
+        }
+
+        if (downloadPdfBtn) {
+            downloadPdfBtn.addEventListener('click', function() {
+                console.log('PDF button clicked');
+                downloadPdf();
+            });
+        }
+
+        if (printBtn) {
+            printBtn.addEventListener('click', function() {
+                setTimeout(function() { window.print(); }, 120);
+            });
+        }
+
+        dateInput.value = new Date().toISOString().slice(0, 10);
+        fetchPlantMaster();
+        clearTable();
     })();
 </script>
 </body>

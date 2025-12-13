@@ -103,15 +103,20 @@
         { id: "biocharProduced", label: "Biochar Produced (Kgs)", placeholder: "Enter Kgs" },
         { id: "plantRunningHrs", label: "Plant Running Hrs (Hrs)", placeholder: "Enter Hrs" },
 
-        { id: "solarIntegration", label: "Solar Integration", type: "radio" },
-
         // Import (always)
         { id: "powerReadingAmImport", label: "Power Import - Morning (Kwh)", placeholder: "Enter Morning Kwh" },
         { id: "powerReadingPmImport", label: "Power Import - Evening (Kwh)", placeholder: "Enter Evening Kwh" },
 
-        // Export (only when solarIntegration === true)
+        // Export (only when solar === true)
         { id: "powerReadingAmExport", label: "Solar Power Export - Morning (Kwh)", placeholder: "Enter Morning Kwh", solarExport: true },
         { id: "powerReadingPmExport", label: "Solar Power Export - Evening (Kwh)", placeholder: "Enter Evening Kwh", solarExport: true },
+
+        // Power Bill (grouped)
+        { id: "powerBill", label: "Power Bill Generated?", type: "checkbox" },
+        { id: "lastBillDate", label: "Last Bill Date", type: "date", billField: true },
+        { id: "TotalNoOfUnits", label: "Total No. of Units", placeholder: "Enter units", billField: true },
+        { id: "totalBillAmount", label: "Total Bill Amount", placeholder: "Enter amount", billField: true },
+
 
         { id: "dgReadingAm", label: "DG RunHours Morning (Hrs)", placeholder: "Enter Hrs" },
         { id: "dgReadingPm", label: "DG RunHours Evening (Hrs)", placeholder: "Enter Hrs" },
@@ -155,6 +160,7 @@
       let currentOp = {};
       let vehicles = [];
       let vehicleOps = {};
+      let plantSolar = false;   // ✅ plant master solar flag
 
       /* ================== HELPERS ================== */
       function escapeHtml(s){ return String(s ?? ""); }
@@ -200,9 +206,6 @@
       function computeCompleteness(){
         let filled = 0, total = 0;
 
-        const sel = document.querySelector('input[name="solarIntegration"]:checked');
-        const solarYes = sel ? sel.value === "true" : (currentOp.solarIntegration === true);
-
         const alwaysPlant = [
           "sludgeTankLevelAm",
           "sludgeTankLevelPm",
@@ -224,22 +227,46 @@
           if(el && String(el.value).trim() !== "") filled++;
         });
 
-        total++; // solarIntegration choice
-        if(sel) filled++;
+        /* ================= POWER READINGS ================= */
 
-        ["powerReadingAmImport","powerReadingPmImport"].forEach(id=>{
+        // Import readings are ALWAYS counted
+        ["powerReadingAmImport", "powerReadingPmImport"].forEach(id => {
           total++;
           const el = document.getElementById(id);
-          if(el && String(el.value).trim() !== "") filled++;
+          if (el && String(el.value).trim() !== "") filled++;
         });
 
-        if(solarYes){
-          ["powerReadingAmExport","powerReadingPmExport"].forEach(id=>{
+        // Export readings ONLY when solar = true
+        if (plantSolar) {
+          ["powerReadingAmExport", "powerReadingPmExport"].forEach(id => {
             total++;
             const el = document.getElementById(id);
-            if(el && String(el.value).trim() !== "") filled++;
+            if (el && String(el.value).trim() !== "") filled++;
           });
         }
+
+        /* ================= POWER BILL ================= */
+
+        const billChk = document.getElementById("powerBill");
+
+        // powerBill Boolean is ALWAYS counted
+        total++;
+        if (billChk && billChk.checked !== null) {
+          filled++; // checkbox itself is answered (true or false)
+        }
+
+        // Extra bill fields ONLY when powerBill = true
+        if (billChk && billChk.checked) {
+          ["lastBillDate", "TotalNoOfUnits", "totalBillAmount"].forEach(id => {
+            total++;
+            const el = document.getElementById(id);
+            if (el && String(el.value).trim() !== "") filled++;
+          });
+        }
+
+
+
+
 
         if(privateToggle.checked){
           total += 2;
@@ -288,29 +315,36 @@
       function renderPlantFields(){
         fieldsBody.innerHTML = "";
         plantFieldDefs.forEach(f=>{
+           if (!plantSolar && f.solarExport) return;   // ✅ ADD THIS LINE
           const tr = document.createElement('tr');
           const tdLabel = document.createElement('td'); tdLabel.textContent = f.label;
           const tdVal = document.createElement('td');
 
-          if(f.type === "radio"){
-            tdVal.innerHTML = `
-              <label style="margin-right:12px"><input type="radio" name="solarIntegration" value="true"> Yes</label>
-              <label><input type="radio" name="solarIntegration" value="false"> No</label>
-              <div class="muted-note" style="margin-top:6px">If Yes → Solar Export inputs enabled. If No → export inputs disabled.</div>
-            `;
-            const yes = tdVal.querySelector('input[value="true"]');
-            const no = tdVal.querySelector('input[value="false"]');
-            if(currentOp.solarIntegration === true) yes.checked = true;
-            else if(currentOp.solarIntegration === false) no.checked = true;
-            yes.addEventListener('change', applySolarLogic);
-            no.addEventListener('change', applySolarLogic);
-          } else if(f.type === "textarea"){
-            const ta = createTextarea(f.id, f.placeholder, currentOp[f.id] ?? "");
-            tdVal.appendChild(ta);
-          } else {
-            const node = createInput(f.id, f.placeholder, currentOp[f.id] ?? "");
-            tdVal.appendChild(node);
-          }
+                 if (f.type === "textarea") {
+          const ta = createTextarea(f.id, f.placeholder, currentOp[f.id] ?? "");
+          tdVal.appendChild(ta);
+
+        } else if (f.type === "checkbox") {
+          const chk = document.createElement("input");
+          chk.type = "checkbox";
+          chk.id = f.id;
+          chk.checked = !!currentOp[f.id];
+          tdVal.appendChild(chk);
+
+          chk.addEventListener("change", () => {
+            togglePowerBillFields(chk.checked);
+            setStatusBadge(computeCompleteness());
+          });
+
+        } else if (f.type === "date") {
+          const node = createInput(f.id, "", currentOp[f.id] ?? "", { type: "date" });
+          tdVal.appendChild(node);
+
+        } else {
+          const node = createInput(f.id, f.placeholder, currentOp[f.id] ?? "");
+          tdVal.appendChild(node);
+        }
+
 
           tr.appendChild(tdLabel);
           tr.appendChild(tdVal);
@@ -319,9 +353,15 @@
 
         // combine import pair
         combinePair("powerReadingAmImport","powerReadingPmImport","Power Import (Kwh)");
-        // combine export pair
-        combinePair("powerReadingAmExport","powerReadingPmExport","Solar Power Export (Kwh)");
-        applySolarLogic();
+        // combine power bill fields into single row
+        combineBillRow();
+
+
+        // combine export pair ONLY if plant has solar
+        if (plantSolar) {
+          combinePair("powerReadingAmExport","powerReadingPmExport","Solar Power Export (Kwh)");
+        }
+
       }
 
       function combinePair(amId, pmId, labelText){
@@ -355,24 +395,38 @@
         pmRow.remove();
       }
 
-      function applySolarLogic(){
-        const sel = document.querySelector('input[name="solarIntegration"]:checked');
-        const solarYes = sel ? sel.value === "true" : (currentOp.solarIntegration === true);
+      function combineBillRow() {
+  const ids = ["powerBill","lastBillDate","TotalNoOfUnits","totalBillAmount"];
+  const rows = ids.map(id =>
+    Array.from(fieldsBody.querySelectorAll("tr")).find(r => r.querySelector(`#${id}`))
+  );
 
-        ["powerReadingAmExport","powerReadingPmExport"].forEach(id=>{
-          const el = document.getElementById(id);
-          if(!el) return;
-          el.disabled = !solarYes;
-          if(!solarYes) el.value = "";
-        });
+  if (rows.some(r => !r)) return;
 
-        ["powerReadingAmImport","powerReadingPmImport"].forEach(id=>{
-          const el = document.getElementById(id);
-          if(el) el.disabled = false;
-        });
+  const th = document.createElement("td");
+  th.textContent = "Power Bill Details";
 
-        setStatusBadge(computeCompleteness());
-      }
+  const td = document.createElement("td");
+  const wrap = document.createElement("div");
+  wrap.style.display = "flex";
+  wrap.style.gap = "8px";
+  wrap.style.flexWrap = "wrap";
+
+  rows.forEach(r => {
+    const input = r.querySelector("input");
+    input.style.maxWidth = "160px";
+    wrap.appendChild(input);
+    r.remove();
+  });
+
+  td.appendChild(wrap);
+
+  const tr = document.createElement("tr");
+  tr.appendChild(th);
+  tr.appendChild(td);
+  fieldsBody.appendChild(tr);
+}
+
 
       /* ================== VEHICLES ================== */
       async function loadVehiclesAndOps(){
@@ -513,6 +567,15 @@
         attachEnterNav();
         setStatusBadge(computeCompleteness());
       }
+              function togglePowerBillFields(enabled) {
+          ["lastBillDate", "TotalNoOfUnits", "totalBillAmount"].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.disabled = !enabled;
+            if (!enabled) el.value = "";
+          });
+        }
+
 
       /* ================== LOAD PLANT ================== */
       async function loadPlantOperation(){
@@ -529,6 +592,7 @@
         }
 
         renderPlantFields();
+        togglePowerBillFields(!!currentOp.powerBill);
 
         // private aggregates in plant
         if(currentOp.noOfTripsPrivateVehicle != null || currentOp.sludgeCollectPrivateVehicle != null){
@@ -571,7 +635,7 @@
 
         // validate plant numeric fields (remark excluded)
         for(const f of plantFieldDefs){
-          if(f.type === "radio" || f.id === "remarks") continue;
+          if (f.type === "radio" || f.type === "checkbox" || f.type === "date" || f.id === "remarks") continue;
           const el = document.getElementById(f.id);
           if(!el || el.disabled) continue;
           if(!numericValid(el.value)){
@@ -617,11 +681,9 @@
 
         // Build plant payload
         const plantPayload = {};
-        const sel = document.querySelector('input[name="solarIntegration"]:checked');
-        plantPayload.solarIntegration = sel ? (sel.value === "true") : null;
 
         plantFieldDefs.forEach(f=>{
-          if(f.type === "radio") return;
+          if (f.type === "radio" || f.type === "checkbox") return;
           const el = document.getElementById(f.id);
           if(!el || el.disabled){
             plantPayload[f.id] = null;
@@ -636,6 +698,21 @@
 
         plantPayload.operationDate = date;
 
+        const billChecked = document.getElementById("powerBill")?.checked;
+
+plantPayload.powerBill = !!billChecked;
+
+if (billChecked) {
+  plantPayload.lastBillDate = document.getElementById("lastBillDate").value || null;
+  plantPayload.TotalNoOfUnits = Number(document.getElementById("TotalNoOfUnits").value || 0);
+  plantPayload.totalBillAmount = Number(document.getElementById("totalBillAmount").value || 0);
+} else {
+  plantPayload.lastBillDate = null;
+  plantPayload.TotalNoOfUnits = null;
+  plantPayload.totalBillAmount = null;
+}
+
+
         if(privateToggle.checked){
           plantPayload.privateVehicle = true;
           plantPayload.noOfTripsPrivateVehicle = privateTripsEl.value.trim() === "" ? null : Number(privateTripsEl.value.trim());
@@ -646,8 +723,7 @@
           plantPayload.sludgeCollectPrivateVehicle = 0;
         }
 
-        const solarYes = plantPayload.solarIntegration === true;
-        if(!solarYes){
+        if (!plantSolar) {
           plantPayload.powerReadingAmExport = null;
           plantPayload.powerReadingPmExport = null;
         }
@@ -744,6 +820,18 @@
           }
         }
       }
+      async function loadPlantMaster() {
+          try {
+            const r = await fetch(`/api/plants/${plantID}`);
+            if (r.ok) {
+              const plant = await r.json();
+              plantSolar = !!plant.solar;
+            }
+          } catch (e) {
+            plantSolar = false;
+          }
+        }
+
 
       // events
       submitBtn.addEventListener('click', onSubmit);
@@ -762,6 +850,7 @@
 
       // initial load
       (async function init(){
+        await loadPlantMaster();
         await loadPlantOperation();
         await loadVehiclesAndOps();
         privateTripsEl.disabled = !privateToggle.checked;
