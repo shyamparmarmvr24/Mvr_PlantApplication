@@ -49,6 +49,32 @@
           .inline-pair{grid-template-columns:1fr}
           table th{width:200px}
         }
+
+        .section-header td{
+          background: #0f172a;   /* Navy dark */
+          color: #ffffff;
+          font-weight: 700;
+          font-size: 15px;
+          padding: 12px 10px;
+        }
+        /* gap AFTER each section header */
+        .section-header + tr td,
+        .section-header + tr th {
+          padding-top: 18px;
+        }
+
+        /* optional extra spacing BEFORE next section header */
+        tr.section-header {
+          border-top: 14px solid #f5f7fa;  /* background gap */
+        }
+
+        .section-header td {
+          border-radius: 6px;
+        }
+
+
+
+
     </style>
 </head>
 <body>
@@ -62,25 +88,56 @@
             <tbody id="fieldsBody"></tbody>
         </table>
 
-        <h2 style="margin-top:18px;color:var(--blue);font-size:16px">Vehicle Operations</h2>
+        <table style="width:100%;border-collapse:collapse;margin-top:18px">
+            <tr class="section-header">
+                <td colspan="2">Vehicle Operations</td>
+            </tr>
+        </table>
+
         <div id="vehicleSection" style="margin-top:8px"></div>
 
-        <div style="margin-top:12px">
-            <div style="font-weight:700;margin-bottom:6px">Private Vehicles (aggregate)</div>
-            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-                <label class="switch">
-                    <input id="privateToggle" type="checkbox">
-                    <span class="small">Private Vehicles Present?</span>
-                </label>
-                <div style="width:160px">
+        <table style="width:100%;border-collapse:collapse;margin-top:18px">
+            <tr class="section-header">
+                <td colspan="2">Private Vehicles</td>
+            </tr>
+
+            <tr>
+                <th>Private Vehicles Present?</th>
+                <td>
+                    <label class="switch">
+                        <input id="privateToggle" type="checkbox">
+                        <span class="small">Yes</span>
+                    </label>
+                </td>
+            </tr>
+
+            <tr>
+                <th>No. of Trips</th>
+                <td>
                     <input id="privateTrips" class="input" placeholder="No. of trips (private)" />
-                </div>
-                <div style="width:200px">
-                    <input id="privateSludge" class="input" placeholder="Sludge (Ltrs) (private)" />
-                </div>
-                <div class="muted-note">Note: <code>sludgeReceived</code> and <code>totalNoOfTrips</code> are computed server-side; not editable here.</div>
-            </div>
-        </div>
+                </td>
+            </tr>
+
+            <tr>
+                <th>Sludge Collected</th>
+                <td>
+                    <div class="two-inline">
+                        <input id="privateSludge" class="input" placeholder="Sludge (Ltrs)" />
+                        <input id="privateSludgeKgs" class="input" placeholder="Sludge (Kgs)" />
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" class="muted-note">
+                    Note: <code>sludgeReceived</code> and <code>totalNoOfTrips</code> are computed server-side; not editable here.
+                </td>
+            </tr>
+        </table>
+
+        <!-- 🔽 PRIVATE VEHICLE DYNAMIC FORMS -->
+        <div id="privateVehicleForms" style="margin-top:16px"></div>
+
 
         <div class="buttons" style="margin-top:18px">
             <button id="submitBtn" class="btn btn-submit">Submit</button>
@@ -107,15 +164,16 @@
         { id: "powerReadingAmImport", label: "Power Import - Morning (Kwh)", placeholder: "Enter Morning Kwh" },
         { id: "powerReadingPmImport", label: "Power Import - Evening (Kwh)", placeholder: "Enter Evening Kwh" },
 
-        // Export (only when solar === true)
-        { id: "powerReadingAmExport", label: "Solar Power Export - Morning (Kwh)", placeholder: "Enter Morning Kwh", solarExport: true },
-        { id: "powerReadingPmExport", label: "Solar Power Export - Evening (Kwh)", placeholder: "Enter Evening Kwh", solarExport: true },
-
         // Power Bill (grouped)
         { id: "powerBill", label: "Power Bill Generated?", type: "checkbox" },
         { id: "lastBillDate", label: "Last Bill Date", type: "date", billField: true },
         { id: "TotalNoOfUnits", label: "Total No. of Units", placeholder: "Enter units", billField: true },
         { id: "totalBillAmount", label: "Total Bill Amount", placeholder: "Enter amount", billField: true },
+
+        // ❌ REMOVE THESE TWO COMPLETELY
+        { id: "powerReadingAmExport", label: "Solar Power Export - Morning (Kwh)", placeholder: "Enter Morning Kwh", solarExport: true },
+        { id: "powerReadingPmExport", label: "Solar Power Export - Evening (Kwh)", placeholder: "Enter Evening Kwh", solarExport: true },
+
 
 
         { id: "dgReadingAm", label: "DG RunHours Morning (Hrs)", placeholder: "Enter Hrs" },
@@ -153,14 +211,16 @@
       const privateToggle = document.getElementById("privateToggle");
       const privateTripsEl = document.getElementById("privateTrips");
       const privateSludgeEl = document.getElementById("privateSludge");
+      const privateSludgeKgsEl = document.getElementById("privateSludgeKgs");
 
-      infoEl.innerHTML = `Date: <strong style="color:#f97316">${escapeHtml(date)}</strong> &nbsp; | &nbsp; Plant ID: <strong style="color:#059669">${escapeHtml(plantID)}</strong>`;
 
       /* ================== STATE ================== */
       let currentOp = {};
       let vehicles = [];
       let vehicleOps = {};
       let plantSolar = false;   // ✅ plant master solar flag
+      let existingPrivateVehicles = [];
+      let plantName = "";
 
       /* ================== HELPERS ================== */
       function escapeHtml(s){ return String(s ?? ""); }
@@ -237,13 +297,13 @@
         });
 
         // Export readings ONLY when solar = true
-        if (plantSolar) {
+       if (plantSolar) {
           ["powerReadingAmExport", "powerReadingPmExport"].forEach(id => {
             total++;
-            const el = document.getElementById(id);
-            if (el && String(el.value).trim() !== "") filled++;
+            if (document.getElementById(id)?.value) filled++;
           });
         }
+
 
         /* ================= POWER BILL ================= */
 
@@ -269,10 +329,21 @@
 
 
         if(privateToggle.checked){
-          total += 2;
+          total += 3;
           if(String(privateTripsEl.value).trim() !== "") filled++;
           if(String(privateSludgeEl.value).trim() !== "") filled++;
+          if(String(privateSludgeKgsEl.value).trim() !== "") filled++;
         }
+
+        if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
+          for (let i = 0; i < Number(privateTripsEl.value); i++) {
+            total += 2;
+            if (document.getElementById(`pv_ltrs_${i}`)?.value) filled++;
+            if (document.getElementById(`pv_kgs_${i}`)?.value) filled++;
+          }
+        }
+
+
 
         vehicles.forEach(v=>{
           const vid = String(v.vehicleID);
@@ -283,13 +354,16 @@
           const lastFuelDate = document.getElementById(`lastFuelDate_${vid}`);
           const trips = document.getElementById(`trips_${vid}`);
           const sludge = document.getElementById(`sludge_${vid}`);
+          const sludgeKgs = document.getElementById(`sludgeKgs_${vid}`);
 
-          total += 5;
-          if(am && String(am.value).trim() !== "") filled++;
-          if(pm && String(pm.value).trim() !== "") filled++;
-          if(fuel && String(fuel.value).trim() !== "") filled++;
-          if(trips && String(trips.value).trim() !== "") filled++;
-          if(sludge && String(sludge.value).trim() !== "") filled++;
+            total += 6;
+            if(am && String(am.value).trim() !== "") filled++;
+            if(pm && String(pm.value).trim() !== "") filled++;
+            if(fuel && String(fuel.value).trim() !== "") filled++;
+            if(trips && String(trips.value).trim() !== "") filled++;
+            if(sludge && String(sludge.value).trim() !== "") filled++;
+            if(sludgeKgs && String(sludgeKgs.value).trim() !== "") filled++;
+
 
           if(lastFuel && lastFuel.checked)
           {
@@ -312,120 +386,195 @@
       }
 
       /* ================== RENDER PLANT FIELDS ================== */
-      function renderPlantFields(){
-        fieldsBody.innerHTML = "";
-        plantFieldDefs.forEach(f=>{
-           if (!plantSolar && f.solarExport) return;   // ✅ ADD THIS LINE
-          const tr = document.createElement('tr');
-          const tdLabel = document.createElement('td'); tdLabel.textContent = f.label;
-          const tdVal = document.createElement('td');
+     function renderPlantFields(){
+  fieldsBody.innerHTML = "";
 
-                 if (f.type === "textarea") {
-          const ta = createTextarea(f.id, f.placeholder, currentOp[f.id] ?? "");
-          tdVal.appendChild(ta);
+  /* ================= 1️⃣ SLUDGE REPORT ================= */
+  fieldsBody.innerHTML += `
+    <tr class="section-header"><td colspan="2">Sludge Report</td></tr>
 
-        } else if (f.type === "checkbox") {
-          const chk = document.createElement("input");
-          chk.type = "checkbox";
-          chk.id = f.id;
-          chk.checked = !!currentOp[f.id];
-          tdVal.appendChild(chk);
+    <tr>
+      <th>Sludge Tank Level (Ltrs)</th>
+      <td>
+        <div class="two-inline">
+          ${createInput("sludgeTankLevelAm","Enter Morning Tank Level",currentOp.sludgeTankLevelAm).outerHTML}
+          ${createInput("sludgeTankLevelPm","Enter Evening Tank Level",currentOp.sludgeTankLevelPm).outerHTML}
+        </div>
+      </td>
+    </tr>
 
-          chk.addEventListener("change", () => {
-            togglePowerBillFields(chk.checked);
-            setStatusBadge(computeCompleteness());
-          });
+    <tr>
+      <th>Sludge Processed (Ltrs)</th>
+      <td>${createInput("sludgeProcessed","Enter Sludge Process Ltrs",currentOp.sludgeProcessed).outerHTML}</td>
+    </tr>
 
-        } else if (f.type === "date") {
-          const node = createInput(f.id, "", currentOp[f.id] ?? "", { type: "date" });
-          tdVal.appendChild(node);
+    <tr>
+      <th>Biochar Produced (Kgs)</th>
+      <td>${createInput("biocharProduced","Enter Biochar Produced (Kgs)",currentOp.biocharProduced).outerHTML}</td>
+    </tr>
 
-        } else {
-          const node = createInput(f.id, f.placeholder, currentOp[f.id] ?? "");
-          tdVal.appendChild(node);
-        }
+    <tr>
+      <th>Plant Running Hrs (Hrs)</th>
+      <td>${createInput("plantRunningHrs","Enter Plant Running Hrs (Hrs)",currentOp.plantRunningHrs).outerHTML}</td>
+    </tr>
+  `;
 
+  /* ================= 2️⃣ POWER & SOLAR REPORT ================= */
+  fieldsBody.innerHTML += `
+    <tr class="section-header"><td colspan="2">Power & Solar Report</td></tr>
 
-          tr.appendChild(tdLabel);
-          tr.appendChild(tdVal);
-          fieldsBody.appendChild(tr);
-        });
+    <tr>
+      <th>Power Import (Kwh)</th>
+      <td>
+        <div class="two-inline">
+          ${createInput("powerReadingAmImport","Enter Power Import Morning",currentOp.powerReadingAmImport).outerHTML}
+          ${createInput("powerReadingPmImport","Enter Power Import Evening",currentOp.powerReadingPmImport).outerHTML}
+        </div>
+      </td>
+    </tr>
+  `;
 
-        // combine import pair
-        combinePair("powerReadingAmImport","powerReadingPmImport","Power Import (Kwh)");
-        // combine power bill fields into single row
-        combineBillRow();
+  /* 🔆 Solar Export — ONLY if plant has solar */
+  if (plantSolar) {
+    fieldsBody.innerHTML += `
+      <tr>
+        <th>Solar Power Export (Kwh)</th>
+        <td>
+          <div class="two-inline">
+            ${createInput("powerReadingAmExport","Enter Solar Power Morning",currentOp.powerReadingAmExport).outerHTML}
+            ${createInput("powerReadingPmExport","Enter Solar Power Evening",currentOp.powerReadingPmExport).outerHTML}
+          </div>
+        </td>
+      </tr>
+    `;
+  }
 
+  fieldsBody.innerHTML += `
+    <tr>
+      <th>Power Bill Generated?</th>
+      <td><input type="checkbox" id="powerBill" ${currentOp.powerBill ? "checked" : ""}></td>
+    </tr>
 
-        // combine export pair ONLY if plant has solar
-        if (plantSolar) {
-          combinePair("powerReadingAmExport","powerReadingPmExport","Solar Power Export (Kwh)");
-        }
+    <tr>
+      <th>Last Bill Date</th>
+      <td><input type="date" class="input" id="lastBillDate" value="${currentOp.lastBillDate || ""}"></td>
+    </tr>
 
-      }
+    <tr>
+      <th>Power Bill Details</th>
+      <td>
+        <div class="two-inline">
+          ${createInput("TotalNoOfUnits","Enter Total Units",currentOp.TotalNoOfUnits).outerHTML}
+          ${createInput("totalBillAmount","Enter Total Amount Paid",currentOp.totalBillAmount).outerHTML}
+        </div>
+      </td>
+    </tr>
+  `;
 
-      function combinePair(amId, pmId, labelText){
-        const rows = Array.from(fieldsBody.querySelectorAll('tr'));
-        const amRow = rows.find(r => r.querySelector(`#${amId}`));
-        const pmRow = rows.find(r => r.querySelector(`#${pmId}`));
-        if(!amRow || !pmRow) return;
+  togglePowerBillFields(!!currentOp.powerBill);
 
-        const th = document.createElement('td'); th.textContent = labelText;
-        const td = document.createElement('td');
+  /* ================= 3️⃣ DG REPORT ================= */
+  fieldsBody.innerHTML += `
+    <tr class="section-header"><td colspan="2">DG Report</td></tr>
 
-        const amInput = amRow.querySelector(`#${amId}`);
-        const pmInput = pmRow.querySelector(`#${pmId}`);
-        if(!amInput || !pmInput) return;
+    <tr>
+      <th>DG RunHours (Hrs)</th>
+      <td>
+        <div class="two-inline">
+          ${createInput("dgReadingAm","DG RunHours Morning (Hrs)",currentOp.dgReadingAm).outerHTML}
+          ${createInput("dgReadingPm","DG RunHours Evening (Hrs)",currentOp.dgReadingPm).outerHTML}
+        </div>
+      </td>
+    </tr>
 
-        amInput.style.width = "48%";
-        pmInput.style.width = "48%";
+    <tr>
+      <th>DG Diesel %</th>
+      <td>
+        <div class="two-inline">
+          ${createInput("dgDiesalPercentageAm","DG Diesel % Morning",currentOp.dgDiesalPercentageAm).outerHTML}
+          ${createInput("dgDiesalPercentagePm","DG Diesel % Evening",currentOp.dgDiesalPercentagePm).outerHTML}
+        </div>
+      </td>
+    </tr>
+  `;
 
-        const wrapper = document.createElement('div');
-        wrapper.style.display = "flex";
-        wrapper.style.gap = "8px";
-        wrapper.appendChild(amInput);
-        wrapper.appendChild(pmInput);
+  /* ================= 4️⃣ POLYMER & PILLETS REPORT ================= */
+  fieldsBody.innerHTML += `
+    <tr class="section-header"><td colspan="2">Polymer & Pillets Report</td></tr>
 
-        td.appendChild(wrapper);
+    <tr>
+      <th>Polymer</th>
+      <td>
+        <div class="two-inline">
+          ${createInput("polymerUsage","Polymer Usage (Grms)",currentOp.polymerUsage).outerHTML}
+          ${createInput("polymerStock","Polymer Stock (Kgs)",currentOp.polymerStock).outerHTML}
+        </div>
+      </td>
+    </tr>
 
-        amRow.innerHTML = "";
-        amRow.appendChild(th);
-        amRow.appendChild(td);
+    <tr>
+      <th>Pillets</th>
+      <td>
+        <div class="two-inline">
+          ${createInput("pillets","Pillets Usage (Kgs)",currentOp.pillets).outerHTML}
+          ${createInput("pilletsStock","Pillets Stock (Kgs)",currentOp.pilletsStock).outerHTML}
+        </div>
+      </td>
+    </tr>
 
-        pmRow.remove();
-      }
+    <tr>
+      <th>Remarks</th>
+      <td>${createTextarea("remarks","Enter remarks",currentOp.remarks).outerHTML}</td>
+    </tr>
+  `;
 
-      function combineBillRow() {
-  const ids = ["powerBill","lastBillDate","TotalNoOfUnits","totalBillAmount"];
-  const rows = ids.map(id =>
-    Array.from(fieldsBody.querySelectorAll("tr")).find(r => r.querySelector(`#${id}`))
-  );
+   const powerBillChk = document.getElementById("powerBill");
+    if (powerBillChk) {
+      powerBillChk.addEventListener("change", () => {
+        togglePowerBillFields(powerBillChk.checked);
+        setStatusBadge(computeCompleteness());
+      });
+    }
 
-  if (rows.some(r => !r)) return;
-
-  const th = document.createElement("td");
-  th.textContent = "Power Bill Details";
-
-  const td = document.createElement("td");
-  const wrap = document.createElement("div");
-  wrap.style.display = "flex";
-  wrap.style.gap = "8px";
-  wrap.style.flexWrap = "wrap";
-
-  rows.forEach(r => {
-    const input = r.querySelector("input");
-    input.style.maxWidth = "160px";
-    wrap.appendChild(input);
-    r.remove();
-  });
-
-  td.appendChild(wrap);
-
-  const tr = document.createElement("tr");
-  tr.appendChild(th);
-  tr.appendChild(td);
-  fieldsBody.appendChild(tr);
 }
+
+function renderPrivateVehicleForms(count) {
+  const container = document.getElementById("privateVehicleForms");
+  container.innerHTML = "";
+
+  for (let i = 0; i < count; i++) {
+    const pv = existingPrivateVehicles[i] || {};
+
+    const block = document.createElement("div");
+    block.className = "vehicle-block";
+    block.innerHTML = `
+      <div class="vehicle-title">Private Vehicle ${i + 1}</div>
+
+      <input type="hidden" id="pv_id_${i}" value="${pv.privateVehicleID || ""}">
+
+      <div class="two-inline">
+        <input id="pv_number_${i}" class="input" placeholder="Vehicle Number"
+               value="${pv.privateVehNumber || ""}">
+        <input id="pv_driver_no_${i}" class="input" placeholder="Driver Number"
+               value="${pv.driverNumber || ""}">
+      </div>
+
+      <div class="two-inline" style="margin-top:6px">
+        <input id="pv_driver_name_${i}" class="input" placeholder="Driver Name"
+               value="${pv.driverName || ""}">
+      </div>
+
+      <div class="two-inline" style="margin-top:6px">
+        <input id="pv_ltrs_${i}" class="input" placeholder="Sludge Ltrs"
+               value="${pv.receivedSludgeLtrs || ""}">
+        <input id="pv_kgs_${i}" class="input" placeholder="Sludge Kgs"
+               value="${pv.receivedSludgeKgs || ""}">
+      </div>
+    `;
+    container.appendChild(block);
+  }
+}
+
 
 
       /* ================== VEHICLES ================== */
@@ -461,16 +610,18 @@
               <div style="margin-top:8px">
                 <table style="width:100%;border-collapse:collapse">
                   <tr>
-                    <th style="width:35%">Odometer Reading Morning (Km)</th>
-                    <td style="width:65%"><input id="am_${vid}" class="input" placeholder="Enter km"></td>
+                      <th>Odometer Reading (Km)</th>
+                      <td>
+                        <div class="two-inline">
+                          <input id="am_${vid}" class="input" placeholder="Morning Km">
+                          <input id="pm_${vid}" class="input" placeholder="Evening Km">
+                        </div>
+                      </td>
                   </tr>
+
                   <tr>
-                    <th>Odometer Reading Evening (Km)</th>
-                    <td><input id="pm_${vid}" class="input" placeholder="Enter km"></td>
-                  </tr>
-                  <tr>
-                    <th>Vehicle Fuel Level (0-6 %)</th>
-                    <td><input id="fuel_${vid}" class="input" placeholder="Enter (0-6 )"></td>
+                    <th>Vehicle Fuel Level (0-6)</th>
+                    <td><input id="fuel_${vid}" class="input" placeholder="Enter (0-6)"></td>
                   </tr>
                   <tr>
                     <th>Last Fuel Filled?</th>
@@ -486,9 +637,15 @@
                     <td><input id="trips_${vid}" class="input" placeholder="Enter integer"></td>
                   </tr>
                   <tr>
-                    <th>Sludge Collect (Ltrs)</th>
-                    <td><input id="sludge_${vid}" class="input" placeholder="Enter Ltrs"></td>
+                      <th>Sludge Collect</th>
+                      <td>
+                        <div class="two-inline">
+                          <input id="sludge_${vid}" class="input" placeholder="Enter Ltrs">
+                          <input id="sludgeKgs_${vid}" class="input" placeholder="Enter Kgs">
+                        </div>
+                      </td>
                   </tr>
+
                 </table>
               </div>
             `;
@@ -534,12 +691,14 @@
               const filledLitersEl = document.getElementById(`filledLiters_${vid}`);
               const trips = document.getElementById(`trips_${vid}`);
               const sludge = document.getElementById(`sludge_${vid}`);
+              const sludgeKgs = document.getElementById(`sludgeKgs_${vid}`);
 
               if(am) am.value = op.vehicleReadingAm ?? "";
               if(pm) pm.value = op.vehicleReadingPm ?? "";
               if(fuel) fuel.value = op.vehicleFuelLevel ?? "";
               if(trips) trips.value = op.noOfTrips ?? "";
               if(sludge) sludge.value = op.sludgeCollect ?? "";
+              if(sludgeKgs) sludgeKgs.value = op.sludgeCollectKgs ?? "";
 
               if(lastFuel){
                   lastFuel.checked = !!op.lastFuelFilled;
@@ -578,6 +737,24 @@
 
 
       /* ================== LOAD PLANT ================== */
+      async function loadPrivateVehicles() {
+          try {
+            const r = await fetch(`/api/private-vehicles/privateveh/${plantID}?date=${date}`);
+            if (!r.ok) return;
+
+            existingPrivateVehicles = await r.json();
+
+            // ✅ RENDER FORMS AFTER DATA IS AVAILABLE
+            if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
+              renderPrivateVehicleForms(Number(privateTripsEl.value));
+            }
+          } catch (e) {
+            console.warn("Failed to load private vehicles", e);
+          }
+        }
+
+
+
       async function loadPlantOperation(){
         try{
           const r = await fetch(endpoints.plantGet(plantID, date));
@@ -595,25 +772,37 @@
         togglePowerBillFields(!!currentOp.powerBill);
 
         // private aggregates in plant
-        if(currentOp.noOfTripsPrivateVehicle != null || currentOp.sludgeCollectPrivateVehicle != null){
-          privateToggle.checked = !!currentOp.noOfTripsPrivateVehicle || !!currentOp.sludgeCollectPrivateVehicle;
+        if(currentOp.noOfTripsPrivateVehicle != null || currentOp.sludgeCollectPrivateVehicle != null||currentOp.sludgeCollectPrivateVehicleKgs != null)
+        {
+          privateToggle.checked = !!currentOp.noOfTripsPrivateVehicle || !!currentOp.sludgeCollectPrivateVehicle || !!currentOp.sludgeCollectPrivateVehicleKgs;
           if(privateToggle.checked){
             privateTripsEl.value = currentOp.noOfTripsPrivateVehicle ?? "";
             privateSludgeEl.value = currentOp.sludgeCollectPrivateVehicle ?? "";
+            privateSludgeKgsEl.value = currentOp.sludgeCollectPrivateVehicleKgs ?? "";
             privateTripsEl.disabled = false;
             privateSludgeEl.disabled = false;
+            privateSludgeKgsEl.disabled = false;
+
           } else {
             privateTripsEl.value = "";
             privateSludgeEl.value = "";
+            privateSludgeKgsEl.value = "";
+
             privateTripsEl.disabled = true;
             privateSludgeEl.disabled = true;
+            privateSludgeKgsEl.disabled = true;
           }
-        } else {
+        }
+        else {
           privateToggle.checked = false;
+
           privateTripsEl.value = "";
           privateSludgeEl.value = "";
+          privateSludgeKgsEl.value = "";
+
           privateTripsEl.disabled = true;
           privateSludgeEl.disabled = true;
+          privateSludgeKgsEl.disabled = true;
         }
 
         // populate other plant values into inputs (if existed)
@@ -645,17 +834,23 @@
             submitBtn.textContent = "Submit";
             return;
           }
+
         }
 
         // validate private aggregates if enabled
         if(privateToggle.checked){
-          if(!numericValid(privateTripsEl.value) || !numericValid(privateSludgeEl.value)){
+          if(
+            !numericValid(privateTripsEl.value) ||
+            !numericValid(privateSludgeEl.value) ||
+            !numericValid(privateSludgeKgsEl.value)
+          ){
             alert("Invalid number in private aggregate fields. Use digits and '.' only.");
             submitBtn.disabled = false;
             submitBtn.textContent = "Submit";
             return;
           }
         }
+
 
         // validate vehicle numeric fields (note: filledLiters and date are optional)
         for(const v of vehicles){
@@ -665,17 +860,19 @@
           const fuel = document.getElementById(`fuel_${vid}`);
           const trips = document.getElementById(`trips_${vid}`);
           const sludge = document.getElementById(`sludge_${vid}`);
+          const sludgeKgs = document.getElementById(`sludgeKgs_${vid}`);
 
-          for(const el of [am,pm,fuel,trips,sludge]){
-            if(!el) continue;
-            if(!numericValid(el.value)){
-              alert("Invalid number in vehicle fields. Use digits and '.' only (no commas or colons).");
-              el.focus();
-              submitBtn.disabled = false;
-              submitBtn.textContent = "Submit";
-              return;
+          for(const el of [am, pm, fuel, trips, sludge, sludgeKgs]){
+              if(!el) continue;
+              if(!numericValid(el.value)){
+                alert("Invalid number in vehicle fields. Use digits and '.' only (no commas or colons).");
+                el.focus();
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit";
+                return;
+              }
             }
-          }
+
           // lastFuelFilledDate and filledLiters are optional by your instruction → no validation here
         }
 
@@ -695,6 +892,23 @@
           }
           plantPayload[f.id] = el.value.trim() === "" ? null : Number(el.value.trim());
         });
+
+        // ✅ ADD SOLAR EXPORT VALUES (CORRECT PLACE)
+        if (plantSolar) {
+          const amExpEl = document.getElementById("powerReadingAmExport");
+          const pmExpEl = document.getElementById("powerReadingPmExport");
+
+          plantPayload.powerReadingAmExport =
+            amExpEl && amExpEl.value.trim() !== ""
+              ? Number(amExpEl.value.trim())
+              : null;
+
+          plantPayload.powerReadingPmExport =
+            pmExpEl && pmExpEl.value.trim() !== ""
+              ? Number(pmExpEl.value.trim())
+              : null;
+        }
+
 
         plantPayload.operationDate = date;
 
@@ -717,10 +931,13 @@ if (billChecked) {
           plantPayload.privateVehicle = true;
           plantPayload.noOfTripsPrivateVehicle = privateTripsEl.value.trim() === "" ? null : Number(privateTripsEl.value.trim());
           plantPayload.sludgeCollectPrivateVehicle = privateSludgeEl.value.trim() === "" ? null : Number(privateSludgeEl.value.trim());
+          plantPayload.sludgeCollectPrivateVehicleKgs =privateSludgeKgsEl.value.trim() === "" ? null : Number(privateSludgeKgsEl.value.trim());
+
         } else {
           plantPayload.privateVehicle = false;
           plantPayload.noOfTripsPrivateVehicle = 0;
           plantPayload.sludgeCollectPrivateVehicle = 0;
+          plantPayload.sludgeCollectPrivateVehicleKgs = 0;
         }
 
         if (!plantSolar) {
@@ -770,7 +987,8 @@ if (billChecked) {
               lastFuelFilledDate: (lastFuel && lastFuel.checked && lastFuelDate && String(lastFuelDate.value).trim() !== "") ? lastFuelDate.value : null,
               filledLiters: filledLitersVal,
               noOfTrips: (document.getElementById(`trips_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`trips_${vid}`).value.trim())),
-              sludgeCollect: (document.getElementById(`sludge_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`sludge_${vid}`).value.trim()))
+              sludgeCollect: (document.getElementById(`sludge_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`sludge_${vid}`).value.trim())),
+              sludgeCollectKgs: (document.getElementById(`sludgeKgs_${vid}`).value.trim() === ""? null: Number(document.getElementById(`sludgeKgs_${vid}`).value.trim()))
             };
 
             const vr = await fetch(endpoints.vehicleOpPut(plantID, v.vehicleID, date), {
@@ -792,6 +1010,44 @@ if (billChecked) {
           submitBtn.textContent = "Submit";
           return;
         }
+        // 🔽 SAVE / UPDATE PRIVATE VEHICLES
+if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
+  for (let i = 0; i < Number(privateTripsEl.value); i++) {
+
+    const id = document.getElementById(`pv_id_${i}`).value;
+
+    const payload = {
+  privateVehNumber: document.getElementById(`pv_number_${i}`).value || null,
+  driverNumber: document.getElementById(`pv_driver_no_${i}`).value
+      ? Number(document.getElementById(`pv_driver_no_${i}`).value)
+      : null,
+  driverName: document.getElementById(`pv_driver_name_${i}`).value || null,
+  receivedSludgeLtrs: document.getElementById(`pv_ltrs_${i}`).value
+      ? Number(document.getElementById(`pv_ltrs_${i}`).value)
+      : null,
+  receivedSludgeKgs: document.getElementById(`pv_kgs_${i}`).value
+      ? Number(document.getElementById(`pv_kgs_${i}`).value)
+      : null,
+  operationDate: date
+};
+
+
+    if (id) {
+      await fetch(`/api/private-vehicles/update/${plantID}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      await fetch(`/api/private-vehicles/create/${plantID}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+  }
+}
+
 
         alert("✔ Operation updated successfully!");
         window.location.href = `index.html?date=${encodeURIComponent(date)}`;
@@ -826,11 +1082,21 @@ if (billChecked) {
             if (r.ok) {
               const plant = await r.json();
               plantSolar = !!plant.solar;
+              plantName = plant.plantName || plant.name || "";
             }
           } catch (e) {
             plantSolar = false;
+            plantName = "";
           }
+          infoEl.innerHTML = `
+              Date: <strong style="color:#f97316">${escapeHtml(date)}</strong>
+              &nbsp; | &nbsp;
+              Plant ID: <strong style="color:#059669">${escapeHtml(plantID)}</strong>
+              ${plantName ? `&nbsp; | &nbsp; Plant: <strong style="color:#2563eb">${escapeHtml(plantName)}</strong>` : ""}
+            `;
+
         }
+
 
 
       // events
@@ -841,24 +1107,36 @@ if (billChecked) {
         const yes = privateToggle.checked;
         privateTripsEl.disabled = !yes;
         privateSludgeEl.disabled = !yes;
+        privateSludgeKgsEl.disabled = !yes;
         if(!yes){
           privateTripsEl.value = "";
           privateSludgeEl.value = "";
+          privateSludgeKgsEl.value = "";
         }
         setStatusBadge(computeCompleteness());
       });
 
+      privateTripsEl.addEventListener("input", () => {
+      const count = Number(privateTripsEl.value || 0);
+      if (count > 0) {
+        renderPrivateVehicleForms(count);
+      } else {
+        document.getElementById("privateVehicleForms").innerHTML = "";
+      }
+    });
+
+
       // initial load
-      (async function init(){
-        await loadPlantMaster();
-        await loadPlantOperation();
-        await loadVehiclesAndOps();
-        privateTripsEl.disabled = !privateToggle.checked;
-        privateSludgeEl.disabled = !privateToggle.checked;
-        attachEnterNav();
-        bindStatusWatcher();
-        setStatusBadge(computeCompleteness());
-      })();
+     (async function init(){
+      await loadPlantMaster();
+      await loadPlantOperation();
+      await loadVehiclesAndOps();
+      await loadPrivateVehicles();   // ✅ ADD THIS LINE
+      attachEnterNav();
+      bindStatusWatcher();
+      setStatusBadge(computeCompleteness());
+    })();
+
 
       // live completeness recompute
       document.addEventListener('input', ()=> setStatusBadge(computeCompleteness()));

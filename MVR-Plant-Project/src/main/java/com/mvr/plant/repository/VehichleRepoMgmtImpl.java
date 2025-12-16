@@ -69,6 +69,9 @@ public class VehichleRepoMgmtImpl implements IVehicleRepoImpl
         if (updated.getGpsStatus() != null)
             existing.setGpsStatus(updated.getGpsStatus());
 
+        if (updated.getGpsInstallationDate() != null)
+            existing.setGpsInstallationDate(updated.getGpsInstallationDate());
+
         if (updated.getVehicleEngineNumber() != null)
             existing.setVehicleEngineNumber(updated.getVehicleEngineNumber());
 

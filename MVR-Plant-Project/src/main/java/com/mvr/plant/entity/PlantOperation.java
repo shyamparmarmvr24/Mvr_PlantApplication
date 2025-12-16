@@ -40,6 +40,8 @@ public class PlantOperation
 
     private Double sludgeReceived;
 
+    private Double sludgeReceivedKgs;
+
     private Integer totalNoOfTrips;
 
     private Double sludgeProcessed;
@@ -47,8 +49,6 @@ public class PlantOperation
     private Double biocharProduced;
 
     private Double plantRunningHrs;
-
-    //private Boolean solarIntegration;
 
     private Double powerReadingAmImport;
 
@@ -91,6 +91,8 @@ public class PlantOperation
     private Integer noOfTripsPrivateVehicle;
 
     private Double sludgeCollectPrivateVehicle;
+
+    private Double sludgeCollectPrivateVehicleKgs;
 
     @Column(length = 500)
     private String remarks;

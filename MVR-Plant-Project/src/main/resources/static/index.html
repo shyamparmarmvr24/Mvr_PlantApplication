@@ -436,13 +436,16 @@
                 }
             }));
 
-            return calcPlantStatus(plantOp, vehicleOps);
+            const plantSolar = originalPlants.find(p => p.plantID === plantID)?.solar === true;
+            return calcPlantStatus(plantOp, vehicleOps, plantSolar);
 
-        } catch {
+        }
+        catch
+        {
             return "update";
         }
     }
-function calcPlantStatus(op, vehicleOps) {
+function calcPlantStatus(op, vehicleOps, plantSolar) {
 
     if (!op || typeof op !== "object") return "update";
 
@@ -451,21 +454,21 @@ function calcPlantStatus(op, vehicleOps) {
 
     /* ------------------ ALWAYS count these plant fields ------------------ */
     const alwaysPlant = [
-        "sludgeTankLevelAm",
-        "sludgeTankLevelPm",
-        "sludgeProcessed",
-        "biocharProduced",
-        "plantRunningHrs",
-        "dgReadingAm",
-        "dgReadingPm",
-        "dgDiesalPercentageAm",
-        "dgDiesalPercentagePm",
-        "dgRunHours",
-        "polymerUsage",
-        "polymerStock",
-        "pillets",
-        "pilletsStock"
-    ];
+    "sludgeTankLevelAm",
+    "sludgeTankLevelPm",
+    "sludgeProcessed",
+    "biocharProduced",
+    "plantRunningHrs",
+    "dgReadingAm",
+    "dgReadingPm",
+    "dgDiesalPercentageAm",
+    "dgDiesalPercentagePm",
+    "polymerUsage",
+    "polymerStock",
+    "pillets",
+    "pilletsStock"
+];
+
 
     alwaysPlant.forEach(f => {
         total++;
@@ -473,7 +476,6 @@ function calcPlantStatus(op, vehicleOps) {
     });
 
     /* ------------------ Solar logic (FROM PLANT MASTER) ------------------ */
-       const plantSolar = originalPlants.find(p => p.plantID === op.plantID)?.solar === true;
 
         /* Import readings ALWAYS counted */
         ["powerReadingAmImport", "powerReadingPmImport"].forEach(f => {
@@ -505,11 +507,14 @@ function calcPlantStatus(op, vehicleOps) {
 
 
     /* ------------------ Private Vehicle ------------------ */
-    if (op.privateVehicle === true) {
-        total += 2;
-        if (op.noOfTripsPrivateVehicle != null) filled++;
-        if (op.sludgeCollectPrivateVehicle != null) filled++;
+    if (op.privateVehicle === true)
+    {
+    total += 3;
+    if (op.noOfTripsPrivateVehicle != null) filled++;
+    if (op.sludgeCollectPrivateVehicle != null) filled++;
+    if (op.sludgeCollectPrivateVehicleKgs != null) filled++;
     }
+
     // if false → do not count
 
     /* ------------------ Vehicle Operation Fields ------------------ */

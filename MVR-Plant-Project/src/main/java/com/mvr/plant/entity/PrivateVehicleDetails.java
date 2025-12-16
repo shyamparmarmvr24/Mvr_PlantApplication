@@ -12,46 +12,38 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "PrivateVehicleDetails")
 @Data
-@Table(name = "Vehicle_Operation_Table")
 @AllArgsConstructor
 @NoArgsConstructor
-public class VehicleOperation
+public class PrivateVehicleDetails
 {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vehicle_op_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "private_vehicle_seq")
     @SequenceGenerator(
-            name = "vehicle_op_seq",
-            sequenceName = "VehicleOpSeq",
+            name = "private_vehicle_seq",
+            sequenceName = "PrivateVehicleSeq",
             allocationSize = 1,
-            initialValue = 100
+            initialValue = 1
     )
-    private Long vehicleOpID;
+    private Long privateVehicleID;
 
     @ManyToOne
-    @JoinColumn(name = "vehicleID", referencedColumnName = "vehicleID")
+    @JoinColumn(name = "PlantID", referencedColumnName = "PlantID")
     @JsonBackReference
-    private VehicleInformation vehicle;
+    private FstpPlant plant;
+
+    private String privateVehNumber;
+
+    private Long driverNumber;
+
+    private String driverName;
+
+    private Double receivedSludgeLtrs;
+
+    private Double receivedSludgeKgs;
 
     private LocalDate operationDate;
-
-    private Double vehicleReadingAm;
-
-    private Double vehicleReadingPm;
-
-    private Double vehicleFuelLevel;
-
-    private Boolean lastFuelFilled;
-
-    private LocalDate lastFuelFilledDate;
-
-    private Double filledLiters;
-
-    private Integer noOfTrips;
-
-    private Double sludgeCollect;
-
-    private Double sludgeCollectKgs;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

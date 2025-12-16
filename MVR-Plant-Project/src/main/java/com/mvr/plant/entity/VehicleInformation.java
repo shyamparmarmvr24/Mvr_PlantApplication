@@ -54,6 +54,8 @@ public class VehicleInformation
 
     private Boolean gpsStatus;
 
+    private LocalDate gpsInstallationDate;
+
     private String vehicleEngineNumber;
 
     private String vehicleBatteryMake;

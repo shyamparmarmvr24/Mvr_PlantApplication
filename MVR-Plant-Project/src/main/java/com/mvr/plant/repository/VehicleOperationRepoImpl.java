@@ -69,6 +69,7 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
         if(vehicleOp.getFilledLiters() != null) count++;
         if(vehicleOp.getNoOfTrips() != null) count++;
         if(vehicleOp.getSludgeCollect() != null) count++;
+        if(vehicleOp.getSludgeCollectKgs() != null) count++;
 
 
         existing.setVehicleReadingAm(vehicleOp.getVehicleReadingAm());
@@ -80,6 +81,7 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
         existing.setNoOfTrips(vehicleOp.getNoOfTrips());
 
         existing.setSludgeCollect(vehicleOp.getSludgeCollect());
+        existing.setSludgeCollectKgs(vehicleOp.getSludgeCollectKgs());
 
         vehicleOpRepo.save(existing);
 

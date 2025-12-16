@@ -50,6 +50,14 @@ public class PlantEmployee
     @Column(nullable = false)
     private LocalDate dateOfJoining;
 
+//    private String licenceType;
+//
+//    private String licenceNumber;
+//
+//    private LocalDate licenceIssueDate;
+//
+//    private LocalDate licenceExpiryDate;
+
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     //@JsonManagedReference
     @JsonIgnore

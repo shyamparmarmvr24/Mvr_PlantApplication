@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,9 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
 
         // Set FK plant reference
         employee.setPlant(plant);
+
+        // 🔒 VALIDATE DRIVER LICENCE
+        //validateAndNormalizeLicence(employee);
 
         // Save employee
         return empRepo.save(employee);
@@ -59,6 +63,13 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
         existing.setAddress(employee.getAddress());
         existing.setDateOfBirth(employee.getDateOfBirth());
         existing.setDateOfJoining(employee.getDateOfJoining());
+//        existing.setLicenceType(employee.getLicenceType());
+//        existing.setLicenceNumber(employee.getLicenceNumber());
+//        existing.setLicenceIssueDate(employee.getLicenceIssueDate());
+//        existing.setLicenceExpiryDate(employee.getLicenceExpiryDate());
+
+        // 🔒 VALIDATE DRIVER LICENCE
+        //validateAndNormalizeLicence(existing);
 
         empRepo.save(existing);
 
@@ -90,17 +101,37 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
     return "Employee Not Found For Id " + empId;
    }
 
-}
-
-
-//    @Override
-//    public String deleteEmployeeByEmpId(Integer empId)
-//    {
-//        Optional<PlantEmployee> emp = empRepo.findById(empId);
-//        if(emp.isPresent())
-//        {
-//            empRepo.deleteById(empId);
-//            return "Employee Deleted Successfully";
+//    private void validateAndNormalizeLicence(PlantEmployee employee) {
+//
+//        if ("Driver".equalsIgnoreCase(employee.getDesignation())) {
+//
+//            if (employee.getLicenceType() == null ||
+//                    employee.getLicenceType().trim().isEmpty() ||
+//                    employee.getLicenceNumber() == null ||
+//                    employee.getLicenceNumber().trim().isEmpty() ||
+//                    employee.getLicenceIssueDate() == null ||
+//                    employee.getLicenceExpiryDate() == null) {
+//
+//                throw new IllegalArgumentException(
+//                        "Licence details are mandatory for Driver"
+//                );
+//            }
+//
+//            // Expiry date should be after issue date
+//            if (employee.getLicenceExpiryDate().isBefore(employee.getLicenceIssueDate())) {
+//                throw new IllegalArgumentException(
+//                        "Licence expiry date cannot be before issue date"
+//                );
+//            }
+//
+//        } else {
+//            // 🚿 CLEAR licence fields for non-driver
+//            employee.setLicenceType(null);
+//            employee.setLicenceNumber(null);
+//            employee.setLicenceIssueDate(null);
+//            employee.setLicenceExpiryDate(null);
 //        }
-//        return "Employee Not Found For Id "+empId;
 //    }
+
+
+}

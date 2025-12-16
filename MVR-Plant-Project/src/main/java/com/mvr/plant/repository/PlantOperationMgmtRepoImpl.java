@@ -80,6 +80,7 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         if(plantOp.getPrivateVehicle() != null) count++;
         if(plantOp.getNoOfTripsPrivateVehicle() != null) count++;
         if(plantOp.getSludgeCollectPrivateVehicle() != null) count++;
+        if(plantOp.getSludgeCollectPrivateVehicleKgs() != null) count++;
         if(plantOp.getPowerBill() != null) count++;
         if(plantOp.getLastBillDate() != null) count++;
         if(plantOp.getTotalNoOfUnits() != null) count++;
@@ -88,7 +89,7 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         existing.setPrivateVehicle(plantOp.getPrivateVehicle());
         existing.setNoOfTripsPrivateVehicle(plantOp.getNoOfTripsPrivateVehicle());
         existing.setSludgeCollectPrivateVehicle(plantOp.getSludgeCollectPrivateVehicle());
-
+        existing.setSludgeCollectPrivateVehicleKgs(plantOp.getSludgeCollectPrivateVehicleKgs());
 
         existing.setSludgeTankLevelAm(plantOp.getSludgeTankLevelAm());
         existing.setSludgeTankLevelPm(plantOp.getSludgeTankLevelPm());
@@ -178,14 +179,20 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
 
         int totalTrips = 0;
         double totalSludge = 0.0;
+        double totalSludgeKgs=0.0;
 
         for (VehicleOperation vo : vehicles) {
             if (vo.getNoOfTrips() != null)
                 totalTrips += vo.getNoOfTrips();
 
-            if (vo.getSludgeCollect() != null)
+            if (vo.getSludgeCollect()  != null)
                 totalSludge += vo.getSludgeCollect();
+
+            if (vo.getSludgeCollectKgs()  != null)
+                totalSludgeKgs += vo.getSludgeCollectKgs();
         }
+
+        //System.out.println("Status"+plantOp.getPrivateVehicle());
 
         // ✅ private vehicle counted ONCE
         if (Boolean.TRUE.equals(plantOp.getPrivateVehicle())) {
@@ -194,12 +201,17 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
 
             if (plantOp.getSludgeCollectPrivateVehicle() != null)
                 totalSludge += plantOp.getSludgeCollectPrivateVehicle();
+
+            if (plantOp.getSludgeCollectPrivateVehicleKgs() != null)
+                totalSludgeKgs += plantOp.getSludgeCollectPrivateVehicleKgs();
         }
 
         plantOp.setTotalNoOfTrips(totalTrips);
         plantOp.setSludgeReceived(totalSludge);
+        plantOp.setSludgeReceivedKgs(totalSludgeKgs);
 
         operationRepo.save(plantOp);
     }
+
 
 }

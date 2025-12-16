@@ -93,17 +93,27 @@ public class FstpPlant
     @Column(name = "TabsReceivedDate")
     private LocalDate tabsReceivedDate;
 
-    @Column(name = "Gps")
-    private Boolean gps;
+    @Column(name = "CtoCertified")
+    private Boolean ctoCertified;
 
-    @Column(name = "GpsDate")
-    private LocalDate gpsDate;
+    @Column(name = "CtoIssuedDate")
+    private LocalDate ctoIssuedDate;
+
+    @Column(name = "CtoExpiryDate")
+    private LocalDate ctoExpiryDate;
+
+    @Column(name = "CteCertified")
+    private Boolean cteCertified;
+
+    @Column(name = "CteIssuedDate")
+    private LocalDate cteIssuedDate;
+
+    @Column(name = "CteExpiryDate")
+    private LocalDate cteExpiryDate;
 
     @Column(name = "NoOfVehicle")
     private Integer noOfVehicle;
 
-//    @Column(name = "NoOfEmployees")
-//    private Integer noOfEmployees;
     public int getNoOfEmployees()
     {return plantEmployees != null ? plantEmployees.size() : 0;}
 
@@ -127,4 +137,9 @@ public class FstpPlant
     //@JsonManagedReference
     @JsonIgnore
     private List<VehicleInformation> vehicleInfo = new ArrayList<>();
+
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    //@JsonManagedReference
+    @JsonIgnore
+    private List<PrivateVehicleDetails> privateVehicle = new ArrayList<>();
 }

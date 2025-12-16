@@ -240,6 +240,47 @@
                 </div>
             </div>
 
+            <div class="section-title">CTO / CTE Certification</div>
+            <div class="divider"></div>
+
+            <!-- CTO -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ctoCertified">CTO Certified</label>
+                    <select id="ctoCertified">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ctoIssuedDate">CTO Issued Date</label>
+                    <input type="date" id="ctoIssuedDate" disabled />
+                </div>
+                <div class="form-group">
+                    <label for="ctoExpiryDate">CTO Expiry Date</label>
+                    <input type="date" id="ctoExpiryDate" disabled />
+                </div>
+            </div>
+
+            <!-- CTE -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cteCertified">CTE Certified</label>
+                    <select id="cteCertified">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cteIssuedDate">CTE Issued Date</label>
+                    <input type="date" id="cteIssuedDate" disabled />
+                </div>
+                <div class="form-group">
+                    <label for="cteExpiryDate">CTE Expiry Date</label>
+                    <input type="date" id="cteExpiryDate" disabled />
+                </div>
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="solarPlantCapacity">Solar Power Capacity (kW)</label>
@@ -280,21 +321,6 @@
                 <div class="form-group">
                     <label for="tabsReceivedDate">Tabs Received Date</label>
                     <input type="date" id="tabsReceivedDate" disabled />
-                    <div class="note">Future dates not allowed</div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="gps">GPS</label>
-                    <select id="gps">
-                        <option value="no">No</option>
-                        <option value="yes">Yes</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="gpsDate">GPS Installation Date</label>
-                    <input type="date" id="gpsDate" disabled />
                     <div class="note">Future dates not allowed</div>
                 </div>
             </div>
@@ -404,8 +430,9 @@
         "ipPhoneDate",
         "cameraConfigurationDate",
         "tabsReceivedDate",
-        "gpsDate",
-        "codAndBodSenserDate"
+        "codAndBodSenserDate",
+        "ctoIssuedDate",
+        "cteIssuedDate"
     ].forEach(setMaxDate);
 
     // ----------------------- YES/NO → ENABLE/DISABLE DATES -----------------------
@@ -432,27 +459,15 @@
     setupToggleWithDate("solar", "solarDate");
     setupToggleWithDate("internet", "internetDate");
     setupToggleWithDate("tabs", "tabsReceivedDate");
-    setupToggleWithDate("gps", "gpsDate");
 
-    // ----------------------- GPS DISABLE WHEN 0 VEHICLES -----------------------
-    function refreshGpsAvailability() {
-        const noOfVehicleVal = document.getElementById("noOfVehicle").value;
-        const noOfVehicle = parseInt(noOfVehicleVal || "0", 10);
-        const gpsSel = document.getElementById("gps");
-        const gpsDate = document.getElementById("gpsDate");
+    setupToggleWithDate("ctoCertified", "ctoIssuedDate");
+    setupToggleWithDate("ctoCertified", "ctoExpiryDate");
 
-        if (isNaN(noOfVehicle) || noOfVehicle === 0) {
-            if (gpsSel) { gpsSel.value = "no"; gpsSel.disabled = true; }
-            if (gpsDate) { gpsDate.value = ""; gpsDate.disabled = true; }
-        } else {
-            if (gpsSel) gpsSel.disabled = false;
-            if (gpsSel) gpsSel.dispatchEvent(new Event("change"));
-        }
-    }
+    setupToggleWithDate("cteCertified", "cteIssuedDate");
+    setupToggleWithDate("cteCertified", "cteExpiryDate");
+
 
     const noOfVehicleEl = document.getElementById("noOfVehicle");
-    if (noOfVehicleEl) noOfVehicleEl.addEventListener("input", refreshGpsAvailability);
-    refreshGpsAvailability();
 
     // ----------------------- ENTER KEY → NEXT FIELD -----------------------
     document.addEventListener("keydown", function (e) {
@@ -522,7 +537,7 @@
         const step = currentStep;
 
         if (step === 1) {
-            const requiredIds = ["plantID", "plantName", "kld", "zones", "mnit", "permanentPower", "solar", "internet"];
+            const requiredIds = ["plantID", "plantName", "kld", "zones", "mnit"];
             for (const id of requiredIds) {
                 const el = document.getElementById(id);
                 if (!el) continue;
@@ -656,6 +671,23 @@
                 document.getElementById("internetDate").value = plantData.internetDateOfCompletion;
             }
 
+            setYesNo("ctoCertified", plantData.ctoCertified);
+            if (plantData.ctoIssuedDate) {
+                document.getElementById("ctoIssuedDate").value = plantData.ctoIssuedDate;
+            }
+            if (plantData.ctoExpiryDate) {
+                document.getElementById("ctoExpiryDate").value = plantData.ctoExpiryDate;
+            }
+
+            setYesNo("cteCertified", plantData.cteCertified);
+            if (plantData.cteIssuedDate) {
+                document.getElementById("cteIssuedDate").value = plantData.cteIssuedDate;
+            }
+            if (plantData.cteExpiryDate) {
+                document.getElementById("cteExpiryDate").value = plantData.cteExpiryDate;
+            }
+
+
             document.getElementById("solarPlantCapacity").value = plantData.solarPlantCapacity ?? "";
 
             document.getElementById("constructionStartedDate").value = plantData.constructionStartedDate || "";
@@ -671,17 +703,11 @@
                 document.getElementById("tabsReceivedDate").value = plantData.tabsReceivedDate;
             }
 
-            setYesNo("gps", plantData.gps);
-            if (plantData.gpsDate) {
-                document.getElementById("gpsDate").value = plantData.gpsDate;
-            }
-
             const noOfVehicle = plantData.noOfVehicle ?? 0;
             const noOfEmployees = plantData.noOfEmployees ?? 0;
 
             document.getElementById("noOfVehicle").value = noOfVehicle;
             document.getElementById("noOfEmployees").value = noOfEmployees;
-            refreshGpsAvailability();
 
             try {
                 const vehRes = await fetch(`/api/vehiclesinformation/plant/${plantId}`);
@@ -689,7 +715,7 @@
                     existingVehiclesData = await vehRes.json();
                     if (!plantData.noOfVehicle && existingVehiclesData.length > 0) {
                         document.getElementById("noOfVehicle").value = existingVehiclesData.length;
-                        refreshGpsAvailability();
+
                     }
                 }
             } catch (e) {
@@ -787,7 +813,14 @@
                         <option value="yes">Yes</option>
                     </select>
                 </div>
+
+                <div class="form-group">
+                    <label>GPS Installation Date</label>
+                    <input type="date" id="veh_${i}_gpsInstallDate" max="${today}" disabled />
+                    <div class="note">Enabled only if GPS is Yes</div>
+                </div>
             </div>
+
 
             <div class="divider"></div>
             <div class="section-title">Engine & Battery</div>
@@ -910,6 +943,7 @@
 
         `;
         vehicleContainer.appendChild(card);
+        setupVehicleGpsToggle(i);
     }
 
     // fill existing vehicles
@@ -922,6 +956,10 @@
         document.getElementById(`veh_${i}_insDate`).value = v.insuranceDate || "";
         document.getElementById(`veh_${i}_insExpDate`).value = v.insuranceExpiryDate || "";
         document.getElementById(`veh_${i}_gpsStatus`).value = v.gpsStatus ? "yes" : "no";
+        document.getElementById(`veh_${i}_gpsInstallDate`).value =
+            v.gpsInstallationDate || "";
+        setupVehicleGpsToggle(i);
+
         document.getElementById(`veh_${i}_engineNo`).value = v.vehicleEngineNumber || "";
         document.getElementById(`veh_${i}_batteryMake`).value = v.vehicleBatteryMake || "";
         document.getElementById(`veh_${i}_batteryNo`).value = v.vehicleBatteryNumber || "";
@@ -1091,11 +1129,17 @@
             tabs: document.getElementById("tabs").value === "yes",
             tabsReceivedDate: document.getElementById("tabsReceivedDate").value || null,
 
-            gps: document.getElementById("gps").value === "yes",
-            gpsDate: document.getElementById("gpsDate").value || null,
-
             noOfVehicle: Number(document.getElementById("noOfVehicle").value || 0),
-            noOfEmployees: Number(document.getElementById("noOfEmployees").value || 0)
+            noOfEmployees: Number(document.getElementById("noOfEmployees").value || 0),
+
+            ctoCertified: document.getElementById("ctoCertified").value === "yes",
+            ctoIssuedDate: document.getElementById("ctoIssuedDate").value || null,
+            ctoExpiryDate: document.getElementById("ctoExpiryDate").value || null,
+
+            cteCertified: document.getElementById("cteCertified").value === "yes",
+            cteIssuedDate: document.getElementById("cteIssuedDate").value || null,
+            cteExpiryDate: document.getElementById("cteExpiryDate").value || null
+
         };
     }
 
@@ -1113,6 +1157,8 @@
                 insuranceDate: document.getElementById(`veh_${i}_insDate`)?.value || null,
                 insuranceExpiryDate: document.getElementById(`veh_${i}_insExpDate`)?.value || null,
                 gpsStatus: document.getElementById(`veh_${i}_gpsStatus`)?.value === "yes",
+                gpsInstallationDate:
+                    document.getElementById(`veh_${i}_gpsInstallDate`)?.value || null,
                 vehicleEngineNumber: document.getElementById(`veh_${i}_engineNo`)?.value || null,
                 vehicleBatteryMake: document.getElementById(`veh_${i}_batteryMake`)?.value || null,
                 vehicleBatteryNumber: document.getElementById(`veh_${i}_batteryNo`)?.value || null,
@@ -1169,6 +1215,27 @@
         return employees;
     }
 
+    //gps status vehicle
+    function setupVehicleGpsToggle(index) {
+    const gpsSel = document.getElementById(`veh_${index}_gpsStatus`);
+    const gpsDate = document.getElementById(`veh_${index}_gpsInstallDate`);
+
+    if (!gpsSel || !gpsDate) return;
+
+    function refresh() {
+        if (gpsSel.value === "yes") {
+            gpsDate.disabled = false;
+        } else {
+            gpsDate.disabled = true;
+            gpsDate.value = "";
+        }
+    }
+
+    gpsSel.addEventListener("change", refresh);
+    refresh();
+    }
+
+
     // ----------------------- AUTOSAVE -----------------------
     function collectDraftState() {
         const fields = {};
@@ -1222,12 +1289,12 @@
                     }
                 });
 
-                // re-trigger toggles
-                ["mnit","permanentPower","solar","internet","tabs","gps"].forEach(id => {
+                ["mnit","permanentPower","solar","internet","tabs","ctoCertified","cteCertified"]
+                .forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.dispatchEvent(new Event("change"));
                 });
-                refreshGpsAvailability();
+
             }
 
             if (draft.step && draft.step >= 1 && draft.step <= 5) {
@@ -1271,7 +1338,6 @@ document.getElementById("plantID").addEventListener("input", function () {
         document.getElementById("noOfEmployees").value = "0";
 
         // refresh dependent UI
-        refreshGpsAvailability();
         document.getElementById("vehicleFormsContainer").innerHTML = "";
         document.getElementById("employeeFormsContainerStep5").innerHTML = "";
 
@@ -1392,9 +1458,9 @@ document.getElementById("plantID").addEventListener("input", function () {
     updateStepPills();
     restoreDraft();
     // Clear autosave when user closes or refreshes page
-window.addEventListener("beforeunload", () => {
+    window.addEventListener("beforeunload", () => {
     clearDraft();
-});
+     });
 </script>
 </body>
 </html>

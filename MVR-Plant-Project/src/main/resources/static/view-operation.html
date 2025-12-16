@@ -32,6 +32,18 @@
         .muted { color:#6b7280; font-size:13px; }
         .inline-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
         @media (max-width:720px){ th { width:180px; } table td { font-size:13px } }
+
+        .section-header td{
+            background:#0f172a;
+            color:#ffffff;
+            font-weight:700;
+            font-size:15px;
+            padding:12px;
+        }
+        .section-header{
+            border-top:14px solid #eef2f7;
+        }
+
     </style>
 </head>
 <body>
@@ -59,8 +71,14 @@
         <tr><td>Private Vehicles Present</td><td id="pv_present">-</td></tr>
         <tr><td>No. of Trips (Private)</td><td id="pv_trips">-</td></tr>
         <tr><td>Sludge (Ltrs) (Private)</td><td id="pv_sludge">-</td></tr>
+        <tr>
+            <td>Sludge (Kgs) (Private)</td>
+            <td id="pv_sludge_kgs">-</td>
+        </tr>
         </tbody>
     </table>
+    <h3 style="margin-top:14px;color:#0369a1">Private Vehicle Details</h3>
+    <div id="privateVehicleDetails"></div>
 
     <div class="buttons">
         <button id="updateBtn" class="btn btn-update">Update</button>
@@ -70,6 +88,7 @@
 </div>
 
 <script>
+    let plantSolar = false;
     (function(){
         // get params
         const params = new URLSearchParams(window.location.search);
@@ -82,6 +101,7 @@
         const pvPresentEl = document.getElementById('pv_present');
         const pvTripsEl = document.getElementById('pv_trips');
         const pvSludgeEl = document.getElementById('pv_sludge');
+        const pvSludgeKgsEl = document.getElementById('pv_sludge_kgs');
 
         const progressFill = document.getElementById('progressFill');
         const progressText = document.getElementById('progressText');
@@ -99,7 +119,6 @@
             "sludgeProcessed",
             "biocharProduced",
             "plantRunningHrs",
-            "solarIntegration",
             "powerReadingAmImport",
             "powerReadingAmExport",
             "powerReadingPmImport",
@@ -157,7 +176,6 @@
         // helper format
         function fmt(field, v){
             if (v === null || v === undefined || v === "") return "-";
-            if (field === "solarIntegration") return v === true ? "Yes" : "No";
             if (units[field]) return `${v} ${units[field]}`;
             if (field === "operationDate") {
                 try {
@@ -168,30 +186,52 @@
             }
             return v;
         }
+        function to2(val) {
+            if (val === null || val === undefined || val === "") return "-";
+            const num = Number(val);
+            return isNaN(num) ? "-" : num.toFixed(2);
+        }
+
 
         // compute progress according to rules:
         // base fields + solar logic + vehicle counts + private aggregates logic
         function computeProgress(op, vehicleOps, privateAgg){
             // base list (same as you gave, but remove remarks)
             const base = [
-                "sludgeTankLevelAm","sludgeTankLevelPm","sludgeReceived","totalNoOfTrips",
-                "sludgeProcessed","biocharProduced","plantRunningHrs","solarIntegration",
-                "dgReadingAm","dgReadingPm","dgDiesalPercentageAm","dgDiesalPercentagePm",
-                "polymerUsage","pillets"
-            ];
+            "sludgeTankLevelAm",
+            "sludgeTankLevelPm",
+            "sludgeReceived",
+            "totalNoOfTrips",
+            "sludgeProcessed",
+            "biocharProduced",
+            "plantRunningHrs",
+            "powerConsumed",
+            "dgReadingAm",
+            "dgReadingPm",
+            "dgDiesalPercentageAm",
+            "dgDiesalPercentagePm",
+            "polymerUsage",
+            "pillets"
+        ];
+
 
             let fieldsToCheck = base.slice();
 
-            if (op && op.solarIntegration === true) {
-                fieldsToCheck = fieldsToCheck.concat([
-                    "powerReadingAmImport","powerReadingAmExport","powerReadingPmImport","powerReadingPmExport"
-                ]);
+            // power readings – depend ONLY on plant solar flag
+            if (plantSolar === true) {
+                fieldsToCheck.push(
+                    "powerReadingAmImport",
+                    "powerReadingPmImport",
+                    "powerReadingAmExport",
+                    "powerReadingPmExport"
+                );
             } else {
-                // When no solar, count the two imports (AM + PM) as per your rule
-                fieldsToCheck = fieldsToCheck.concat([
-                    "powerReadingAmImport","powerReadingPmImport"
-                ]);
+                fieldsToCheck.push(
+                    "powerReadingAmImport",
+                    "powerReadingPmImport"
+                );
             }
+
 
             // count filled plant fields
             let filled = 0;
@@ -221,19 +261,29 @@
                     }
 
                     // noOfTrips & sludgeCollect
-                    vehicleTotal += 2;
-                    if (v.noOfTrips !== null && v.noOfTrips !== undefined && v.noOfTrips !== "") vehicleFilled++;
-                    if (v.sludgeCollect !== null && v.sludgeCollect !== undefined && v.sludgeCollect !== "") vehicleFilled++;
+                   vehicleTotal += 3;
+                    if (v.noOfTrips !== null && v.noOfTrips !== "") vehicleFilled++;
+                    if (v.sludgeCollect !== null && v.sludgeCollect !== "") vehicleFilled++;
+                    if (v.sludgeCollectKgs !== null && v.sludgeCollectKgs !== "") vehicleFilled++;
+
                 }
             }
 
             // private aggregates
             let privateFilled = 0, privateTotal = 0;
-            if (privateAgg && privateAgg.privateVehicle === true) {
-                privateTotal = 2;
-                if (privateAgg.noOfTripsPrivateVehicle !== null && privateAgg.noOfTripsPrivateVehicle !== undefined && privateAgg.noOfTripsPrivateVehicle !== "") privateFilled++;
-                if (privateAgg.sludgeCollectPrivateVehicle !== null && privateAgg.sludgeCollectPrivateVehicle !== undefined && privateAgg.sludgeCollectPrivateVehicle !== "") privateFilled++;
-            } else {
+           if (privateAgg && privateAgg.privateVehicle === true) {
+                privateTotal = 3;
+
+                if (privateAgg.noOfTripsPrivateVehicle !== null && privateAgg.noOfTripsPrivateVehicle !== "")
+                    privateFilled++;
+
+                if (privateAgg.sludgeCollectPrivateVehicle !== null && privateAgg.sludgeCollectPrivateVehicle !== "")
+                    privateFilled++;
+
+                if (op.sludgeCollectPrivateVehicleKgs !== null && op.sludgeCollectPrivateVehicleKgs !== "")
+                    privateFilled++;
+            }
+             else {
                 // if privateVehicle false, treat as not present (counts as 0 filled, 0 total)
                 privateTotal = 0;
             }
@@ -256,38 +306,195 @@
         // load plant op + vehicles + vehicle ops
         async function loadAll(){
             try {
-                // set header
-                infoBox.innerHTML = `Date: <strong style="color:#f97316">${escapeHtml(date)}</strong> &nbsp; | &nbsp; Plant ID: <strong style="color:#059669">${escapeHtml(plantID)}</strong>`;
+            let privateAgg = {
+                privateVehicle: false,
+                noOfTripsPrivateVehicle: null,
+                sludgeCollectPrivateVehicle: null
+            };
+            let pvList = [];
+
 
                 // fetch plant info (for name)
-                let plantName = null;
+               let plantName = null;
                 try {
                     const pr = await fetch(`/api/plants/${plantID}`);
                     if (pr.ok) {
                         const plant = await pr.json();
                         plantName = plant.plantName || plant.name || null;
+                        plantSolar = plant.solar === true; // ✅ IMPORTANT
                     }
-                } catch(e){ plantName = null; }
+                } catch(e){
+                    plantName = null;
+                    plantSolar = false;
+                }
                 if (plantName) {
                     document.getElementById('title').textContent = `${plantName} — Operation Details`;
                 } else {
                     document.getElementById('title').textContent = `Operation Details`;
                 }
+                infoBox.innerHTML = `
+                      Date: <strong style="color:#f97316">${escapeHtml(date)}</strong>
+                      &nbsp; | &nbsp;
+                      Plant ID: <strong style="color:#059669">${escapeHtml(plantID)}</strong>
+                      ${plantName ? `&nbsp; | &nbsp; Plant Name: <strong style="color:#2563eb">${escapeHtml(plantName)}</strong>` : ""}
+                    `;
+
 
                 // fetch plant operation
                 const resOp = await fetch(`/api/operations/plant/${plantID}?date=${encodeURIComponent(date)}`);
                 const textOp = await resOp.text();
                 const op = (textOp && textOp.trim()) ? JSON.parse(textOp) : {};
 
-                // render plant fields in the exact order
-                fieldsBody.innerHTML = "";
-                for (const f of fields){
-                    const tr = document.createElement('tr');
-                    const label = labelMap[f] || f;
-                    const val = fmt(f, op[f]);
-                    tr.innerHTML = `<td>${escapeHtml(label)}</td><td>${escapeHtml(val)}</td>`;
-                    fieldsBody.appendChild(tr);
-                }
+                fieldsBody.innerHTML = `
+<tr class="section-header"><td colspan="2">Sludge Report</td></tr>
+
+<tr>
+  <th>Sludge Tank Level (Ltrs)</th>
+  <td class="inline-row">
+    <div>Morning: <strong>${fmt("sludgeTankLevelAm", op.sludgeTankLevelAm)}</strong></div>
+    <div>Evening: <strong>${fmt("sludgeTankLevelPm", op.sludgeTankLevelPm)}</strong></div>
+  </td>
+</tr>
+
+<tr><th>Sludge Processed (Ltrs)</th><td>${fmt("sludgeProcessed", op.sludgeProcessed)}</td></tr>
+<tr><th>Biochar Produced (Kgs)</th><td>${fmt("biocharProduced", op.biocharProduced)}</td></tr>
+<tr><th>Plant Running Hrs (Hrs)</th><td>${fmt("plantRunningHrs", op.plantRunningHrs)}</td></tr>
+
+<tr>
+  <th>Total Sludge Received (Ltrs)</th>
+  <td style="background:#dcfce7;font-weight:700">${fmt("sludgeReceived", op.sludgeReceived)}</td>
+</tr>
+
+<tr>
+  <th>Total Sludge Received (Kgs)</th>
+  <td style="background:#dcfce7;font-weight:700">
+    ${fmt("sludgeReceivedKgs", op.sludgeReceivedKgs)}
+  </td>
+</tr>
+
+<tr>
+  <th>Total No. Of Trips</th>
+  <td style="background:#dcfce7;font-weight:700">${fmt("totalNoOfTrips", op.totalNoOfTrips)}</td>
+</tr>
+`;
+fieldsBody.innerHTML += `
+<tr class="section-header"><td colspan="2">Power & Solar Report</td></tr>
+
+<tr>
+  <th>Power Import (Kwh)</th>
+  <td class="inline-row">
+    <div>Morning: <strong>${fmt("powerReadingAmImport", op.powerReadingAmImport)}</strong></div>
+    <div>Evening: <strong>${fmt("powerReadingPmImport", op.powerReadingPmImport)}</strong></div>
+  </td>
+</tr>
+`;
+
+if (plantSolar === true) {
+  fieldsBody.innerHTML += `
+  <tr>
+    <th>Solar Power Export (Kwh)</th>
+    <td class="inline-row">
+      <div>Morning: <strong>${fmt("powerReadingAmExport", op.powerReadingAmExport)}</strong></div>
+      <div>Evening: <strong>${fmt("powerReadingPmExport", op.powerReadingPmExport)}</strong></div>
+    </td>
+  </tr>
+
+  <tr>
+  <th>Solar Power Generated (Kwh)</th>
+  <td style="background:#dcfce7;font-weight:700">
+    ${
+      (op.powerReadingPmExport != null && op.powerReadingAmExport != null)
+        ? to2(op.powerReadingPmExport - op.powerReadingAmExport)
+        : "-"
+    }
+  </td>
+</tr>
+  `;
+}
+fieldsBody.innerHTML += `
+<tr>
+  <th>Power Consumed (Kwh)</th>
+  <td style="background:#dcfce7;font-weight:700">
+    ${to2(op.powerConsumed)}
+  </td>
+</tr>
+`;
+
+
+fieldsBody.innerHTML += `
+<tr><th>Power Bill Generated?</th><td>${op.powerBill ? "Yes" : "No"}</td></tr>
+<tr><th>Last Bill Date</th><td>${op.lastBillDate ?? "-"}</td></tr>
+
+<tr>
+  <th>Power Bill Details</th>
+  <td class="inline-row">
+    <div>Total Units: <strong>${op.TotalNoOfUnits ?? "-"}</strong></div>
+    <div>Total Amount: <strong>${op.totalBillAmount ?? "-"}</strong></div>
+  </td>
+</tr>
+
+`;
+fieldsBody.innerHTML += `
+<tr class="section-header"><td colspan="2">DG Report</td></tr>
+
+<tr>
+  <th>DG RunHours (Hrs)</th>
+  <td class="inline-row">
+    <div>Morning: <strong>${fmt("dgReadingAm", op.dgReadingAm)}</strong></div>
+    <div>Evening: <strong>${fmt("dgReadingPm", op.dgReadingPm)}</strong></div>
+  </td>
+</tr>
+
+<tr>
+  <th>DG Diesel %</th>
+  <td class="inline-row">
+    <div>Morning: <strong>${fmt("dgDiesalPercentageAm", op.dgDiesalPercentageAm)}</strong></div>
+    <div>Evening: <strong>${fmt("dgDiesalPercentagePm", op.dgDiesalPercentagePm)}</strong></div>
+  </td>
+</tr>
+
+<tr>
+  <th>DG Total Run Hours (Hrs)</th>
+  <td style="background:#dcfce7;font-weight:700">${to2(op.dgRunHours)}</td>
+</tr>
+<tr>
+  <th>DG Used Fuel (%)</th>
+  <td style="background:#dcfce7;font-weight:700">
+    ${
+      (op.dgDiesalPercentageAm != null && op.dgDiesalPercentagePm != null)
+        ? to2(op.dgDiesalPercentageAm - op.dgDiesalPercentagePm)
+        : "-"
+    }
+  </td>
+</tr>
+
+
+`;
+fieldsBody.innerHTML += `
+<tr class="section-header"><td colspan="2">Polymer & Pillets Report</td></tr>
+
+<tr>
+  <th>Polymer</th>
+  <td class="inline-row">
+    <div>Usage: <strong>${fmt("polymerUsage", op.polymerUsage)}</strong></div>
+    <div>Stock: <strong>${fmt("polymerStock", op.polymerStock)}</strong></div>
+  </td>
+</tr>
+
+<tr>
+  <th>Pillets</th>
+  <td class="inline-row">
+    <div>Usage: <strong>${fmt("pillets", op.pillets)}</strong></div>
+    <div>Stock: <strong>${fmt("pilletsStock", op.pilletsStock)}</strong></div>
+  </td>
+</tr>
+
+<tr>
+  <th>Remarks</th>
+  <td>${op.remarks ?? "-"}</td>
+</tr>
+`;
+
 
                 // fetch vehicles for this plant
                 vehicleOpsDiv.innerHTML = "";
@@ -313,6 +520,7 @@
                     vo.lastFuelFilledDate = vo.lastFuelFilledDate ?? null;
                     vo.noOfTrips = vo.noOfTrips ?? null;
                     vo.sludgeCollect = vo.sludgeCollect ?? null;
+                    vo.sludgeCollectKgs = vo.sludgeCollectKgs ?? null;
 
                     vehicleOpsList.push(vo);
 
@@ -322,26 +530,71 @@
                         <table style="margin-top:8px">
                             <tr><th>Vehicle Odometer Reading Morning (Km)</th><td>${vo.vehicleReadingAm ?? "-"}</td></tr>
                             <tr><th>Vehicle Odometer Reading Evening (Km)</th><td>${vo.vehicleReadingPm ?? "-"}</td></tr>
-                            <tr><th>Fuel Level (0-6 %)</th><td>${vo.vehicleFuelLevel ?? "-"}</td></tr>
+                            <tr><th>Fuel Level (0-6)</th><td>${vo.vehicleFuelLevel ?? "-"}</td></tr>
                             <tr><th>Last Fuel Filled?</th><td>${vo.lastFuelFilled ? "Yes" : "No"}</td></tr>
                             <tr><th>Last Fuel Filled Date</th><td>${vo.lastFuelFilled ? (vo.lastFuelFilledDate ?? "-") : "-"}</td></tr>
                             <tr><th>No. of Trips</th><td>${vo.noOfTrips ?? "-"}</td></tr>
-                            <tr><th>Sludge Collect (Ltrs)</th><td>${vo.sludgeCollect ?? "-"}</td></tr>
+                            <tr>
+                              <th>Sludge Collected</th>
+                              <td>
+                                Ltrs: ${vo.sludgeCollect ?? "-"} <br>
+                                Kgs: ${vo.sludgeCollectKgs ?? "-"}
+                              </td>
+                            </tr>
+
                         </table>
                     `;
                     vehicleOpsDiv.insertAdjacentHTML('beforeend', html);
                 }
 
                 // private aggregates (part of PlantOperation response maybe)
-                const privateAgg = {
-                    privateVehicle: op.privateVehicle ?? false,
-                    noOfTripsPrivateVehicle: op.noOfTripsPrivateVehicle ?? null,
-                    sludgeCollectPrivateVehicle: op.sludgeCollectPrivateVehicle ?? null
-                };
+                privateAgg.privateVehicle = op.privateVehicle ?? false;
+                privateAgg.noOfTripsPrivateVehicle = op.noOfTripsPrivateVehicle ?? null;
+                privateAgg.sludgeCollectPrivateVehicle = op.sludgeCollectPrivateVehicle ?? null;
+
+                if (privateAgg.privateVehicle) {
+                    try {
+                        const rpv = await fetch(
+                            `/api/private-vehicles/privateveh/${plantID}?date=${encodeURIComponent(date)}`
+                        );
+                        pvList = rpv.ok ? await rpv.json() : [];
+                    } catch (e) {
+                        pvList = [];
+                    }
+                }
+
 
                 pvPresentEl.textContent = privateAgg.privateVehicle ? "Yes" : "No";
                 pvTripsEl.textContent = (privateAgg.privateVehicle ? (privateAgg.noOfTripsPrivateVehicle ?? "-") : "0");
                 pvSludgeEl.textContent = (privateAgg.privateVehicle ? (privateAgg.sludgeCollectPrivateVehicle ?? "-") : "0");
+                pvSludgeKgsEl.textContent =privateAgg.privateVehicle ? (op.sludgeCollectPrivateVehicleKgs ?? "-") : "0";
+
+
+                /* ================= PRIVATE VEHICLE DETAILS ================= */
+
+                let pvDiv = document.getElementById("privateVehicleDetails");
+                pvDiv.innerHTML = "";
+
+                if (privateAgg.privateVehicle) {
+
+                    if (pvList.length === 0) {
+                        pvDiv.innerHTML = `<div class="muted">No private vehicle details found</div>`;
+                    }
+
+                    pvList.forEach((pv, i) => {
+                        pvDiv.innerHTML += `
+                            <table style="margin-top:10px">
+                                <tr><th>Vehicle Number</th><td>${pv.privateVehNumber ?? "-"}</td></tr>
+                                <tr><th>Driver Number</th><td>${pv.driverNumber ?? "-"}</td></tr>
+                                <tr><th>Driver Name</th><td>${pv.driverName ?? "-"}</td></tr>
+                                <tr><th>Sludge Received (Ltrs)</th><td>${pv.receivedSludgeLtrs ?? "-"}</td></tr>
+                                <tr><th>Sludge Received (Kgs)</th><td>${pv.receivedSludgeKgs ?? "-"}</td></tr>
+                            </table>
+                        `;
+                    });
+                }
+
+
 
                 // compute and apply progress
                 const pct = computeProgress(op, vehicleOpsList, privateAgg);
@@ -427,6 +680,7 @@
                 addRow("Last Fuel Filled Date", vo.lastFuelFilled ? (vo.lastFuelFilledDate ?? "-") : "-");
                 addRow("No. of Trips", vo.noOfTrips ?? "-");
                 addRow("Sludge Collect (Ltrs)", vo.sludgeCollect ?? "-");
+                addRow("Sludge Collect (Kgs)", vo.sludgeCollectKgs ?? "-");
             }
 
             doc.autoTable({
