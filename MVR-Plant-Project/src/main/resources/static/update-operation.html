@@ -324,10 +324,6 @@
           });
         }
 
-
-
-
-
         if(privateToggle.checked){
           total += 3;
           if(String(privateTripsEl.value).trim() !== "") filled++;
@@ -457,7 +453,12 @@
 
     <tr>
       <th>Last Bill Date</th>
-      <td><input type="date" class="input" id="lastBillDate" value="${currentOp.lastBillDate || ""}"></td>
+      <td><input type="date"
+       class="input"
+       id="lastBillDate"
+       value="${currentOp.lastBillDate || ""}"
+       max="${new Date().toISOString().split('T')[0]}">
+</td>
     </tr>
 
     <tr>
@@ -627,7 +628,13 @@ function renderPrivateVehicleForms(count) {
                     <th>Last Fuel Filled?</th>
                     <td style="display:flex; gap:8px; align-items:center;">
                       <label><input type="checkbox" id="lastFuel_${vid}"> Yes</label>
-                      <input id="lastFuelDate_${vid}" type="date" class="input" style="max-width:160px" disabled>
+                      <input id="lastFuelDate_${vid}"
+       type="date"
+       class="input"
+       style="max-width:160px"
+       max="${new Date().toISOString().split('T')[0]}"
+       disabled>
+
                       <input id="filledLiters_${vid}" class="input" placeholder="Filled Liters" style="max-width:140px" disabled>
                     </td>
                   </tr>

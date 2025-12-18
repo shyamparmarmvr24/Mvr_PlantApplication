@@ -195,104 +195,109 @@
 
         // compute progress according to rules:
         // base fields + solar logic + vehicle counts + private aggregates logic
-        function computeProgress(op, vehicleOps, privateAgg){
-            // base list (same as you gave, but remove remarks)
-            const base = [
-            "sludgeTankLevelAm",
-            "sludgeTankLevelPm",
-            "sludgeReceived",
-            "totalNoOfTrips",
-            "sludgeProcessed",
-            "biocharProduced",
-            "plantRunningHrs",
-            "powerConsumed",
-            "dgReadingAm",
-            "dgReadingPm",
-            "dgDiesalPercentageAm",
-            "dgDiesalPercentagePm",
-            "polymerUsage",
-            "pillets"
-        ];
+      function computeProgress(op, vehicleOps, privateAgg, privateList) {
+  let filled = 0;
+  let total = 0;
+
+  /* ================= PLANT FIELDS ================= */
+  const alwaysPlant = [
+    "sludgeTankLevelAm",
+    "sludgeTankLevelPm",
+    "sludgeProcessed",
+    "biocharProduced",
+    "plantRunningHrs",
+    "dgReadingAm",
+    "dgReadingPm",
+    "dgDiesalPercentageAm",
+    "dgDiesalPercentagePm",
+    "polymerUsage",
+    "polymerStock",
+    "pillets",
+    "pilletsStock"
+  ];
+
+  alwaysPlant.forEach(f => {
+    total++;
+    if (op && op[f] !== null && op[f] !== "") filled++;
+  });
+
+  /* ================= POWER IMPORT ================= */
+  ["powerReadingAmImport", "powerReadingPmImport"].forEach(f => {
+    total++;
+    if (op && op[f] !== null && op[f] !== "") filled++;
+  });
+
+  /* ================= SOLAR EXPORT ================= */
+  if (plantSolar) {
+    ["powerReadingAmExport", "powerReadingPmExport"].forEach(f => {
+      total++;
+      if (op && op[f] !== null && op[f] !== "") filled++;
+    });
+  }
+
+  /* ================= POWER BILL ================= */
+  total++; // powerBill checkbox always counts
+  if (op && typeof op.powerBill === "boolean") filled++;
+
+  if (op && op.powerBill === true) {
+    ["lastBillDate", "TotalNoOfUnits", "totalBillAmount"].forEach(f => {
+      total++;
+      if (op[f] !== null && op[f] !== "") filled++;
+    });
+  }
+
+  /* ================= PRIVATE VEHICLES ================= */
+  if (privateAgg && privateAgg.privateVehicle === true) {
+  total += 3;
+
+  if (privateAgg.noOfTripsPrivateVehicle !== null && privateAgg.noOfTripsPrivateVehicle !== "")
+    filled++;
+
+  if (privateAgg.sludgeCollectPrivateVehicle !== null && privateAgg.sludgeCollectPrivateVehicle !== "")
+    filled++;
+
+  if (op.sludgeCollectPrivateVehicleKgs !== null && op.sludgeCollectPrivateVehicleKgs !== "")
+    filled++;
+}
 
 
-            let fieldsToCheck = base.slice();
+  /* ================= PRIVATE VEHICLE PER-TRIP DETAILS ================= */
+if (Array.isArray(privateList) && privateAgg?.privateVehicle === true) {
+  privateList.forEach(pv => {
+    total += 2; // Ltrs + Kgs
+    if (pv.receivedSludgeLtrs !== null && pv.receivedSludgeLtrs !== "") filled++;
+    if (pv.receivedSludgeKgs !== null && pv.receivedSludgeKgs !== "") filled++;
+  });
+}
 
-            // power readings – depend ONLY on plant solar flag
-            if (plantSolar === true) {
-                fieldsToCheck.push(
-                    "powerReadingAmImport",
-                    "powerReadingPmImport",
-                    "powerReadingAmExport",
-                    "powerReadingPmExport"
-                );
-            } else {
-                fieldsToCheck.push(
-                    "powerReadingAmImport",
-                    "powerReadingPmImport"
-                );
-            }
+  /* ================= VEHICLES ================= */
+if (Array.isArray(vehicleOps)) {
+  vehicleOps.forEach(v => {
 
+    total += 6;
 
-            // count filled plant fields
-            let filled = 0;
-            fieldsToCheck.forEach(f => {
-                if (op && op[f] !== null && op[f] !== undefined && op[f] !== "") filled++;
-            });
-            const plantTotal = fieldsToCheck.length;
+    if (v.vehicleReadingAm !== null && v.vehicleReadingAm !== "") filled++;
+    if (v.vehicleReadingPm !== null && v.vehicleReadingPm !== "") filled++;
+    if (v.vehicleFuelLevel !== null && v.vehicleFuelLevel !== "") filled++;
+    if (v.noOfTrips !== null && v.noOfTrips !== "") filled++;
+    if (v.sludgeCollect !== null && v.sludgeCollect !== "") filled++;
+    if (v.sludgeCollectKgs !== null && v.sludgeCollectKgs !== "") filled++;
 
-            // per-vehicle: each vehicle contributes 3 always (am, pm, fuel).
-            // plus lastFuelDate counts only if lastFuelFilled true (per-vehicle)
-            let vehicleFilled = 0;
-            let vehicleTotal = 0;
-            if (Array.isArray(vehicleOps)) {
-                for (const v of vehicleOps) {
-                    // am, pm, fuel
-                    vehicleTotal += 3;
-                    if (v.vehicleReadingAm !== null && v.vehicleReadingAm !== undefined && v.vehicleReadingAm !== "") vehicleFilled++;
-                    if (v.vehicleReadingPm !== null && v.vehicleReadingPm !== undefined && v.vehicleReadingPm !== "") vehicleFilled++;
-                    if (v.vehicleFuelLevel !== null && v.vehicleFuelLevel !== undefined && v.vehicleFuelLevel !== "") vehicleFilled++;
+    if (v.lastFuelFilled === true) {
+      total += 3;
 
-                    // lastFuelFilled touched
-                    vehicleTotal += 1;
-                    if (v.lastFuelFilled === true) {
-                        if (v.lastFuelFilledDate !== null && v.lastFuelFilledDate !== undefined && v.lastFuelFilledDate !== "") vehicleFilled++;
-                    } else {
-                        // if not filled, we still count the field as "not present" (so no increment).
-                    }
+      // checkbox itself
+      filled++;
 
-                    // noOfTrips & sludgeCollect
-                   vehicleTotal += 3;
-                    if (v.noOfTrips !== null && v.noOfTrips !== "") vehicleFilled++;
-                    if (v.sludgeCollect !== null && v.sludgeCollect !== "") vehicleFilled++;
-                    if (v.sludgeCollectKgs !== null && v.sludgeCollectKgs !== "") vehicleFilled++;
+      if (v.lastFuelFilledDate !== null && v.lastFuelFilledDate !== "") filled++;
+      if (v.filledLiters !== null && v.filledLiters !== "") filled++;
+    }
+  });
+}
 
-                }
-            }
+  return total === 0 ? 0 : Math.round((filled / total) * 100);
+}
 
-            // private aggregates
-            let privateFilled = 0, privateTotal = 0;
-           if (privateAgg && privateAgg.privateVehicle === true) {
-                privateTotal = 3;
-
-                if (privateAgg.noOfTripsPrivateVehicle !== null && privateAgg.noOfTripsPrivateVehicle !== "")
-                    privateFilled++;
-
-                if (privateAgg.sludgeCollectPrivateVehicle !== null && privateAgg.sludgeCollectPrivateVehicle !== "")
-                    privateFilled++;
-
-                if (op.sludgeCollectPrivateVehicleKgs !== null && op.sludgeCollectPrivateVehicleKgs !== "")
-                    privateFilled++;
-            }
-             else {
-                // if privateVehicle false, treat as not present (counts as 0 filled, 0 total)
-                privateTotal = 0;
-            }
-
-            const total = plantTotal + vehicleTotal + privateTotal;
-            const totalFilled = filled + vehicleFilled + privateFilled;
-            if (total === 0) return 0;
-            return Math.round((totalFilled / total) * 100);
-        }
 
         function applyProgressBar(pct){
             progressFill.style.width = pct + "%";
@@ -344,6 +349,34 @@
                 const resOp = await fetch(`/api/operations/plant/${plantID}?date=${encodeURIComponent(date)}`);
                 const textOp = await resOp.text();
                 const op = (textOp && textOp.trim()) ? JSON.parse(textOp) : {};
+
+                /* ================= ALWAYS LOAD LATEST POWER BILL ================= */
+
+try {
+    const rb = await fetch(
+        `/api/operations/plant/${plantID}/latest-power-bill`
+    );
+
+    if (rb.ok) {
+        const latestBill = await rb.json();
+
+        // Apply latest bill values ONLY if missing in current day
+        if (!op.lastBillDate) {
+            op.lastBillDate = latestBill.lastBillDate;
+        }
+
+        if (!op.TotalNoOfUnits) {
+            op.TotalNoOfUnits = latestBill.TotalNoOfUnits;
+        }
+
+        if (!op.totalBillAmount) {
+            op.totalBillAmount = latestBill.totalBillAmount;
+        }
+    }
+} catch (e) {
+    console.warn("Latest power bill fetch failed", e);
+}
+
 
                 fieldsBody.innerHTML = `
 <tr class="section-header"><td colspan="2">Sludge Report</td></tr>
@@ -512,12 +545,45 @@ fieldsBody.innerHTML += `
                     } catch (e) {
                         vo = {};
                     }
+
+                    /* ===== ALWAYS LOAD LATEST FUEL DATA (ABSOLUTE FINAL FIX) ===== */
+                    try {
+                        const rf = await fetch(
+                            `/api/vehicle-operations/${v.vehicleID}/latest-fuel`
+                        );
+
+                        if (rf.ok) {
+                            const latestFuel = await rf.json();
+
+                            const noTodayFuelData =
+                                (vo.lastFuelFilledDate === null || vo.lastFuelFilledDate === undefined) &&
+                                (vo.filledLiters === null ||
+                                 vo.filledLiters === undefined ||
+                                 vo.filledLiters === 0);
+
+                            if (noTodayFuelData && latestFuel?.lastFuelFilled === true) {
+                                vo.lastFuelFilled = true;
+                                vo.lastFuelFilledDate = latestFuel.lastFuelFilledDate;
+                                vo.filledLiters = latestFuel.filledLiters;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Latest fuel fetch failed", v.vehicleID);
+                    }
+
+
+
+
+
                     // ensure keys exist explicitly (so computeProgress works)
                     vo.vehicleReadingAm = vo.vehicleReadingAm ?? null;
                     vo.vehicleReadingPm = vo.vehicleReadingPm ?? null;
                     vo.vehicleFuelLevel = vo.vehicleFuelLevel ?? null;
-                    vo.lastFuelFilled = vo.lastFuelFilled ?? false;
-                    vo.lastFuelFilledDate = vo.lastFuelFilledDate ?? null;
+                   // DO NOT override carried-forward fuel values
+                    if (vo.lastFuelFilled === undefined) vo.lastFuelFilled = null;
+                    if (vo.lastFuelFilledDate === undefined) vo.lastFuelFilledDate = null;
+                    if (vo.filledLiters === undefined) vo.filledLiters = null;
+
                     vo.noOfTrips = vo.noOfTrips ?? null;
                     vo.sludgeCollect = vo.sludgeCollect ?? null;
                     vo.sludgeCollectKgs = vo.sludgeCollectKgs ?? null;
@@ -533,6 +599,7 @@ fieldsBody.innerHTML += `
                             <tr><th>Fuel Level (0-6)</th><td>${vo.vehicleFuelLevel ?? "-"}</td></tr>
                             <tr><th>Last Fuel Filled?</th><td>${vo.lastFuelFilled ? "Yes" : "No"}</td></tr>
                             <tr><th>Last Fuel Filled Date</th><td>${vo.lastFuelFilled ? (vo.lastFuelFilledDate ?? "-") : "-"}</td></tr>
+                            <tr><th>Fuel Filled (Liters)</th><td>${vo.lastFuelFilled ? (vo.filledLiters ?? "-") : "-"}</td></tr>
                             <tr><th>No. of Trips</th><td>${vo.noOfTrips ?? "-"}</td></tr>
                             <tr>
                               <th>Sludge Collected</th>
@@ -597,7 +664,7 @@ fieldsBody.innerHTML += `
 
 
                 // compute and apply progress
-                const pct = computeProgress(op, vehicleOpsList, privateAgg);
+                const pct = computeProgress(op, vehicleOpsList, privateAgg, pvList);
                 applyProgressBar(pct);
 
                 // wire update/back/pdf buttons

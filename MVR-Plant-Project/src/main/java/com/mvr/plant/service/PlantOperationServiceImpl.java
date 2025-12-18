@@ -37,4 +37,9 @@ public class PlantOperationServiceImpl implements IPlantOperationService
         return plantOpRepo.findByOperationDateBetween(startDate,endDate);
     }
 
+    @Override
+    public PlantOperation getLatestPowerBill(Long plantId) {
+        return plantOpRepo.getLatestPowerBill(plantId);
+    }
+
 }

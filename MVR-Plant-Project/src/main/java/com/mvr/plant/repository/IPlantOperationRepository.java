@@ -31,4 +31,13 @@ public interface IPlantOperationRepository extends JpaRepository<PlantOperation,
     @EntityGraph(attributePaths = {"plant"})
     List<PlantOperation> findByOperationDateBetween(LocalDate startDate, LocalDate endDate);
 
+    @Query("""
+        SELECT p FROM PlantOperation p
+        WHERE p.plant.plantID = :plantId
+          AND p.powerBill = true
+          AND p.lastBillDate IS NOT NULL
+        ORDER BY p.lastBillDate DESC
+    """)
+    List<PlantOperation> findLatestPowerBill(@Param("plantId") Long plantId);
+
 }

@@ -26,4 +26,12 @@ public interface IVehicleOperationRepo extends JpaRepository<VehicleOperation,Lo
     @EntityGraph(attributePaths = {"vehicle", "vehicle.plant"})
     List<VehicleOperation> findByOperationDateBetween(LocalDate start, LocalDate end);
 
+    @Query("""
+    SELECT v FROM VehicleOperation v
+    WHERE v.vehicle.vehicleID = :vehicleId
+      AND v.lastFuelFilled = true
+      AND v.lastFuelFilledDate IS NOT NULL
+    ORDER BY v.lastFuelFilledDate DESC
+    """)
+    List<VehicleOperation> findLatestFuelFilled(@Param("vehicleId") Long vehicleId);
 }

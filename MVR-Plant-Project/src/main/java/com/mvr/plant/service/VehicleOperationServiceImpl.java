@@ -36,4 +36,9 @@ public class VehicleOperationServiceImpl implements IVehicleOperationService
     public List<VehicleOperationBetweenDTO> getVehicleOperationsBetween(LocalDate start, LocalDate end) {
         return vehicleOpRepo.getVehicleOperationsBetween(start,end);
     }
+
+    @Override
+    public VehicleOperation getLatestFuelFilled(Long vehicleId) {
+        return vehicleOpRepo.getLatestFuelFilled(vehicleId);
+    }
 }

@@ -92,4 +92,10 @@ public class VehicleOperationController
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/{vehicleId}/latest-fuel")
+    public ResponseEntity<VehicleOperation> latestFuel(@PathVariable Long vehicleId) {
+        return ResponseEntity.ok(vehicleOperationService.getLatestFuelFilled(vehicleId));
+    }
+
+
 }

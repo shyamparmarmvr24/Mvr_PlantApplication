@@ -76,4 +76,9 @@ public class PlantOperationController
         return ResponseEntity.ok(operations);
     }
 
+    @GetMapping("/plant/{plantId}/latest-power-bill")
+    public ResponseEntity<PlantOperation> latestPowerBill(@PathVariable Long plantId)
+    {
+        return ResponseEntity.ok(plantOpService.getLatestPowerBill(plantId));
+    }
 }

@@ -157,5 +157,10 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
         return result;
     }
 
+    @Override
+    public VehicleOperation getLatestFuelFilled(Long vehicleId) {
+        return vehicleOpRepo.findLatestFuelFilled(vehicleId).stream().findFirst().orElse(null);
+    }
+
 }
 

@@ -134,8 +134,11 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         existing.setPilletsStock(plantOp.getPilletsStock());
         existing.setRemarks(plantOp.getRemarks());
 
-       //save the update on db
-       operationRepo.save(existing);
+        //save the update on db
+        operationRepo.save(existing);
+
+       // ✅ IMPORTANT: recompute totals (fixes private-only plants)
+        recomputePlantTotals(plantId, date);
 
        Map<String, Integer> map = new HashMap<>();
        map.put("Operation Details Updated Successfully", count);
@@ -211,6 +214,11 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         plantOp.setSludgeReceivedKgs(totalSludgeKgs);
 
         operationRepo.save(plantOp);
+    }
+
+    @Override
+    public PlantOperation getLatestPowerBill(Long plantId) {
+        return operationRepo.findLatestPowerBill(plantId).stream().findFirst().orElse(null);
     }
 
 

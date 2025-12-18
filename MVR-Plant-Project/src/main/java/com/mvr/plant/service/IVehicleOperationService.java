@@ -14,4 +14,5 @@ public interface IVehicleOperationService
     public Map<String,Integer> updateVehicleOperation(Long plantId, Long vehicleID, VehicleOperation vehicleOp);
     public List<VehicleOperationDTO> getVehicleOperationsByDate(LocalDate date);
     public List<VehicleOperationBetweenDTO> getVehicleOperationsBetween(LocalDate start, LocalDate end);
+    public VehicleOperation getLatestFuelFilled(Long vehicleId);
 }
