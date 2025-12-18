@@ -27,14 +27,13 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
     public PlantEmployee createEmployee(Long plantId, PlantEmployee employee) {
 
         // Fetch Plant
-        FstpPlant plant = plantRepo.findPlantByPlantID(plantId)
-                .orElseThrow(() -> new RuntimeException("Plant not found: " + plantId));
+        FstpPlant plant = plantRepo.findPlantByPlantID(plantId).orElseThrow(() -> new RuntimeException("Plant not found: " + plantId));
 
         // Set FK plant reference
         employee.setPlant(plant);
 
-        // 🔒 VALIDATE DRIVER LICENCE
-        //validateAndNormalizeLicence(employee);
+        // HANDLE DRIVER LICENCE
+        handleDriverLicence(employee);
 
         // Save employee
         return empRepo.save(employee);
@@ -51,9 +50,7 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
     public String updateOperationById(Long plantId, Integer empId, PlantEmployee employee)
     {
         // Find existing employee for this plant + employee ID
-        PlantEmployee existing = empRepo
-                .getEmployeeByPlantIdAndEmployeeId(plantId, empId)
-                .orElseThrow(() -> new IllegalStateException("Employee Not Found For This Plant"));
+        PlantEmployee existing = empRepo.getEmployeeByPlantIdAndEmployeeId(plantId, empId).orElseThrow(() -> new IllegalStateException("Employee Not Found For This Plant"));
 
         // ✅ Update allowed fields
         existing.setEmployeeName(employee.getEmployeeName());
@@ -63,13 +60,19 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
         existing.setAddress(employee.getAddress());
         existing.setDateOfBirth(employee.getDateOfBirth());
         existing.setDateOfJoining(employee.getDateOfJoining());
-//        existing.setLicenceType(employee.getLicenceType());
-//        existing.setLicenceNumber(employee.getLicenceNumber());
-//        existing.setLicenceIssueDate(employee.getLicenceIssueDate());
-//        existing.setLicenceExpiryDate(employee.getLicenceExpiryDate());
 
-        // 🔒 VALIDATE DRIVER LICENCE
-        //validateAndNormalizeLicence(existing);
+        //DRIVER LICENCE UPDATE (ONLY FOR DRIVER)
+        if ("Driver".equalsIgnoreCase(employee.getDesignation())) {
+            existing.setLicenceType(employee.getLicenceType());
+            existing.setLicenceNumber(employee.getLicenceNumber());
+            existing.setLicenceIssueDate(employee.getLicenceIssueDate());
+            existing.setLicenceExpiryDate(employee.getLicenceExpiryDate());
+        } else {
+            existing.setLicenceType(null);
+            existing.setLicenceNumber(null);
+            existing.setLicenceIssueDate(null);
+            existing.setLicenceExpiryDate(null);
+        }
 
         empRepo.save(existing);
 
@@ -101,37 +104,13 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
     return "Employee Not Found For Id " + empId;
    }
 
-//    private void validateAndNormalizeLicence(PlantEmployee employee) {
-//
-//        if ("Driver".equalsIgnoreCase(employee.getDesignation())) {
-//
-//            if (employee.getLicenceType() == null ||
-//                    employee.getLicenceType().trim().isEmpty() ||
-//                    employee.getLicenceNumber() == null ||
-//                    employee.getLicenceNumber().trim().isEmpty() ||
-//                    employee.getLicenceIssueDate() == null ||
-//                    employee.getLicenceExpiryDate() == null) {
-//
-//                throw new IllegalArgumentException(
-//                        "Licence details are mandatory for Driver"
-//                );
-//            }
-//
-//            // Expiry date should be after issue date
-//            if (employee.getLicenceExpiryDate().isBefore(employee.getLicenceIssueDate())) {
-//                throw new IllegalArgumentException(
-//                        "Licence expiry date cannot be before issue date"
-//                );
-//            }
-//
-//        } else {
-//            // 🚿 CLEAR licence fields for non-driver
-//            employee.setLicenceType(null);
-//            employee.setLicenceNumber(null);
-//            employee.setLicenceIssueDate(null);
-//            employee.setLicenceExpiryDate(null);
-//        }
-//    }
-
+    private void handleDriverLicence(PlantEmployee employee) {
+        if (!"Driver".equalsIgnoreCase(employee.getDesignation())) {
+            employee.setLicenceType(null);
+            employee.setLicenceNumber(null);
+            employee.setLicenceIssueDate(null);
+            employee.setLicenceExpiryDate(null);
+        }
+    }
 
 }

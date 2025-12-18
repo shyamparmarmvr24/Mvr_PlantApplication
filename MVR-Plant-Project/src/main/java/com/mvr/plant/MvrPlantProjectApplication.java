@@ -7,5 +7,4 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MvrPlantProjectApplication {
 	public static void main(String[] args) {SpringApplication.run(MvrPlantProjectApplication.class, args);
 	}
-
 }

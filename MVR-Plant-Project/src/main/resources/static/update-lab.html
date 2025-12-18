@@ -78,13 +78,11 @@
             gap: 16px;
             margin-top: 18px;
             align-items: center;
-            flex-wrap: nowrap; /* 🔥 keeps inputs side by side */
+            flex-wrap: nowrap; /* keeps inputs side by side */
         }
         .flow-row .input {
                 max-width: 180px;
             }
-
-
 
         .flow-row label {
             font-weight: 700;
@@ -258,13 +256,41 @@
     });
 
     if (!res.ok) {
-        // ❌ NO validation error shown unless backend fails
+        //  NO validation error shown unless backend fails
         return;
     }
 
     alert("✔ Laboratory Operation Updated Successfully!");
     window.location.href = `index.html?date=${encodeURIComponent(date)}`;
 };
+
+    // ================= ENTER KEY → MOVE TO NEXT INPUT =================
+    document.addEventListener("keydown", function (e) {
+        if (e.key !== "Enter") return;
+
+        const target = e.target;
+
+        // only for inputs
+        if (target.tagName !== "INPUT") return;
+
+        e.preventDefault(); // stop form submit
+
+        // get all enabled & visible inputs in order
+        const inputs = Array.from(
+            document.querySelectorAll("input")
+        ).filter(el =>
+            !el.disabled &&
+            el.type !== "hidden" &&
+            el.offsetParent !== null
+        );
+
+        const index = inputs.indexOf(target);
+
+        // focus next input if exists
+        if(index > -1 && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+        }
+    });
 
     loadPlantInfo();
     loadLab();

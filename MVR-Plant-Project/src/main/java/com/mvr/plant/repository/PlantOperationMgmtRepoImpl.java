@@ -26,7 +26,6 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
     @Autowired
     private IVehicleOperationRepo vehicleOpRepo;
 
-
     @Override
     @Transactional
     public Map<String, Integer> updateOperationById(Long plantId, PlantOperation plantOp)
@@ -38,15 +37,12 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
     }
 
     // Find existing operation for plant + date
-    PlantOperation exist = operationRepo
-            .getOperationByPlantIdAndDate(plantId, date)
-            .orElse(null);
+    PlantOperation exist = operationRepo.getOperationByPlantIdAndDate(plantId, date).orElse(null);
 
     // If no existing operation → CREATE NEW ONE
     if (exist == null) {
         // First fetch the parent plant
-        FstpPlant plant = plantRepo.findPlantByPlantID(plantId)
-                .orElseThrow(() -> new IllegalStateException("Parent plant not found"));
+        FstpPlant plant = plantRepo.findPlantByPlantID(plantId).orElseThrow(() -> new IllegalStateException("Parent plant not found"));
 
         // Set parent reference and save new operation (for that date)
         plantOp.setPlant(plant);
@@ -54,29 +50,27 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
     }
 
     // existing operation by plant + date
-    PlantOperation existing = operationRepo
-            .getOperationByPlantIdAndDate(plantId, date)
-            .orElseThrow(() -> new IllegalStateException("Plant Operation Not Found For Date"));
+    PlantOperation existing = operationRepo.getOperationByPlantIdAndDate(plantId, date).orElseThrow(() -> new IllegalStateException("Plant Operation Not Found For Date"));
 
-    int count = 0;
+        int count = 0;
 
-        if (plantOp.getSludgeTankLevelAm() != null) count++;
-        if (plantOp.getSludgeTankLevelPm() != null) count++;
-        if (plantOp.getSludgeProcessed() != null) count++;
-        if (plantOp.getBiocharProduced() != null) count++;
-        if (plantOp.getPlantRunningHrs() != null) count++;
-        if (plantOp.getPowerReadingAmImport() != null) count++;
-        if (plantOp.getPowerReadingAmExport() != null) count++;
-        if (plantOp.getPowerReadingPmImport() != null) count++;
-        if (plantOp.getPowerReadingPmExport() != null) count++;
-        if (plantOp.getDgReadingAm() != null) count++;
-        if (plantOp.getDgReadingPm() != null) count++;
-        if (plantOp.getDgDiesalPercentageAm() != null) count++;
-        if (plantOp.getDgDiesalPercentagePm() != null) count++;
-        if (plantOp.getPolymerUsage() != null) count++;
-        if (plantOp.getPillets() != null) count++;
-        if (plantOp.getPilletsStock() != null) count++;
-        if (plantOp.getPolymerStock() != null) count++;
+        if(plantOp.getSludgeTankLevelAm() != null) count++;
+        if(plantOp.getSludgeTankLevelPm() != null) count++;
+        if(plantOp.getSludgeProcessed() != null) count++;
+        if(plantOp.getBiocharProduced() != null) count++;
+        if(plantOp.getPlantRunningHrs() != null) count++;
+        if(plantOp.getPowerReadingAmImport() != null) count++;
+        if(plantOp.getPowerReadingAmExport() != null) count++;
+        if(plantOp.getPowerReadingPmImport() != null) count++;
+        if(plantOp.getPowerReadingPmExport() != null) count++;
+        if(plantOp.getDgReadingAm() != null) count++;
+        if(plantOp.getDgReadingPm() != null) count++;
+        if(plantOp.getDgDiesalPercentageAm() != null) count++;
+        if(plantOp.getDgDiesalPercentagePm() != null) count++;
+        if(plantOp.getPolymerUsage() != null) count++;
+        if(plantOp.getPillets() != null) count++;
+        if(plantOp.getPilletsStock() != null) count++;
+        if(plantOp.getPolymerStock() != null) count++;
         if(plantOp.getPrivateVehicle() != null) count++;
         if(plantOp.getNoOfTripsPrivateVehicle() != null) count++;
         if(plantOp.getSludgeCollectPrivateVehicle() != null) count++;
@@ -93,7 +87,6 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
 
         existing.setSludgeTankLevelAm(plantOp.getSludgeTankLevelAm());
         existing.setSludgeTankLevelPm(plantOp.getSludgeTankLevelPm());
-
 
         existing.setSludgeProcessed(plantOp.getSludgeProcessed());
         existing.setBiocharProduced(plantOp.getBiocharProduced());
@@ -137,7 +130,7 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
         //save the update on db
         operationRepo.save(existing);
 
-       // ✅ IMPORTANT: recompute totals (fixes private-only plants)
+        //recompute totals
         recomputePlantTotals(plantId, date);
 
        Map<String, Integer> map = new HashMap<>();
@@ -145,12 +138,11 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
        return map;
        }
 
-      //getting date wise operation from db
+      //getting date wise (between) operation from db
       @Override
       public PlantOperation getAllOperationDataByIdAndDate(Long plantId, LocalDate date)
       {
-        return operationRepo.getOperationByPlantIdAndDate(plantId, date)
-                .orElse(null);
+        return operationRepo.getOperationByPlantIdAndDate(plantId, date).orElse(null);
       }
 
     @Override
@@ -173,17 +165,16 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
     @Transactional
     public void recomputePlantTotals(Long plantId, LocalDate date)
     {
-        PlantOperation plantOp = operationRepo
-                .getOperationByPlantIdAndDate(plantId, date)
-                .orElseThrow(() -> new IllegalStateException("Plant operation not found"));
+        PlantOperation plantOp = operationRepo.getOperationByPlantIdAndDate(plantId, date).orElseThrow(() -> new IllegalStateException("Plant operation not found"));
 
-        List<VehicleOperation> vehicles =
-                vehicleOpRepo.findByPlantIdAndDate(plantId, date);
+        List<VehicleOperation> vehicles = vehicleOpRepo.findByPlantIdAndDate(plantId, date);
 
+        //local variables for counting
         int totalTrips = 0;
         double totalSludge = 0.0;
         double totalSludgeKgs=0.0;
 
+        //multiple vehicles loop
         for (VehicleOperation vo : vehicles) {
             if (vo.getNoOfTrips() != null)
                 totalTrips += vo.getNoOfTrips();
@@ -195,9 +186,7 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
                 totalSludgeKgs += vo.getSludgeCollectKgs();
         }
 
-        //System.out.println("Status"+plantOp.getPrivateVehicle());
-
-        // ✅ private vehicle counted ONCE
+        // private vehicle counted ONCE
         if (Boolean.TRUE.equals(plantOp.getPrivateVehicle())) {
             if (plantOp.getNoOfTripsPrivateVehicle() != null)
                 totalTrips += plantOp.getNoOfTripsPrivateVehicle();
@@ -209,10 +198,12 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
                 totalSludgeKgs += plantOp.getSludgeCollectPrivateVehicleKgs();
         }
 
+        //set the values of sludge
         plantOp.setTotalNoOfTrips(totalTrips);
         plantOp.setSludgeReceived(totalSludge);
         plantOp.setSludgeReceivedKgs(totalSludgeKgs);
 
+        //saving the plant operation in db
         operationRepo.save(plantOp);
     }
 
@@ -220,6 +211,5 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo
     public PlantOperation getLatestPowerBill(Long plantId) {
         return operationRepo.findLatestPowerBill(plantId).stream().findFirst().orElse(null);
     }
-
 
 }

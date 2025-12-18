@@ -78,11 +78,9 @@
 
 <body>
 
-<header>Create FSTP Plant & Vehicles</header>
+<header>Create Plant Vehicles And Employees</header>
 
 <div class="container">
-
-    <h2>New Plant Wizard</h2>
 
     <!-- Step Pills -->
     <div class="steps-indicator">
@@ -749,6 +747,31 @@
         }
     });
 
+    function toggleDriverLicence(i) {
+    const des = document.getElementById(`emp_${i}_designation`);
+    const block = document.getElementById(`emp_${i}_licence_block`);
+    const dates = document.getElementById(`emp_${i}_licence_dates`);
+
+    function refresh() {
+        if (des.value === "Driver") {
+            block.style.display = "";
+            dates.style.display = "";
+        } else {
+            block.style.display = "none";
+            dates.style.display = "none";
+
+            document.getElementById(`emp_${i}_licenceType`).value = "";
+            document.getElementById(`emp_${i}_licenceNumber`).value = "";
+            document.getElementById(`emp_${i}_licenceIssueDate`).value = "";
+            document.getElementById(`emp_${i}_licenceExpiryDate`).value = "";
+        }
+    }
+
+    des.addEventListener("change", refresh);
+    refresh();
+}
+
+
     // ----------------------- VEHICLE / EMPLOYEE FORMS -----------------------
     async function prepareVehiclesAndGoToStep4() {
     if (!validateCurrentStep()) return;
@@ -1041,6 +1064,33 @@
                         <option value="Driver">Driver</option>
                         <option value="Security Guard">Security Guard</option>
                     </select>
+
+                    <div class="form-row" id="emp_${i}_licence_block" style="display:none;">
+                        <div class="form-group">
+                            <label>Licence Type</label>
+                            <select id="emp_${i}_licenceType">
+                                <option value="">-- Select Licence Type --</option>
+                                <option value="Heavy">Heavy</option>
+                                <option value="Light">Light</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Licence Number</label>
+                            <input type="text" id="emp_${i}_licenceNumber">
+                        </div>
+                    </div>
+
+                    <div class="form-row" id="emp_${i}_licence_dates" style="display:none;">
+                        <div class="form-group">
+                            <label>Licence Issue Date</label>
+                            <input type="date" id="emp_${i}_licenceIssueDate" max="${today}">
+                        </div>
+                        <div class="form-group">
+                            <label>Licence Expiry Date</label>
+                            <input type="date" id="emp_${i}_licenceExpiryDate">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -1072,6 +1122,7 @@
             </div>
         `;
         employeeContainer.appendChild(card);
+        toggleDriverLicence(i);
     }
 
     // Prefill from existing data
@@ -1087,6 +1138,12 @@
         document.getElementById(`emp_${i}_address`).value = emp.address ?? "";
         document.getElementById(`emp_${i}_dob`).value = emp.dateOfBirth ?? "";
         document.getElementById(`emp_${i}_doj`).value = emp.dateOfJoining ?? "";
+        document.getElementById(`emp_${i}_licenceType`).value = emp.licenceType ?? "";
+        document.getElementById(`emp_${i}_licenceNumber`).value = emp.licenceNumber ?? "";
+        document.getElementById(`emp_${i}_licenceIssueDate`).value = emp.licenceIssueDate ?? "";
+        document.getElementById(`emp_${i}_licenceExpiryDate`).value = emp.licenceExpiryDate ?? "";
+
+        toggleDriverLicence(i);
     });
 
     goToStep(5);
@@ -1195,22 +1252,43 @@
         if (noOfEmployees <= 0) return employees;
 
         for (let i = 1; i <= noOfEmployees; i++) {
-            employees.push({
-                employeeId: document.getElementById(`emp_${i}_id`)?.value
-                    ? Number(document.getElementById(`emp_${i}_id`).value)
-                    : null,
-                employeeName: document.getElementById(`emp_${i}_name`)?.value.trim() || "",
-                designation: document.getElementById(`emp_${i}_designation`)?.value.trim() || "",
-                mobileNo: document.getElementById(`emp_${i}_mobile`)?.value
-                    ? Number(document.getElementById(`emp_${i}_mobile`).value)
-                    : null,
-                alternateMobNo: document.getElementById(`emp_${i}_altMobile`)?.value
-                    ? Number(document.getElementById(`emp_${i}_altMobile`).value)
-                    : null,
-                address: document.getElementById(`emp_${i}_address`)?.value.trim() || "",
-                dateOfBirth: document.getElementById(`emp_${i}_dob`)?.value || null,
-                dateOfJoining: document.getElementById(`emp_${i}_doj`)?.value || null
-            });
+            const designation = document.getElementById(`emp_${i}_designation`).value;
+
+employees.push({
+    employeeId: document.getElementById(`emp_${i}_id`)?.value
+        ? Number(document.getElementById(`emp_${i}_id`).value)
+        : null,
+
+    employeeName: document.getElementById(`emp_${i}_name`).value.trim(),
+    designation,
+
+    mobileNo: Number(document.getElementById(`emp_${i}_mobile`).value),
+
+    alternateMobNo: document.getElementById(`emp_${i}_altMobile`).value
+        ? Number(document.getElementById(`emp_${i}_altMobile`).value)
+        : null,
+
+    address: document.getElementById(`emp_${i}_address`).value.trim(),
+    dateOfBirth: document.getElementById(`emp_${i}_dob`).value,
+    dateOfJoining: document.getElementById(`emp_${i}_doj`).value,
+
+    licenceType: designation === "Driver"
+        ? document.getElementById(`emp_${i}_licenceType`).value || null
+        : null,
+
+    licenceNumber: designation === "Driver"
+        ? document.getElementById(`emp_${i}_licenceNumber`).value || null
+        : null,
+
+    licenceIssueDate: designation === "Driver"
+        ? document.getElementById(`emp_${i}_licenceIssueDate`).value || null
+        : null,
+
+    licenceExpiryDate: designation === "Driver"
+        ? document.getElementById(`emp_${i}_licenceExpiryDate`).value || null
+        : null
+});
+
         }
         return employees;
     }

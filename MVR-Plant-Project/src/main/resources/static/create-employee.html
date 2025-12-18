@@ -83,6 +83,84 @@
             border-radius: 6px;
             text-decoration: none;
         }
+        .form-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.form-table td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.form-table td:first-child {
+    width: 35%;
+    font-weight: 600;
+    color: #374151;
+}
+
+.form-table input,
+.form-table select {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-table tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+/* BUTTONS */
+.btn-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-submit-small {
+    padding: 8px 18px;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-submit-small:hover {
+    background: #15803d;
+}
+
+.btn-back-small {
+    padding: 8px 18px;
+    background: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-back-small:hover {
+    background: #4b5563;
+}
+        .form-table select {
+    background-color: #fff;
+    cursor: pointer;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+
     </style>
 </head>
 
@@ -96,49 +174,89 @@
 
     <form id="empForm">
 
-        <div class="form-group">
-            <label>Employee ID *</label>
-            <input type="number" id="employeeId" required>
+        <table class="form-table">
+            <tr>
+                <td><label>Employee ID *</label></td>
+                <td><input type="number" id="employeeId" required></td>
+            </tr>
+
+            <tr>
+                <td><label>Employee Name *</label></td>
+                <td><input type="text" id="employeeName" required></td>
+            </tr>
+
+            <tr>
+                <td><label>Designation *</label></td>
+                <td>
+                    <select id="designation" required>
+                        <option value="">-- Select Designation --</option>
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="Operator">Operator</option>
+                        <option value="Helper">Helper</option>
+                        <option value="Driver">Driver</option>
+                        <option value="Security Guard">Security Guard</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td><label>Mobile Number *</label></td>
+                <td><input type="number" id="mobileNo" required></td>
+            </tr>
+
+            <tr>
+                <td><label>Alternate Number</label></td>
+                <td><input type="number" id="alternateMobNo" placeholder="Optional (10 digits)"></td>
+            </tr>
+
+            <tr>
+                <td><label>Address *</label></td>
+                <td><input type="text" id="address" required></td>
+            </tr>
+
+            <tr>
+                <td><label>Date of Birth *</label></td>
+                <td><input type="date" id="dateOfBirth" required></td>
+            </tr>
+
+            <tr>
+                <td><label>Date of Joining *</label></td>
+                <td><input type="date" id="dateOfJoining" required></td>
+            </tr>
+
+            <tr class="driver-only" style="display:none;">
+                <td><label>Licence Type *</label></td>
+                <td>
+                    <select id="licenceType">
+                        <option value="">-- Select Licence Type --</option>
+                        <option value="Heavy">Heavy</option>
+                        <option value="Light">Light</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr class="driver-only" style="display:none;">
+                <td><label>Licence Number *</label></td>
+                <td><input type="text" id="licenceNumber"></td>
+            </tr>
+
+            <tr class="driver-only" style="display:none;">
+                <td><label>Licence Issue Date *</label></td>
+                <td><input type="date" id="licenceIssueDate"></td>
+            </tr>
+
+            <tr class="driver-only" style="display:none;">
+                <td><label>Licence Expiry Date *</label></td>
+                <td><input type="date" id="licenceExpiryDate"></td>
+            </tr>
+
+        </table>
+
+        <div class="btn-row">
+            <button type="submit" class="btn-submit-small">Submit</button>
+            <button type="button" class="btn-back-small" onclick="goBack()">Back</button>
         </div>
 
-        <div class="form-group">
-            <label>Employee Name *</label>
-            <input type="text" id="employeeName" required>
-        </div>
-
-        <div class="form-group">
-            <label>Designation *</label>
-            <input type="text" id="designation" required>
-        </div>
-
-        <div class="form-group">
-            <label>Mobile Number *</label>
-            <input type="number" id="mobileNo" required>
-        </div>
-
-        <div class="form-group">
-            <label>Alternate Number</label>
-            <input type="number" id="alternateMobNo">
-        </div>
-
-        <div class="form-group">
-            <label>Address *</label>
-            <input type="text" id="address" required>
-        </div>
-
-        <div class="form-group">
-            <label>Date of Birth *</label>
-            <input type="date" id="dateOfBirth" required>
-        </div>
-
-        <div class="form-group">
-            <label>Date of Joining *</label>
-            <input type="date" id="dateOfJoining" required>
-        </div>
-
-        <button class="btn-submit" type="submit">Create Employee</button>
-
-        <a class="back-btn" onclick="history.back()">Back</a>
     </form>
 
 </div>
@@ -146,50 +264,96 @@
 <script>
 
     const plantID = new URLSearchParams(window.location.search).get("plantID");
-    const FORM_KEY = "createEmployeeDraft_" + plantID;
+    const FORM_KEY = "createEmployeeForm";
+
 
     // -------------------------------------------------------
-    // LOAD AUTOSAVED DRAFT (IF EXISTS)
+    // DISABLE FUTURE DATES FOR DOB & DOJ
     // -------------------------------------------------------
-    function loadDraft() {
-        const draft = localStorage.getItem(FORM_KEY);
-        if (!draft) return;
+    const today = new Date().toISOString().split("T")[0];
 
-        try {
-            const data = JSON.parse(draft);
-            for (const key in data) {
-                if (document.getElementById(key)) {
-                    document.getElementById(key).value = data[key];
-                }
-            }
-        } catch {}
+    document.getElementById("dateOfBirth").setAttribute("max", today);
+    document.getElementById("dateOfJoining").setAttribute("max", today);
+    // Disable future dates for Licence Issue Date ONLY
+    document.getElementById("licenceIssueDate").setAttribute("max", today);
+
+    document.getElementById("dateOfBirth").addEventListener("change", () => {
+    const dob = document.getElementById("dateOfBirth").value;
+    if (dob) {
+        document.getElementById("licenceIssueDate").setAttribute("min", dob);
     }
+});
+
+function goBack() {
+    sessionStorage.removeItem(FORM_KEY); // clear draft
+    history.back();
+}
+
+
+// ---------------------------------------------
+// SAVE FORM DATA TO SESSION (AUTOSAVE)
+// ---------------------------------------------
+function saveDraft() {
+    const data = {};
+    document.querySelectorAll("input, select").forEach(el => {
+        if (el.id) data[el.id] = el.value;
+    });
+    sessionStorage.setItem(FORM_KEY, JSON.stringify(data));
+}
+
+document.querySelectorAll("input, select").forEach(el => {
+    el.addEventListener("input", saveDraft);
+    el.addEventListener("change", saveDraft);
+});
+
+
 
     // -------------------------------------------------------
     // AUTOSAVE FORM ON INPUT
     // -------------------------------------------------------
-    function autoSave() {
-        const data = {};
 
-        const ids = [
-            "employeeId", "employeeName", "designation", "mobileNo",
-            "alternateMobNo", "address", "dateOfBirth", "dateOfJoining"
-        ];
+    const designationSelect = document.getElementById("designation");
+const driverFields = document.querySelectorAll(".driver-only");
 
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) data[id] = el.value;
-        });
+function toggleDriverFields() {
+    const isDriver = designationSelect.value === "Driver";
 
-        localStorage.setItem(FORM_KEY, JSON.stringify(data));
-    }
-
-    document.querySelectorAll("input").forEach(inp => {
-        inp.addEventListener("input", autoSave);
+    driverFields.forEach(row => {
+        row.style.display = isDriver ? "table-row" : "none";
     });
 
-    // Load draft on page open
-    loadDraft();
+    if (!isDriver) {
+        ["licenceType", "licenceNumber", "licenceIssueDate", "licenceExpiryDate"]
+            .forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+
+        // reset min/max when not driver
+        document.getElementById("licenceIssueDate").removeAttribute("min");
+    }
+}
+
+
+   // ---------------------------------------------
+// LOAD FORM DATA ON PAGE LOAD
+// ---------------------------------------------
+function loadDraft() {
+    const draft = sessionStorage.getItem(FORM_KEY);
+    if (!draft) return;
+
+    const data = JSON.parse(draft);
+    for (const key in data) {
+        const el = document.getElementById(key);
+        if (el) el.value = data[key];
+    }
+}
+
+loadDraft();
+
+  toggleDriverFields();
+
+  designationSelect.addEventListener("change", toggleDriverFields);
 
 
     // -------------------------------------------------------
@@ -200,6 +364,7 @@
         const name = document.getElementById("employeeName").value.trim();
         const des = document.getElementById("designation").value.trim();
         const mob = document.getElementById("mobileNo").value.trim();
+        const altMob = document.getElementById("alternateMobNo").value.trim();
         const addr = document.getElementById("address").value.trim();
         const dob = document.getElementById("dateOfBirth").value;
         const doj = document.getElementById("dateOfJoining").value;
@@ -207,10 +372,30 @@
         if (!id || isNaN(id)) return "Employee ID must be a valid number.";
         if (!name) return "Employee name is required.";
         if (!des) return "Designation is required.";
-        if (!mob || mob.length < 10) return "Mobile number must be at least 10 digits.";
+        if (!/^\d{10}$/.test(mob)) return "Mobile number must be exactly 10 digits.";
+        if (altMob && !/^\d{10}$/.test(altMob)) return "Alternate number must be exactly 10 digits.";
         if (!addr) return "Address is required.";
         if (!dob) return "Date of birth is required.";
         if (!doj) return "Date of joining is required.";
+
+        if (des === "Driver") {
+            const lt = document.getElementById("licenceType").value;
+            const ln = document.getElementById("licenceNumber").value.trim();
+            const lid = document.getElementById("licenceIssueDate").value;
+            const led = document.getElementById("licenceExpiryDate").value;
+
+            if (!lt) return "Licence type is required for Driver.";
+            if (!ln) return "Licence number is required for Driver.";
+            if (!lid) return "Licence issue date is required for Driver.";
+            if (!led) return "Licence expiry date is required for Driver.";
+
+            if (new Date(lid) > new Date())
+                return "Licence issue date cannot be in the future.";
+
+            if (new Date(led) <= new Date(lid))
+                return "Licence expiry date must be after issue date.";
+        }
+
 
         if (new Date(doj) < new Date(dob))
             return "Date of Joining cannot be earlier than Date of Birth.";
@@ -240,7 +425,11 @@
             alternateMobNo: document.getElementById("alternateMobNo").value || null,
             address: document.getElementById("address").value,
             dateOfBirth: document.getElementById("dateOfBirth").value,
-            dateOfJoining: document.getElementById("dateOfJoining").value
+            dateOfJoining: document.getElementById("dateOfJoining").value,
+            licenceType: document.getElementById("licenceType")?.value || null,
+            licenceNumber: document.getElementById("licenceNumber")?.value || null,
+            licenceIssueDate: document.getElementById("licenceIssueDate")?.value || null,
+            licenceExpiryDate: document.getElementById("licenceExpiryDate")?.value || null
         };
 
         let res;
@@ -277,8 +466,8 @@
         // SUCCESS
         alert("✔ Employee created successfully!");
 
-        // Remove draft after success
-        localStorage.removeItem(FORM_KEY);
+        // clear session data ONLY after submit
+        sessionStorage.removeItem(FORM_KEY);
 
         window.location.href = `view-employees.html?plantID=${plantID}`;
     });

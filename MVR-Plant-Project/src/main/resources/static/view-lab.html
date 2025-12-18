@@ -268,9 +268,9 @@
         document.getElementById("flowPm").innerText = lab.flowMeterReadingPm ?? "-";
 
         const cum =
-            (Number(lab.flowMeterReadingPm || 0) - Number(lab.flowMeterReadingAm || 0)) * 1000;
+        (Number(lab.flowMeterReadingPm || 0) - Number(lab.flowMeterReadingAm || 0)) * 1000;
         document.getElementById("cumulativeFlow").innerText =
-            isNaN(cum) ? "-" : cum + " Ltrs";
+        isNaN(cum) ? "-" : cum.toFixed(2) + " Ltrs";
         document.getElementById("cumulativeFlow").style="background:#f1f5f9; font-weight:700;"
         applyProgress(calculateProgress(lab));
     }

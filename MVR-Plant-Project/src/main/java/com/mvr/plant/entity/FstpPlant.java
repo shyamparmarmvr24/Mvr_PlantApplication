@@ -119,27 +119,22 @@ public class FstpPlant
 
 
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    //@JsonManagedReference
     @JsonIgnore
     private List<PlantOperation> operations = new ArrayList<>();
 
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    //@JsonManagedReference
     @JsonIgnore
     private List<LaboratoryOperation> labOperations = new ArrayList<>();
 
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    //@JsonManagedReference
     @JsonIgnore
     private List<PlantEmployee> plantEmployees = new ArrayList<>();
 
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    //@JsonManagedReference
     @JsonIgnore
     private List<VehicleInformation> vehicleInfo = new ArrayList<>();
 
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    //@JsonManagedReference
     @JsonIgnore
     private List<PrivateVehicleDetails> privateVehicle = new ArrayList<>();
 }
