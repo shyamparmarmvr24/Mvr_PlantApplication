@@ -122,8 +122,8 @@
                 <th>Sludge Collected</th>
                 <td>
                     <div class="two-inline">
-                        <input id="privateSludge" class="input" placeholder="Sludge (Ltrs)" />
-                        <input id="privateSludgeKgs" class="input" placeholder="Sludge (Kgs)" />
+                        <input id="privateSludge" class="input" placeholder="Sludge (Ltrs)" readonly />
+                        <input id="privateSludgeKgs" class="input" placeholder="Sludge (Kgs)" readonly />
                     </div>
                 </td>
             </tr>
@@ -212,6 +212,9 @@
       const privateTripsEl = document.getElementById("privateTrips");
       const privateSludgeEl = document.getElementById("privateSludge");
       const privateSludgeKgsEl = document.getElementById("privateSludgeKgs");
+      privateSludgeEl.disabled = true;
+      privateSludgeKgsEl.disabled = true;
+
 
 
       /* ================== STATE ================== */
@@ -573,6 +576,11 @@ function renderPrivateVehicleForms(count) {
       </div>
     `;
     container.appendChild(block);
+
+    block.querySelectorAll("input").forEach(inp => {
+  inp.addEventListener("input", updatePrivateSludgeTotals);
+});
+
   }
 }
 
@@ -787,8 +795,6 @@ function renderPrivateVehicleForms(count) {
             privateSludgeEl.value = currentOp.sludgeCollectPrivateVehicle ?? "";
             privateSludgeKgsEl.value = currentOp.sludgeCollectPrivateVehicleKgs ?? "";
             privateTripsEl.disabled = false;
-            privateSludgeEl.disabled = false;
-            privateSludgeKgsEl.disabled = false;
 
           } else {
             privateTripsEl.value = "";
@@ -796,8 +802,6 @@ function renderPrivateVehicleForms(count) {
             privateSludgeKgsEl.value = "";
 
             privateTripsEl.disabled = true;
-            privateSludgeEl.disabled = true;
-            privateSludgeKgsEl.disabled = true;
           }
         }
         else {
@@ -808,8 +812,6 @@ function renderPrivateVehicleForms(count) {
           privateSludgeKgsEl.value = "";
 
           privateTripsEl.disabled = true;
-          privateSludgeEl.disabled = true;
-          privateSludgeKgsEl.disabled = true;
         }
 
         // populate other plant values into inputs (if existed)
@@ -1111,17 +1113,19 @@ if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
       backBtn.addEventListener('click', ()=> window.location.href = `index.html?date=${encodeURIComponent(date)}`);
 
       privateToggle.addEventListener('change', ()=>{
-        const yes = privateToggle.checked;
-        privateTripsEl.disabled = !yes;
-        privateSludgeEl.disabled = !yes;
-        privateSludgeKgsEl.disabled = !yes;
-        if(!yes){
-          privateTripsEl.value = "";
-          privateSludgeEl.value = "";
-          privateSludgeKgsEl.value = "";
-        }
-        setStatusBadge(computeCompleteness());
-      });
+          const yes = privateToggle.checked;
+          privateTripsEl.disabled = !yes;
+
+          if(!yes){
+            privateTripsEl.value = "";
+            privateSludgeEl.value = "";
+            privateSludgeKgsEl.value = "";
+            document.getElementById("privateVehicleForms").innerHTML = "";
+          }
+
+          setStatusBadge(computeCompleteness());
+        });
+
 
       privateTripsEl.addEventListener("input", () => {
       const count = Number(privateTripsEl.value || 0);
@@ -1130,6 +1134,7 @@ if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
       } else {
         document.getElementById("privateVehicleForms").innerHTML = "";
       }
+      updatePrivateSludgeTotals(); // ✅ ADD THIS LINE
     });
 
 
@@ -1143,6 +1148,31 @@ if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
       bindStatusWatcher();
       setStatusBadge(computeCompleteness());
     })();
+
+    function updatePrivateSludgeTotals() {
+  let totalLtrs = 0;
+  let totalKgs = 0;
+
+  const count = Number(privateTripsEl.value || 0);
+
+  for (let i = 0; i < count; i++) {
+    const ltrsEl = document.getElementById(`pv_ltrs_${i}`);
+    const kgsEl  = document.getElementById(`pv_kgs_${i}`);
+
+    if (ltrsEl && ltrsEl.value && !isNaN(ltrsEl.value)) {
+      totalLtrs += Number(ltrsEl.value);
+    }
+    if (kgsEl && kgsEl.value && !isNaN(kgsEl.value)) {
+      totalKgs += Number(kgsEl.value);
+    }
+  }
+
+  // 🔥 write totals to readonly fields
+  privateSludgeEl.value =totalLtrs === 0 ? "0" : totalLtrs;
+
+  privateSludgeKgsEl.value =totalKgs === 0 ? "0" : totalKgs;
+
+}
 
 
       // live completeness recompute

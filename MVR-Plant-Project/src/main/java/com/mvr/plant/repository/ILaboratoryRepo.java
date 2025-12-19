@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface ILaboratoryRepo extends JpaRepository<LaboratoryOperation,Long>
@@ -22,5 +23,8 @@ public interface ILaboratoryRepo extends JpaRepository<LaboratoryOperation,Long>
 
     @Query("SELECT p FROM FstpPlant p WHERE p.plantID = :plantID")
     Optional<FstpPlant> findPlantByPlantID(@Param("plantID") Long plantID);
+
+    @Query("SELECT o FROM LaboratoryOperation o WHERE o.operationDate = :date")
+    List<LaboratoryOperation> getLabOperationsByDate(@Param("date") LocalDate date);
 
 }

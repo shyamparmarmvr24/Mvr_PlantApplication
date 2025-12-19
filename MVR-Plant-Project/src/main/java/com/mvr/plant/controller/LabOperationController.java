@@ -1,5 +1,6 @@
 package com.mvr.plant.controller;
 
+import com.mvr.plant.DTO.LabOperationDTO;
 import com.mvr.plant.entity.LaboratoryOperation;
 import com.mvr.plant.entity.PlantOperation;
 import com.mvr.plant.service.ILaboratoryOperationService;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -50,5 +52,18 @@ public class LabOperationController
         LaboratoryOperation labOp = labService.getAllLabOperationDataByIdAndDate(plantId, localDate);
         return ResponseEntity.ok(labOp);
     }
+
+    @GetMapping("/date")
+    public ResponseEntity<List<LabOperationDTO>> getLabOperationsByDate(
+            @RequestParam("date") String date
+    ) {
+        LocalDate localDate = LocalDate.parse(date);
+
+        List<LabOperationDTO> result =
+                labService.getLabOperationsByDate(localDate);
+
+        return ResponseEntity.ok(result);
+    }
+
 
 }

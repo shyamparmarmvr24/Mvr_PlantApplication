@@ -1,5 +1,7 @@
 package com.mvr.plant.repository;
 
+import com.mvr.plant.DTO.LabOperationDTO;
+import com.mvr.plant.DTO.PlantOperationBetweenDTO;
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.LaboratoryOperation;
 import com.mvr.plant.entity.PlantOperation;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 @Repository
 public class LaboratoryMgmtRepoImpl implements ILaboratoryMgmtRepo
@@ -115,13 +118,6 @@ public class LaboratoryMgmtRepoImpl implements ILaboratoryMgmtRepo
         existing.setPhReading3(labOp.getPhReading3());
         existing.setPhReading4(labOp.getPhReading4());
 
-//        existing.setCod((labOp.getCodReading1()+labOp.getCodReading2()+labOp.getCodReading3()+labOp.getCodReading4())/4);
-//        existing.setBod((labOp.getBodReading1()+labOp.getBodReading2()+labOp.getBodReading3()+labOp.getBodReading4())/4);
-//        existing.setTn((labOp.getThReading1()+labOp.getThReading2()+labOp.getThReading3()+labOp.getThReading4())/4);
-//        existing.setTemperature((labOp.getTemperatureReading1()+labOp.getTemperatureReading2()+labOp.getTemperatureReading3()+labOp.getTemperatureReading4())/4);
-//        existing.setTss((labOp.getTssReading1()+labOp.getTssReading2()+labOp.getTssReading3()+labOp.getTssReading4())/4);
-//        existing.setPh((labOp.getPhReading1()+labOp.getPhReading2()+labOp.getPhReading3()+labOp.getPhReading4())/4);
-
         existing.setCod(average(
                 labOp.getCodReading1(),
                 labOp.getCodReading2(),
@@ -189,6 +185,14 @@ public class LaboratoryMgmtRepoImpl implements ILaboratoryMgmtRepo
     public LaboratoryOperation getAllLabOperationDataByIdAndDate(Long plantId, LocalDate date)
     {
         return labOperationRepo.getLabOperationByPlantIdAndDate(plantId,date).orElse(null);
+    }
+
+    @Override
+    public List<LabOperationDTO> getLabOperationsByDate(LocalDate date)
+    {
+        List<LaboratoryOperation> operations = labOperationRepo.getLabOperationsByDate(date);
+
+        return operations.stream().map(op -> new LabOperationDTO(op.getPlant() != null ? op.getPlant().getPlantID() : null, op)).toList();
     }
 
     private Double average(Double... values) {
