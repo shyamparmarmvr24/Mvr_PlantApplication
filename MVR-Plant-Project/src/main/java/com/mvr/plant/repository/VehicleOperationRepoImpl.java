@@ -31,7 +31,7 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
     }
 
     @Override
-    public Map<String, Integer> updateVehicleOperation(Long plantId, Long vehicleID, VehicleOperation vehicleOp)
+    public VehicleOperation updateVehicleOperation(Long plantId, Long vehicleID, VehicleOperation vehicleOp)
     {
 
         LocalDate date = vehicleOp.getOperationDate();
@@ -59,19 +59,6 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
                 .getVehicleOperationByVehicleIdAndDate(vehicleID,date)
                 .orElseThrow(()->new IllegalStateException("Vehicle Operation Not Found For Date"));
 
-        int count = 0;
-
-        if(vehicleOp.getVehicleReadingAm() != null) count++;
-        if(vehicleOp.getVehicleReadingPm() != null) count++;
-        if(vehicleOp.getVehicleFuelLevel() !=null) count++;
-        if(vehicleOp.getLastFuelFilled() !=null) count++;
-        if(vehicleOp.getLastFuelFilledDate() !=null) count++;
-        if(vehicleOp.getFilledLiters() != null) count++;
-        if(vehicleOp.getNoOfTrips() != null) count++;
-        if(vehicleOp.getSludgeCollect() != null) count++;
-        if(vehicleOp.getSludgeCollectKgs() != null) count++;
-
-
         existing.setVehicleReadingAm(vehicleOp.getVehicleReadingAm());
         existing.setVehicleReadingPm(vehicleOp.getVehicleReadingPm());
         existing.setVehicleFuelLevel(vehicleOp.getVehicleFuelLevel());
@@ -85,13 +72,10 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
 
         vehicleOpRepo.save(existing);
 
-
         //this save
         plantOp.recomputePlantTotals(plantId, date);
 
-        Map<String, Integer> map = new HashMap<>();
-        map.put("Vehicle Operation Updated Successfully", count);
-        return map;
+        return existing;
     }
 
     @Override

@@ -51,7 +51,7 @@ public class VehicleOperationController
 
     // 3. PUT: Update OR Create Vehicle Operation
     @PutMapping("/{plantId}/{vehicleId}")
-    public ResponseEntity<Map<String, Integer>> updateVehicleOperation(
+    public ResponseEntity<VehicleOperation> updateVehicleOperation(
             @PathVariable Long plantId,
             @PathVariable Long vehicleId,
             @RequestParam("date") String date,
@@ -60,7 +60,7 @@ public class VehicleOperationController
         // set operation date before sending to repository logic
         vehicleOp.setOperationDate(LocalDate.parse(date));
 
-        Map<String, Integer> response = vehicleOperationService.updateVehicleOperation(plantId, vehicleId, vehicleOp);
+        VehicleOperation response = vehicleOperationService.updateVehicleOperation(plantId, vehicleId, vehicleOp);
 
         // SSE broadcast event
         sseController.broadcastUpdate();

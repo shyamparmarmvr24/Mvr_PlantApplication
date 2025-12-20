@@ -3,6 +3,7 @@ package com.mvr.plant.repository;
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.LaboratoryOperation;
 import com.mvr.plant.entity.PlantOperation;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,5 +27,8 @@ public interface ILaboratoryRepo extends JpaRepository<LaboratoryOperation,Long>
 
     @Query("SELECT o FROM LaboratoryOperation o WHERE o.operationDate = :date")
     List<LaboratoryOperation> getLabOperationsByDate(@Param("date") LocalDate date);
+
+    @EntityGraph(attributePaths = {"plant"})
+    List<LaboratoryOperation> findByOperationDateBetween(LocalDate startDate, LocalDate endDate);
 
 }

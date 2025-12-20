@@ -71,9 +71,12 @@
         .section-header td {
           border-radius: 6px;
         }
-
-
-
+.input-warning {
+  color: #dc2626;      /* red */
+  font-size: 12px;
+  margin-top: 4px;
+  display: none;       /* hidden by default */
+}
 
     </style>
 </head>
@@ -114,7 +117,17 @@
             <tr>
                 <th>No. of Trips</th>
                 <td>
-                    <input id="privateTrips" class="input" placeholder="No. of trips (private)" />
+                    <input
+                            id="privateTrips"
+                            class="input"
+                            type="number"
+                            min="0"
+                            max="10"
+                            placeholder="Enter No Of Trips Private" />
+                    <div id="privateTripsWarning" class="input-warning">
+                        Maximum 10 trips allowed
+                    </div>
+
                 </td>
             </tr>
 
@@ -173,8 +186,6 @@
         // ❌ REMOVE THESE TWO COMPLETELY
         { id: "powerReadingAmExport", label: "Solar Power Export - Morning (Kwh)", placeholder: "Enter Morning Kwh", solarExport: true },
         { id: "powerReadingPmExport", label: "Solar Power Export - Evening (Kwh)", placeholder: "Enter Evening Kwh", solarExport: true },
-
-
 
         { id: "dgReadingAm", label: "DG RunHours Morning (Hrs)", placeholder: "Enter Hrs" },
         { id: "dgReadingPm", label: "DG RunHours Evening (Hrs)", placeholder: "Enter Hrs" },
@@ -408,13 +419,13 @@
     </tr>
 
     <tr>
-      <th>Biochar Produced (Kgs)</th>
-      <td>${createInput("biocharProduced","Enter Biochar Produced (Kgs)",currentOp.biocharProduced).outerHTML}</td>
+      <th>Plant Running Hrs (Hrs)</th>
+      <td>${createInput("plantRunningHrs","Enter Plant Running Hrs (Hrs)",currentOp.plantRunningHrs).outerHTML}</td>
     </tr>
 
     <tr>
-      <th>Plant Running Hrs (Hrs)</th>
-      <td>${createInput("plantRunningHrs","Enter Plant Running Hrs (Hrs)",currentOp.plantRunningHrs).outerHTML}</td>
+      <th>Biochar Produced (Kgs)</th>
+      <td>${createInput("biocharProduced","Enter Biochar Produced (Kgs)",currentOp.biocharProduced).outerHTML}</td>
     </tr>
   `;
 
@@ -584,6 +595,79 @@ function renderPrivateVehicleForms(count) {
   }
 }
 
+function renderTripForms(vehicleId, count) {
+  const container = document.getElementById(`tripForms_${vehicleId}`);
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  for (let i = 0; i < count; i++) {
+    const row = document.createElement("div");
+    row.className = "vehicle-block";
+    row.style.marginTop = "8px";
+
+    row.innerHTML = `
+      <div class="vehicle-title">Trip ${i + 1}</div>
+
+      <!-- HIDDEN TRIP ID -->
+      <input type="hidden" id="trip_id_${vehicleId}_${i}" />
+
+      <div class="two-inline">
+        <input id="trip_ltrs_${vehicleId}_${i}" class="input" placeholder="Sludge (Ltrs)">
+        <input id="trip_kgs_${vehicleId}_${i}" class="input" placeholder="Sludge (Kgs)">
+        <input id="trip_time_${vehicleId}_${i}" type="time" class="input">
+      </div>
+    `;
+
+    container.appendChild(row);
+    row.querySelectorAll("input").forEach(inp => {
+  inp.addEventListener("input", () => {
+    updateVehicleTripSludgeTotals(vehicleId);
+    setStatusBadge(computeCompleteness());
+  });
+});
+
+  }
+}
+
+
+async function loadTripDetails(vehicleId, vehicleOpId) {
+  try {
+    const r = await fetch(`/api/vehicle-trip-details/operation/${vehicleOpId}`);
+    if (!r.ok) return;
+
+    const trips = await r.json();
+    if (!Array.isArray(trips)) return;
+
+    // set trip count
+    const tripsInput = document.getElementById(`trips_${vehicleId}`);
+    tripsInput.value = trips.length;
+
+    // render forms
+    renderTripForms(vehicleId, trips.length);
+
+    // fill data
+    trips.forEach((t, i) => {
+      document.getElementById(`trip_ltrs_${vehicleId}_${i}`).value =
+        t.sludgeCollectLtrs ?? "";
+
+        document.getElementById(`trip_id_${vehicleId}_${i}`).value =
+        t.vehicleTripId ?? "";
+
+
+      document.getElementById(`trip_kgs_${vehicleId}_${i}`).value =
+        t.sludgeCollectKgs ?? "";
+
+      document.getElementById(`trip_time_${vehicleId}_${i}`).value =
+        t.tripTime ?? "";
+    });
+    updateVehicleTripSludgeTotals(vehicleId);
+
+  } catch (e) {
+    console.warn("Failed to load trips", e);
+  }
+}
+
 
 
       /* ================== VEHICLES ================== */
@@ -648,15 +732,28 @@ function renderPrivateVehicleForms(count) {
                   </tr>
 
                   <tr>
-                    <th>No. of Trips</th>
-                    <td><input id="trips_${vid}" class="input" placeholder="Enter integer"></td>
+                      <th>No. of Trips</th>
+                      <td>
+                        <input
+                              id="trips_${vid}"
+                              class="input"
+                              type="number"
+                              min="0"
+                              max="10"
+                              placeholder="Enter No Of Trips">
+                              <div id="tripsWarning_${vid}" class="input-warning">
+                              Maximum 10 trips allowed
+                              </div>
+                        <div id="tripForms_${vid}" style="margin-top:10px"></div>
+                      </td>
                   </tr>
+
                   <tr>
                       <th>Sludge Collect</th>
                       <td>
                         <div class="two-inline">
-                          <input id="sludge_${vid}" class="input" placeholder="Enter Ltrs">
-                          <input id="sludgeKgs_${vid}" class="input" placeholder="Enter Kgs">
+                          <input id="sludge_${vid}" class="input" placeholder="Enter Ltrs" readonly disabled>
+                          <input id="sludgeKgs_${vid}" class="input" placeholder="Enter Kgs" readonly disabled>
                         </div>
                       </td>
                   </tr>
@@ -664,7 +761,56 @@ function renderPrivateVehicleForms(count) {
                 </table>
               </div>
             `;
-            vehicleSection.appendChild(block);
+        vehicleSection.appendChild(block);
+
+const tripsInput = document.getElementById(`trips_${vid}`);
+
+const warningEl = document.getElementById(`tripsWarning_${vid}`);
+
+tripsInput.addEventListener("input", () => {
+  let count = Number(tripsInput.value || 0);
+
+  if (count > 10) {
+    count = 10;
+    warningEl.style.display = "block";
+  } else {
+    warningEl.style.display = "none";
+  }
+
+  if (count < 0) count = 0;
+  tripsInput.value = count;
+
+  const container = document.getElementById(`tripForms_${vid}`);
+  container.innerHTML = "";
+
+  for (let i = 0; i < count; i++) {
+    const row = document.createElement("div");
+    row.className = "vehicle-block";
+    row.style.marginTop = "8px";
+
+    row.innerHTML = `
+      <div class="vehicle-title">Trip ${i + 1}</div>
+      <input type="hidden" id="trip_id_${vid}_${i}">
+      <div class="two-inline">
+        <input id="trip_ltrs_${vid}_${i}" class="input" placeholder="Sludge (Ltrs)">
+        <input id="trip_kgs_${vid}_${i}" class="input" placeholder="Sludge (Kgs)">
+        <input id="trip_time_${vid}_${i}" type="time" class="input">
+      </div>
+    `;
+
+    container.appendChild(row);
+
+    row.querySelectorAll("input").forEach(inp => {
+      inp.addEventListener("input", () => {
+        updateVehicleTripSludgeTotals(vid);
+        setStatusBadge(computeCompleteness());
+      });
+    });
+  }
+
+  updateVehicleTripSludgeTotals(vid);
+});
+
 
             // attach lastFuel handler safely
             (function(localVid){
@@ -698,6 +844,12 @@ function renderPrivateVehicleForms(count) {
               const vid = String(v.vehicleID);   // MUST be first
               vehicleOps[vid] = op;
 
+              // LOAD EXISTING TRIPS
+                if (op.vehicleOpID) {
+                  loadTripDetails(vid, op.vehicleOpID);
+                }
+
+
               const am = document.getElementById(`am_${vid}`);
               const pm = document.getElementById(`pm_${vid}`);
               const fuel = document.getElementById(`fuel_${vid}`);
@@ -711,7 +863,6 @@ function renderPrivateVehicleForms(count) {
               if(am) am.value = op.vehicleReadingAm ?? "";
               if(pm) pm.value = op.vehicleReadingPm ?? "";
               if(fuel) fuel.value = op.vehicleFuelLevel ?? "";
-              if(trips) trips.value = op.noOfTrips ?? "";
               if(sludge) sludge.value = op.sludgeCollect ?? "";
               if(sludgeKgs) sludgeKgs.value = op.sludgeCollectKgs ?? "";
 
@@ -759,7 +910,7 @@ function renderPrivateVehicleForms(count) {
 
             existingPrivateVehicles = await r.json();
 
-            // ✅ RENDER FORMS AFTER DATA IS AVAILABLE
+            // RENDER FORMS AFTER DATA IS AVAILABLE
             if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
               renderPrivateVehicleForms(Number(privateTripsEl.value));
             }
@@ -831,6 +982,7 @@ function renderPrivateVehicleForms(count) {
         submitBtn.disabled = true;
         submitBtn.textContent = "Submitting...";
 
+
         // validate plant numeric fields (remark excluded)
         for(const f of plantFieldDefs){
           if (f.type === "radio" || f.type === "checkbox" || f.type === "date" || f.id === "remarks") continue;
@@ -859,7 +1011,6 @@ function renderPrivateVehicleForms(count) {
             return;
           }
         }
-
 
         // validate vehicle numeric fields (note: filledLiters and date are optional)
         for(const v of vehicles){
@@ -902,7 +1053,7 @@ function renderPrivateVehicleForms(count) {
           plantPayload[f.id] = el.value.trim() === "" ? null : Number(el.value.trim());
         });
 
-        // ✅ ADD SOLAR EXPORT VALUES (CORRECT PLACE)
+        //  ADD SOLAR EXPORT VALUES (CORRECT PLACE)
         if (plantSolar) {
           const amExpEl = document.getElementById("powerReadingAmExport");
           const pmExpEl = document.getElementById("powerReadingPmExport");
@@ -1005,13 +1156,19 @@ if (billChecked) {
               headers: {"Content-Type":"application/json"},
               body: JSON.stringify(payload)
             });
-            if(!vr.ok){
+
+            if (!vr.ok) {
               const t = await vr.text();
               alert(`Error saving vehicle ${v.vehicleNumber}:\n${t}`);
               submitBtn.disabled = false;
               submitBtn.textContent = "Submit";
               return;
             }
+
+            // VERY IMPORTANT — SAVE RETURNED OP
+            const savedOp = await vr.json();
+            vehicleOps[vid] = savedOp;
+
           }
         } catch(e){
           alert("Network error saving vehicle operations.");
@@ -1019,7 +1176,69 @@ if (billChecked) {
           submitBtn.textContent = "Submit";
           return;
         }
-        // 🔽 SAVE / UPDATE PRIVATE VEHICLES
+
+        // ================== SAVE VEHICLE TRIP DETAILS ==================
+for (const v of vehicles) {
+  const vid = String(v.vehicleID);
+
+  const tripsCount = Number(
+    document.getElementById(`trips_${vid}`)?.value || 0
+  );
+
+  if (tripsCount <= 0) continue;
+
+  const vehicleOpId = vehicleOps[vid]?.vehicleOpID;
+  if (!vehicleOpId) {
+    console.warn("Missing vehicleOpID for vehicle", vid);
+    continue;
+  }
+
+  for (let i = 0; i < tripsCount; i++) {
+    const ltrsEl = document.getElementById(`trip_ltrs_${vid}_${i}`);
+    const kgsEl  = document.getElementById(`trip_kgs_${vid}_${i}`);
+    const timeEl = document.getElementById(`trip_time_${vid}_${i}`);
+
+    const tripId =
+      document.getElementById(`trip_id_${vid}_${i}`)?.value || null;
+
+    const payload = {
+      vehicleTripId: tripId,   // CREATE or UPDATE handled by backend
+      sludgeCollectLtrs:
+        ltrsEl && ltrsEl.value.trim() !== ""
+          ? Number(ltrsEl.value)
+          : null,
+      sludgeCollectKgs:
+        kgsEl && kgsEl.value.trim() !== ""
+          ? Number(kgsEl.value)
+          : null,
+      tripTime:
+        timeEl && timeEl.value
+          ? timeEl.value
+          : null
+    };
+
+    const resp = await fetch(
+      `/api/vehicle-trip-details/operation/${vehicleOpId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    if (resp.ok) {
+      const savedTrip = await resp.json();
+
+      // store ID after first insert
+      if (!tripId && savedTrip.vehicleTripId) {
+        document.getElementById(`trip_id_${vid}_${i}`).value =
+          savedTrip.vehicleTripId;
+      }
+    }
+  }
+}
+
+        // SAVE / UPDATE PRIVATE VEHICLES
 if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
   for (let i = 0; i < Number(privateTripsEl.value); i++) {
 
@@ -1103,10 +1322,7 @@ if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
               Plant ID: <strong style="color:#059669">${escapeHtml(plantID)}</strong>
               ${plantName ? `&nbsp; | &nbsp; Plant: <strong style="color:#2563eb">${escapeHtml(plantName)}</strong>` : ""}
             `;
-
         }
-
-
 
       // events
       submitBtn.addEventListener('click', onSubmit);
@@ -1115,6 +1331,7 @@ if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
       privateToggle.addEventListener('change', ()=>{
           const yes = privateToggle.checked;
           privateTripsEl.disabled = !yes;
+          document.getElementById("privateTripsWarning").style.display = "none";
 
           if(!yes){
             privateTripsEl.value = "";
@@ -1127,15 +1344,30 @@ if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
         });
 
 
-      privateTripsEl.addEventListener("input", () => {
-      const count = Number(privateTripsEl.value || 0);
-      if (count > 0) {
-        renderPrivateVehicleForms(count);
-      } else {
-        document.getElementById("privateVehicleForms").innerHTML = "";
-      }
-      updatePrivateSludgeTotals(); // ✅ ADD THIS LINE
-    });
+   const privateWarning = document.getElementById("privateTripsWarning");
+
+privateTripsEl.addEventListener("input", () => {
+  let count = Number(privateTripsEl.value || 0);
+
+  if (count > 10) {
+    count = 10;
+    privateWarning.style.display = "block";
+  } else {
+    privateWarning.style.display = "none";
+  }
+
+  if (count < 0) count = 0;
+  privateTripsEl.value = count;
+
+  if (count > 0) {
+    renderPrivateVehicleForms(count);
+  } else {
+    document.getElementById("privateVehicleForms").innerHTML = "";
+  }
+
+  updatePrivateSludgeTotals();
+});
+
 
 
       // initial load
@@ -1143,10 +1375,11 @@ if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
       await loadPlantMaster();
       await loadPlantOperation();
       await loadVehiclesAndOps();
-      await loadPrivateVehicles();   // ✅ ADD THIS LINE
+      await loadPrivateVehicles();   //ADD THIS LINE
       attachEnterNav();
       bindStatusWatcher();
       setStatusBadge(computeCompleteness());
+      document.getElementById("privateTripsWarning").style.display = "none";
     })();
 
     function updatePrivateSludgeTotals() {
@@ -1167,15 +1400,42 @@ if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
     }
   }
 
-  // 🔥 write totals to readonly fields
+  // write totals to readonly fields
   privateSludgeEl.value =totalLtrs === 0 ? "0" : totalLtrs;
 
   privateSludgeKgsEl.value =totalKgs === 0 ? "0" : totalKgs;
 
 }
 
+function updateVehicleTripSludgeTotals(vehicleId) {
+  let totalLtrs = 0;
+  let totalKgs = 0;
 
-      // live completeness recompute
+  const tripsCount = Number(
+    document.getElementById(`trips_${vehicleId}`)?.value || 0
+  );
+
+  for (let i = 0; i < tripsCount; i++) {
+    const ltrsEl = document.getElementById(`trip_ltrs_${vehicleId}_${i}`);
+    const kgsEl  = document.getElementById(`trip_kgs_${vehicleId}_${i}`);
+
+    if (ltrsEl && ltrsEl.value && !isNaN(ltrsEl.value)) {
+      totalLtrs += Number(ltrsEl.value);
+    }
+    if (kgsEl && kgsEl.value && !isNaN(kgsEl.value)) {
+      totalKgs += Number(kgsEl.value);
+    }
+  }
+
+  // write totals into vehicle operation fields
+  const sludgeEl = document.getElementById(`sludge_${vehicleId}`);
+  const sludgeKgsEl = document.getElementById(`sludgeKgs_${vehicleId}`);
+
+  if (sludgeEl) sludgeEl.value = totalLtrs === 0 ? "0" : totalLtrs;
+  if (sludgeKgsEl) sludgeKgsEl.value = totalKgs === 0 ? "0" : totalKgs;
+}
+
+     // live completeness recompute
       document.addEventListener('input', ()=> setStatusBadge(computeCompleteness()));
       document.addEventListener('change', ()=> setStatusBadge(computeCompleteness()));
 

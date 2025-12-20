@@ -237,7 +237,7 @@
         <tr>
             <th>S.No</th>
             <th>Plant ID</th>
-            <th>Name</th>
+            <th>Plant Name</th>
             <th>KLD</th>
             <th>Zone</th>
             <th>Plant Operation</th>
@@ -593,7 +593,9 @@ function calcPlantStatus(op, vehicleOps, plantSolar) {
             if (filled < total) return "pending";
             return "view";
 
-        } catch {
+        }
+        catch
+        {
             return "update";
         }
     }

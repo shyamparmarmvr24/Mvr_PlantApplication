@@ -1,6 +1,7 @@
 package com.mvr.plant.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +11,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -52,6 +55,10 @@ public class VehicleOperation
     private Double sludgeCollect;
 
     private Double sludgeCollectKgs;
+
+    @OneToMany(mappedBy = "vehicleOp", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<VehicleTripDetails> vehicleTrips = new ArrayList<>();
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

@@ -1,9 +1,7 @@
 package com.mvr.plant.controller;
-
 import com.mvr.plant.DTO.PlantOperationBetweenDTO;
 import com.mvr.plant.DTO.PlantOperationDTO;
 import com.mvr.plant.entity.PlantOperation;
-import com.mvr.plant.entity.VehicleOperation;
 import com.mvr.plant.service.IPlantOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +19,7 @@ public class PlantOperationController
     private IPlantOperationService plantOpService;
 
     @Autowired
-    private SseController sseController;   // ✅ ADD THIS
-
+    private SseController sseController;   // ADD THIS
 
     @PutMapping("/{plantId}")
     public ResponseEntity<Map<String,Integer>> updateOperation(
@@ -30,7 +27,6 @@ public class PlantOperationController
             @RequestParam("date") String date,
             @RequestBody PlantOperation plantOp)
     {
-
         // parse date and set into PlantOperation before service call
         LocalDate localDate = LocalDate.parse(date);
         plantOp.setOperationDate(localDate);

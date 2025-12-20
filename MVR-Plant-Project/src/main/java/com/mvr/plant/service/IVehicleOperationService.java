@@ -11,7 +11,7 @@ import java.util.Map;
 public interface IVehicleOperationService
 {
     public VehicleOperation getVehicleOperationByVehicleIdAndDate(Long vehicleID, LocalDate date);
-    public Map<String,Integer> updateVehicleOperation(Long plantId, Long vehicleID, VehicleOperation vehicleOp);
+    public VehicleOperation updateVehicleOperation(Long plantId, Long vehicleID, VehicleOperation vehicleOp);
     public List<VehicleOperationDTO> getVehicleOperationsByDate(LocalDate date);
     public List<VehicleOperationBetweenDTO> getVehicleOperationsBetween(LocalDate start, LocalDate end);
     public VehicleOperation getLatestFuelFilled(Long vehicleId);

@@ -195,6 +195,14 @@ public class LaboratoryMgmtRepoImpl implements ILaboratoryMgmtRepo
         return operations.stream().map(op -> new LabOperationDTO(op.getPlant() != null ? op.getPlant().getPlantID() : null, op)).toList();
     }
 
+    @Override
+    public List<LabOperationDTO> findByOperationDateBetween(LocalDate startDate, LocalDate endDate)
+    {
+        List<LaboratoryOperation> operations = labOperationRepo.findByOperationDateBetween(startDate, endDate);
+
+        return operations.stream().map(op -> new LabOperationDTO(op.getPlant() != null ? op.getPlant().getPlantID() : null, op)).toList();
+    }
+
     private Double average(Double... values) {
         double sum = 0;
         int count = 0;

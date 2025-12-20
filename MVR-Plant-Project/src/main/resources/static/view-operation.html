@@ -44,6 +44,42 @@
             border-top:14px solid #eef2f7;
         }
 
+        .trip-line {
+  display: grid;
+  grid-template-columns: 160px 20px 1fr;
+  padding: 6px 4px;
+  font-size: 14px;
+  align-items: center;
+}
+
+.trip-label {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.trip-sep {
+  text-align: center;
+  font-weight: 700;
+}
+
+.trip-values {
+  display: flex;
+  gap: 28px;
+  color: #374151;
+}
+
+.trip-values span {
+  white-space: nowrap;
+}
+
+.sludge-summary {
+  display: flex;
+  gap: 40px;
+  font-weight: 700;
+  padding: 6px 4px;
+}
+
+
     </style>
 </head>
 <body>
@@ -500,8 +536,6 @@ fieldsBody.innerHTML += `
     }
   </td>
 </tr>
-
-
 `;
 fieldsBody.innerHTML += `
 <tr class="section-header"><td colspan="2">Polymer & Pillets Report</td></tr>
@@ -534,61 +568,59 @@ fieldsBody.innerHTML += `
                 const rv = await fetch(`/api/vehicle-operations/plant/${plantID}/vehicles`);
                 const vehicles = rv.ok ? await rv.json() : [];
 
-                // gather all vehicle operation objects for progress calc
-                const vehicleOpsList = [];
-                for (const v of vehicles) {
-                    let vo = {};
-                    try {
-                        const rvo = await fetch(`/api/vehicle-operations/${v.vehicleID}?date=${encodeURIComponent(date)}`);
-                        const tv = await rvo.text();
-                        vo = (tv && tv.trim()) ? JSON.parse(tv) : {};
-                    } catch (e) {
-                        vo = {};
-                    }
 
-                    /* ===== ALWAYS LOAD LATEST FUEL DATA (ABSOLUTE FINAL FIX) ===== */
-                    try {
-                        const rf = await fetch(
-                            `/api/vehicle-operations/${v.vehicleID}/latest-fuel`
-                        );
-
-                        if (rf.ok) {
-                            const latestFuel = await rf.json();
-
-                            const noTodayFuelData =
-                                (vo.lastFuelFilledDate === null || vo.lastFuelFilledDate === undefined) &&
-                                (vo.filledLiters === null ||
-                                 vo.filledLiters === undefined ||
-                                 vo.filledLiters === 0);
-
-                            if (noTodayFuelData && latestFuel?.lastFuelFilled === true) {
-                                vo.lastFuelFilled = true;
-                                vo.lastFuelFilledDate = latestFuel.lastFuelFilledDate;
-                                vo.filledLiters = latestFuel.filledLiters;
-                            }
-                        }
-                    } catch (e) {
-                        console.warn("Latest fuel fetch failed", v.vehicleID);
-                    }
+  // gather all vehicle operation objects for progress calc
+const vehicleOpsList = [];
+vehicleOpsDiv.innerHTML = "";
 
 
+for (const v of vehicles) {
+
+    /* ===== LOAD VEHICLE OP ===== */
+    let vo = {};
+    try {
+        const rvo = await fetch(
+            `/api/vehicle-operations/${v.vehicleID}?date=${encodeURIComponent(date)}`
+        );
+        const tv = await rvo.text();
+        vo = (tv && tv.trim()) ? JSON.parse(tv) : {};
+    } catch (e) {
+        vo = {};
+    }
+
+    vehicleOpsList.push(vo); // ✅ important for progress
+
+    /* ===== LOAD TRIP DETAILS ===== */
+    let tripDetails = [];
+    if (vo.vehicleOpID) {
+        try {
+            const rt = await fetch(
+                `/api/vehicle-trip-details/operation/${vo.vehicleOpID}`
+            );
+            if (rt.ok) {
+                tripDetails = await rt.json();
+            }
+        } catch (e) {
+            tripDetails = [];
+        }
+    }
+
+    /* ===== BUILD TRIP LINES ===== */
+    const tripsHtml = tripDetails.length
+        ? tripDetails.map((t, i) => `
+            <div class="trip-line">
+                <div class="trip-label">Trip ${i + 1} Detail</div>
+                <div class="trip-sep">|</div>
+                <div class="trip-values">
+                    <span>Sludge Ltrs: <strong>${t.sludgeCollectLtrs ?? "-"}</strong></span>
+                    <span>Sludge Kgs: <strong>${t.sludgeCollectKgs ?? "-"}</strong></span>
+                    <span>Time: <strong>${t.tripTime ?? "-"}</strong></span>
+                </div>
+            </div>
+        `).join("")
+        : `<div class="muted">No trip details</div>`;
 
 
-
-                    // ensure keys exist explicitly (so computeProgress works)
-                    vo.vehicleReadingAm = vo.vehicleReadingAm ?? null;
-                    vo.vehicleReadingPm = vo.vehicleReadingPm ?? null;
-                    vo.vehicleFuelLevel = vo.vehicleFuelLevel ?? null;
-                   // DO NOT override carried-forward fuel values
-                    if (vo.lastFuelFilled === undefined) vo.lastFuelFilled = null;
-                    if (vo.lastFuelFilledDate === undefined) vo.lastFuelFilledDate = null;
-                    if (vo.filledLiters === undefined) vo.filledLiters = null;
-
-                    vo.noOfTrips = vo.noOfTrips ?? null;
-                    vo.sludgeCollect = vo.sludgeCollect ?? null;
-                    vo.sludgeCollectKgs = vo.sludgeCollectKgs ?? null;
-
-                    vehicleOpsList.push(vo);
 
                     // render block for this vehicle
                     const html = `
@@ -600,13 +632,22 @@ fieldsBody.innerHTML += `
                             <tr><th>Last Fuel Filled?</th><td>${vo.lastFuelFilled ? "Yes" : "No"}</td></tr>
                             <tr><th>Last Fuel Filled Date</th><td>${vo.lastFuelFilled ? (vo.lastFuelFilledDate ?? "-") : "-"}</td></tr>
                             <tr><th>Fuel Filled (Liters)</th><td>${vo.lastFuelFilled ? (vo.filledLiters ?? "-") : "-"}</td></tr>
-                            <tr><th>No. of Trips</th><td>${vo.noOfTrips ?? "-"}</td></tr>
+                            <tr>
+                              <th>No. of Trips</th>
+                              <td>
+                                <strong>${vo.noOfTrips ?? "-"}</strong>
+                                ${tripsHtml}
+                              </td>
+                            </tr>
+
                             <tr>
                               <th>Sludge Collected</th>
                               <td>
-                                Ltrs: ${vo.sludgeCollect ?? "-"} <br>
-                                Kgs: ${vo.sludgeCollectKgs ?? "-"}
-                              </td>
+                                  <div class="sludge-summary">
+                                    <span>Ltrs: ${vo.sludgeCollect ?? "-"}</span>
+                                    <span>Kgs: ${vo.sludgeCollectKgs ?? "-"}</span>
+                                  </div>
+                               </td>
                             </tr>
 
                         </table>
@@ -660,8 +701,6 @@ fieldsBody.innerHTML += `
                         `;
                     });
                 }
-
-
 
                 // compute and apply progress
                 const pct = computeProgress(op, vehicleOpsList, privateAgg, pvList);

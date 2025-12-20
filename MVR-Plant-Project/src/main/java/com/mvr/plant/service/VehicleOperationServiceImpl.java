@@ -23,7 +23,7 @@ public class VehicleOperationServiceImpl implements IVehicleOperationService
     }
 
     @Override
-    public Map<String, Integer> updateVehicleOperation(Long plantId, Long vehicleID, VehicleOperation vehicleOp) {
+    public VehicleOperation updateVehicleOperation(Long plantId, Long vehicleID, VehicleOperation vehicleOp) {
         return vehicleOpRepo.updateVehicleOperation(plantId,vehicleID,vehicleOp);
     }
 

@@ -65,5 +65,18 @@ public class LabOperationController
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/date-range")
+    public ResponseEntity<List<LabOperationDTO>> getLabOperationsBetweenDates(@RequestParam("fromDate") String fromDate, @RequestParam("toDate") String toDate)
+    {
+        LocalDate startDate = LocalDate.parse(fromDate);
+        LocalDate endDate = LocalDate.parse(toDate);
+
+        List<LabOperationDTO> result =
+                labService.findByOperationDateBetween(startDate, endDate);
+
+        return ResponseEntity.ok(result);
+    }
+
+
 
 }

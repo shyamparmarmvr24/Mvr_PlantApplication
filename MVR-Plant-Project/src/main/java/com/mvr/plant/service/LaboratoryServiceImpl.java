@@ -30,4 +30,9 @@ public class LaboratoryServiceImpl implements ILaboratoryOperationService
     public List<LabOperationDTO> getLabOperationsByDate(LocalDate date) {
         return labRepo.getLabOperationsByDate(date);
     }
+
+    @Override
+    public List<LabOperationDTO> findByOperationDateBetween(LocalDate startDate, LocalDate endDate) {
+        return labRepo.findByOperationDateBetween(startDate,endDate);
+    }
 }
