@@ -26,7 +26,7 @@ public class FstpPlantController {
         return ResponseEntity.ok(result);
     }
 
-    // Get all plants
+    // Get All MNIT plants
     @GetMapping
     public ResponseEntity<List<FstpPlant>> getAllPlants() {
         List<FstpPlant> plants = plantService.getAllPlants();

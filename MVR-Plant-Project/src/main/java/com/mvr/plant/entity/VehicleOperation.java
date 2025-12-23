@@ -49,6 +49,8 @@ public class VehicleOperation {
 
     private Double filledLiters;
 
+    private Double currentOdometerReading;
+
     private Integer noOfTrips;
 
     private Double sludgeCollect;

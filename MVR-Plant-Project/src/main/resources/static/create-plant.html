@@ -201,10 +201,16 @@
                         <option value="yes">Yes</option>
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label for="permanentPowerDate">Permanent Power Completion Date</label>
                     <input type="date" id="permanentPowerDate" disabled/>
                     <div class="note">Future dates not allowed</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ppMeterSerialNo">PP Meter Serial No</label>
+                    <input type="text" id="ppMeterSerialNo" maxlength="50"/>
                 </div>
             </div>
 
@@ -216,10 +222,16 @@
                         <option value="yes">Yes</option>
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label for="solarDate">Solar Integration Date</label>
                     <input type="date" id="solarDate" disabled/>
                     <div class="note">Future dates not allowed</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="solarMeterSerialNo">Solar Meter Serial No</label>
+                    <input type="text" id="solarMeterSerialNo" maxlength="50"/>
                 </div>
             </div>
 
@@ -254,10 +266,6 @@
                     <label for="ctoIssuedDate">CTO Issued Date</label>
                     <input type="date" id="ctoIssuedDate" disabled/>
                 </div>
-                <div class="form-group">
-                    <label for="ctoExpiryDate">CTO Expiry Date</label>
-                    <input type="date" id="ctoExpiryDate" disabled/>
-                </div>
             </div>
 
             <!-- CTE -->
@@ -272,10 +280,6 @@
                 <div class="form-group">
                     <label for="cteIssuedDate">CTE Issued Date</label>
                     <input type="date" id="cteIssuedDate" disabled/>
-                </div>
-                <div class="form-group">
-                    <label for="cteExpiryDate">CTE Expiry Date</label>
-                    <input type="date" id="cteExpiryDate" disabled/>
                 </div>
             </div>
 
@@ -452,18 +456,38 @@
         refresh();
     }
 
+    // ----------------------- YES/NO → ENABLE/DISABLE TEXT INPUT -----------------------
+    function setupToggleWithText(selectId, textId) {
+        const sel = document.getElementById(selectId);
+        const textInput = document.getElementById(textId);
+
+        function refresh() {
+            if (!sel || !textInput) return;
+
+            if (sel.value === "yes") {
+                textInput.disabled = false;
+            } else {
+                textInput.disabled = true;
+                textInput.value = "";
+            }
+        }
+
+        sel.addEventListener("change", refresh);
+        refresh();
+    }
+
+
     setupToggleWithDate("mnit", "mnitDate");
     setupToggleWithDate("permanentPower", "permanentPowerDate");
     setupToggleWithDate("solar", "solarDate");
     setupToggleWithDate("internet", "internetDate");
     setupToggleWithDate("tabs", "tabsReceivedDate");
 
+    setupToggleWithText("permanentPower", "ppMeterSerialNo");
+    setupToggleWithText("solar", "solarMeterSerialNo");
+
     setupToggleWithDate("ctoCertified", "ctoIssuedDate");
-    setupToggleWithDate("ctoCertified", "ctoExpiryDate");
-
     setupToggleWithDate("cteCertified", "cteIssuedDate");
-    setupToggleWithDate("cteCertified", "cteExpiryDate");
-
 
     const noOfVehicleEl = document.getElementById("noOfVehicle");
 
@@ -673,18 +697,19 @@
             if (plantData.ctoIssuedDate) {
                 document.getElementById("ctoIssuedDate").value = plantData.ctoIssuedDate;
             }
-            if (plantData.ctoExpiryDate) {
-                document.getElementById("ctoExpiryDate").value = plantData.ctoExpiryDate;
-            }
 
             setYesNo("cteCertified", plantData.cteCertified);
             if (plantData.cteIssuedDate) {
                 document.getElementById("cteIssuedDate").value = plantData.cteIssuedDate;
             }
-            if (plantData.cteExpiryDate) {
-                document.getElementById("cteExpiryDate").value = plantData.cteExpiryDate;
-            }
 
+
+            document.getElementById("ppMeterSerialNo").value = plantData.ppMeterSerialNo || "";
+
+            document.getElementById("solarMeterSerialNo").value = plantData.solarMeterSerialNo || "";
+
+            document.getElementById("permanentPower").dispatchEvent(new Event("change"));
+            document.getElementById("solar").dispatchEvent(new Event("change"));
 
             document.getElementById("solarPlantCapacity").value = plantData.solarPlantCapacity ?? "";
 
@@ -1190,12 +1215,12 @@
 
             ctoCertified: document.getElementById("ctoCertified").value === "yes",
             ctoIssuedDate: document.getElementById("ctoIssuedDate").value || null,
-            ctoExpiryDate: document.getElementById("ctoExpiryDate").value || null,
 
             cteCertified: document.getElementById("cteCertified").value === "yes",
             cteIssuedDate: document.getElementById("cteIssuedDate").value || null,
-            cteExpiryDate: document.getElementById("cteExpiryDate").value || null
 
+            ppMeterSerialNo: document.getElementById("ppMeterSerialNo").value.trim() || null,
+            solarMeterSerialNo: document.getElementById("solarMeterSerialNo").value.trim() || null
         };
     }
 
@@ -1534,6 +1559,10 @@ document.getElementById("plantID").addEventListener("input", function () {
     // ----------------------- INITIAL SETUP -----------------------
     updateStepPills();
     restoreDraft();
+
+    document.getElementById("permanentPower").dispatchEvent(new Event("change"));
+    document.getElementById("solar").dispatchEvent(new Event("change"));
+
     // Clear autosave when user closes or refreshes page
     window.addEventListener("beforeunload", () => {
     clearDraft();

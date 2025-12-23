@@ -59,11 +59,17 @@ public class FstpPlant {
     @Column(name = "PermanentPowerDateOfCompletion")
     private LocalDate permanentPowerDateOfCompletion;
 
+    @Column(name = "PpMeterSerialNo",length = 50)
+    private String ppMeterSerialNo;
+
     @Column(name = "InternetDateOfCompletion")
     private LocalDate internetDateOfCompletion;
 
     @Column(name = "SolarDateOfCompletion")
     private LocalDate solarDateOfCompletion;
+
+    @Column(name ="SolarMeterSerialNo",length = 50)
+    private String solarMeterSerialNo;
 
     @Column(name = "SolarPlantCapacity")
     private Long solarPlantCapacity;
@@ -98,17 +104,11 @@ public class FstpPlant {
     @Column(name = "CtoIssuedDate")
     private LocalDate ctoIssuedDate;
 
-    @Column(name = "CtoExpiryDate")
-    private LocalDate ctoExpiryDate;
-
     @Column(name = "CteCertified")
     private Boolean cteCertified;
 
     @Column(name = "CteIssuedDate")
     private LocalDate cteIssuedDate;
-
-    @Column(name = "CteExpiryDate")
-    private LocalDate cteExpiryDate;
 
     @Column(name = "NoOfVehicle")
     private Integer noOfVehicle;
@@ -137,4 +137,12 @@ public class FstpPlant {
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<PrivateVehicleDetails> privateVehicle = new ArrayList<>();
+
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<DgDetails> dgDetails = new ArrayList<>();
+
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<MotorDetails> motorDetails = new ArrayList<>();
 }

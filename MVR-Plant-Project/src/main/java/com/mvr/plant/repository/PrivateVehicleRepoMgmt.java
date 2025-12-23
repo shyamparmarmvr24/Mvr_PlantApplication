@@ -59,4 +59,10 @@ public class PrivateVehicleRepoMgmt implements IPrivateVehicleRepoImpl {
         existing.setOperationDate(updated.getOperationDate());
         return privateVehRepo.save(existing);
     }
+
+    @Override
+    public void deletePrivateVehicle(Long privateVehicleId)
+    {
+        privateVehRepo.deleteById(privateVehicleId);
+    }
 }

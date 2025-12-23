@@ -78,6 +78,20 @@
   display: none;       /* hidden by default */
 }
 
+  .trip-delete {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #dc2626;
+  font-weight: bold;
+}
+.trip-delete:hover {
+  transform: scale(1.1);
+}
+
+
     </style>
 </head>
 <body>
@@ -241,6 +255,8 @@
       let plantSolar = false;   // ✅ plant master solar flag
       let existingPrivateVehicles = [];
       let plantName = "";
+      const savedTripCountByVehicle = {};
+      let savedPrivateVehicleCount = 0;
 
       /* ================== HELPERS ================== */
       function escapeHtml(s){ return String(s ?? ""); }
@@ -344,21 +360,55 @@
           });
         }
 
-        if(privateToggle.checked){
+        if (privateToggle.checked) {
           total += 3;
-          if(String(privateTripsEl.value).trim() !== "") filled++;
-          if(String(privateSludgeEl.value).trim() !== "") filled++;
-          if(String(privateSludgeKgsEl.value).trim() !== "") filled++;
+
+          const pvTrips = Number(privateTripsEl.value || 0);
+
+          // trips field
+          filled++; // checkbox answered by user
+
+          if (pvTrips === 0) {
+            // sludge not required when 0 trips
+            filled += 2;
+          } else {
+            if (String(privateSludgeEl.value).trim() !== "") filled++;
+            if (String(privateSludgeKgsEl.value).trim() !== "") filled++;
+          }
         }
 
+
         if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
-          for (let i = 0; i < Number(privateTripsEl.value); i++) {
+          const pvCount = Math.max(
+          Number(privateTripsEl.value || 0),
+          savedPrivateVehicleCount,
+          document.querySelectorAll("#privateVehicleForms .vehicle-block").length
+        );
+
+        for (let i = 0; i < pvCount; i++) {
             total += 2;
             if (document.getElementById(`pv_ltrs_${i}`)?.value) filled++;
             if (document.getElementById(`pv_kgs_${i}`)?.value) filled++;
           }
         }
 
+        /* ================= WATER DETAILS ================= */
+
+        const waterUsedChk = document.getElementById("waterUsed");
+
+        if (waterUsedChk) {
+          // checkbox itself counts as answered
+          total++;
+          filled++;
+
+          if (waterUsedChk.checked) {
+            ["waterFilledDate", "waterLtrs", "totalWaterAmount"].forEach(id => {
+              total++;
+              const el = document.getElementById(id);
+              if (el && String(el.value).trim() !== "") filled++;
+            });
+          }
+        }
 
 
         vehicles.forEach(v=>{
@@ -376,25 +426,48 @@
             if(am && String(am.value).trim() !== "") filled++;
             if(pm && String(pm.value).trim() !== "") filled++;
             if(fuel && String(fuel.value).trim() !== "") filled++;
-            if(trips && String(trips.value).trim() !== "") filled++;
-            if(sludge && String(sludge.value).trim() !== "") filled++;
-            if(sludgeKgs && String(sludgeKgs.value).trim() !== "") filled++;
+
+            const tripCount = Number(trips?.value || 0);
+            // ---- TRIPS FIELD ----
+            if (tripCount === 0) {
+              // trips explicitly 0 → auto satisfied
+              filled++;
+            } else if (tripCount > 0) {
+              // user must answer trips
+              filled++;
+            }
+
+            // ---- SLUDGE FIELDS ----
+            if (tripCount === 0) {
+              // sludge not required when no trips
+              filled += 2;
+            } else {
+              // sludge required only when trips > 0
+              if (sludge && String(sludge.value).trim() !== "") filled++;
+              if (sludgeKgs && String(sludgeKgs.value).trim() !== "") filled++;
+            }
+
 
 
           if(lastFuel && lastFuel.checked)
-          {
-                total += 3; // checkbox + date + filledLiters
+            {
+              total += 4; // checkbox + date + filledLiters + currentOdo
 
-                // checkbox counts as present
-                filled++;
+              // checkbox counts
+              filled++;
 
-                // date counts if non-empty
-                if(lastFuelDate && String(lastFuelDate.value).trim() !== "") filled++;
+              // date
+              if(lastFuelDate && String(lastFuelDate.value).trim() !== "") filled++;
 
-                // filledLiters counts if non-empty
-                const filledEl = document.getElementById(`filledLiters_${vid}`);
-                if(filledEl && String(filledEl.value).trim() !== "") filled++;
-          }
+              // filled liters
+              const filledEl = document.getElementById(`filledLiters_${vid}`);
+              if(filledEl && String(filledEl.value).trim() !== "") filled++;
+
+              // ✅ current odometer
+              const odoEl = document.getElementById(`currentOdo_${vid}`);
+              if(odoEl && String(odoEl.value).trim() !== "") filled++;
+            }
+
         });
 
         const pct = total === 0 ? 0 : Math.round((filled / total) * 100);
@@ -519,6 +592,46 @@
     </tr>
   `;
 
+    /* ================= 3️⃣ WATER DETAILS ================= */
+  fieldsBody.innerHTML += `
+    <tr class="section-header"><td colspan="2">Water Details</td></tr>
+
+    <tr>
+      <th>Water Used?</th>
+      <td>
+        <label class="switch">
+          <input type="checkbox" id="waterUsed" ${currentOp.waterUsed ? "checked" : ""}>
+          <span class="small">Yes</span>
+        </label>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Water Filled Date</th>
+      <td>
+        <input
+          type="date"
+          class="input"
+          id="waterFilledDate"
+          value="${currentOp.waterFilledDate || ""}"
+          max="${new Date().toISOString().split('T')[0]}">
+      </td>
+    </tr>
+
+    <tr>
+      <th>Water Ltrs & Amount</th>
+      <td>
+        <div class="two-inline">
+          <input id="waterLtrs" class="input" placeholder="Enter Volume in Ltrs"
+                 value="${currentOp.waterLtrs ?? ""}">
+          <input id="totalWaterAmount" class="input" placeholder="Enter Total Amount"
+                 value="${currentOp.totalWaterAmount ?? ""}">
+        </div>
+      </td>
+    </tr>
+  `;
+
+
   /* ================= 4️⃣ POLYMER & PILLETS REPORT ================= */
   fieldsBody.innerHTML += `
     <tr class="section-header"><td colspan="2">Polymer & Pillets Report</td></tr>
@@ -557,18 +670,45 @@
       });
     }
 
+      const waterUsedChk = document.getElementById("waterUsed");
+      const waterDateEl = document.getElementById("waterFilledDate");
+      const waterLtrsEl = document.getElementById("waterLtrs");
+      const waterAmtEl = document.getElementById("totalWaterAmount");
+
+      function toggleWaterFields(enabled) {
+        [waterDateEl, waterLtrsEl, waterAmtEl].forEach(el => {
+          if (!el) return;
+          el.disabled = !enabled;
+          if (!enabled) el.value = "";
+        });
+      }
+
+      if (waterUsedChk) {
+        toggleWaterFields(!!waterUsedChk.checked);
+
+        waterUsedChk.addEventListener("change", () => {
+          toggleWaterFields(waterUsedChk.checked);
+          setStatusBadge(computeCompleteness());
+        });
+  }
+
+
 }
 
-function renderPrivateVehicleForms(count) {
+function renderPrivateVehicleForms(count, existing = []) {
   const container = document.getElementById("privateVehicleForms");
   container.innerHTML = "";
 
   for (let i = 0; i < count; i++) {
-    const pv = existingPrivateVehicles[i] || {};
+    const pv = existing[i] || existingPrivateVehicles[i] || {};
 
     const block = document.createElement("div");
     block.className = "vehicle-block";
+    block.style.position = "relative";
+
     block.innerHTML = `
+      <span class="trip-delete" title="Delete Vehicle">✖</span>
+
       <div class="vehicle-title">Private Vehicle ${i + 1}</div>
 
       <input type="hidden" id="pv_id_${i}" value="${pv.privateVehicleID || ""}">
@@ -592,50 +732,70 @@ function renderPrivateVehicleForms(count) {
                value="${pv.receivedSludgeKgs || ""}">
       </div>
     `;
+
     container.appendChild(block);
 
-    block.querySelectorAll("input").forEach(inp => {
-  inp.addEventListener("input", updatePrivateSludgeTotals);
-});
+    // 🔥 DELETE HANDLER
+    block.querySelector(".trip-delete").addEventListener("click", () => {
+      deletePrivateVehicle(i);
+    });
 
+    block.querySelectorAll("input").forEach(inp => {
+      inp.addEventListener("input", updatePrivateSludgeTotals);
+    });
   }
+
+  attachEnterNav();
 }
 
-function renderTripForms(vehicleId, count) {
+
+function renderTripForms(vehicleId, count, existingTrips = []) {
   const container = document.getElementById(`tripForms_${vehicleId}`);
   if (!container) return;
 
   container.innerHTML = "";
 
   for (let i = 0; i < count; i++) {
+    const trip = existingTrips[i] || {};
+
     const row = document.createElement("div");
     row.className = "vehicle-block";
     row.style.marginTop = "8px";
+    row.style.position = "relative";
 
     row.innerHTML = `
+      <span class="trip-delete" title="Delete Trip">✖</span>
+
       <div class="vehicle-title">Trip ${i + 1}</div>
 
-      <!-- HIDDEN TRIP ID -->
-      <input type="hidden" id="trip_id_${vehicleId}_${i}" />
+      <input type="hidden" id="trip_id_${vehicleId}_${i}" value="${trip.vehicleTripId || ""}">
 
       <div class="two-inline">
-        <input id="trip_ltrs_${vehicleId}_${i}" class="input" placeholder="Sludge (Ltrs)">
-        <input id="trip_kgs_${vehicleId}_${i}" class="input" placeholder="Sludge (Kgs)">
-        <input id="trip_time_${vehicleId}_${i}" type="time" class="input">
+        <input id="trip_ltrs_${vehicleId}_${i}" class="input" placeholder="Sludge (Ltrs)"
+               value="${trip.sludgeCollectLtrs ?? ""}">
+        <input id="trip_kgs_${vehicleId}_${i}" class="input" placeholder="Sludge (Kgs)"
+               value="${trip.sludgeCollectKgs ?? ""}">
+        <input id="trip_time_${vehicleId}_${i}" type="time" class="input"
+               value="${trip.tripTime ?? ""}">
       </div>
     `;
 
     container.appendChild(row);
+
+    row.querySelector(".trip-delete").addEventListener("click", () => {
+      deleteTrip(vehicleId, i);
+    });
+
     row.querySelectorAll("input").forEach(inp => {
-  inp.addEventListener("input", () => {
-    updateVehicleTripSludgeTotals(vehicleId);
-    setStatusBadge(computeCompleteness());
-  });
-});
-
+      inp.addEventListener("input", () => {
+        updateVehicleTripSludgeTotals(vehicleId);
+        setStatusBadge(computeCompleteness());
+      });
+    });
   }
-}
 
+  attachEnterNav();
+}
 
 async function loadTripDetails(vehicleId, vehicleOpId) {
   try {
@@ -645,35 +805,39 @@ async function loadTripDetails(vehicleId, vehicleOpId) {
     const trips = await r.json();
     if (!Array.isArray(trips)) return;
 
-    // set trip count
+    // 🔐 store DB count
+    savedTripCountByVehicle[vehicleId] = trips.length;
+
     const tripsInput = document.getElementById(`trips_${vehicleId}`);
     tripsInput.value = trips.length;
 
-    // render forms
-    renderTripForms(vehicleId, trips.length);
-
-    // fill data
-    trips.forEach((t, i) => {
-      document.getElementById(`trip_ltrs_${vehicleId}_${i}`).value =
-        t.sludgeCollectLtrs ?? "";
-
-        document.getElementById(`trip_id_${vehicleId}_${i}`).value =
-        t.vehicleTripId ?? "";
-
-
-      document.getElementById(`trip_kgs_${vehicleId}_${i}`).value =
-        t.sludgeCollectKgs ?? "";
-
-      document.getElementById(`trip_time_${vehicleId}_${i}`).value =
-        t.tripTime ?? "";
-    });
+    renderTripForms(vehicleId, trips.length, trips);
     updateVehicleTripSludgeTotals(vehicleId);
-
   } catch (e) {
     console.warn("Failed to load trips", e);
   }
 }
 
+function countTripsWithData(vehicleId) {
+  const rows = document.querySelectorAll(`#tripForms_${vehicleId} .vehicle-block`);
+  let count = 0;
+
+  rows.forEach((_, i) => {
+    const ltrs = document.getElementById(`trip_ltrs_${vehicleId}_${i}`)?.value;
+    const kgs  = document.getElementById(`trip_kgs_${vehicleId}_${i}`)?.value;
+    const time = document.getElementById(`trip_time_${vehicleId}_${i}`)?.value;
+
+    if (
+      (ltrs && ltrs.trim() !== "") ||
+      (kgs && kgs.trim() !== "") ||
+      (time && time.trim() !== "")
+    ) {
+      count++;
+    }
+  });
+
+  return count;
+}
 
 
       /* ================== VEHICLES ================== */
@@ -727,13 +891,20 @@ async function loadTripDetails(vehicleId, vehicleOpId) {
                     <td style="display:flex; gap:8px; align-items:center;">
                       <label><input type="checkbox" id="lastFuel_${vid}"> Yes</label>
                       <input id="lastFuelDate_${vid}"
-       type="date"
-       class="input"
-       style="max-width:160px"
-       max="${new Date().toISOString().split('T')[0]}"
-       disabled>
+                       type="date"
+                       class="input"
+                       style="max-width:160px"
+                       max="${new Date().toISOString().split('T')[0]}"
+                       disabled>
 
                       <input id="filledLiters_${vid}" class="input" placeholder="Filled Liters" style="max-width:140px" disabled>
+
+                      <!-- ✅ NEW FIELD -->
+                      <input id="currentOdo_${vid}"
+                             class="input"
+                             placeholder="Current Odometer Reading"
+                             style="max-width:200px"
+                             disabled>
                     </td>
                   </tr>
 
@@ -770,52 +941,59 @@ async function loadTripDetails(vehicleId, vehicleOpId) {
         vehicleSection.appendChild(block);
 
 const tripsInput = document.getElementById(`trips_${vid}`);
-
 const warningEl = document.getElementById(`tripsWarning_${vid}`);
 
 tripsInput.addEventListener("input", () => {
-  let count = Number(tripsInput.value || 0);
+  let inputCount = Number(tripsInput.value || 0);
 
-  if (count > 10) {
-    count = 10;
+  if (inputCount > 10) {
+    inputCount = 10;
     warningEl.style.display = "block";
   } else {
     warningEl.style.display = "none";
   }
 
-  if (count < 0) count = 0;
-  tripsInput.value = count;
+  if (inputCount < 0) inputCount = 0;
 
-  const container = document.getElementById(`tripForms_${vid}`);
-  container.innerHTML = "";
+  // 🔐 count trips that already have data
+  const filledCount = countTripsWithData(vid);
 
-  for (let i = 0; i < count; i++) {
-    const row = document.createElement("div");
-    row.className = "vehicle-block";
-    row.style.marginTop = "8px";
-
-    row.innerHTML = `
-      <div class="vehicle-title">Trip ${i + 1}</div>
-      <input type="hidden" id="trip_id_${vid}_${i}">
-      <div class="two-inline">
-        <input id="trip_ltrs_${vid}_${i}" class="input" placeholder="Sludge (Ltrs)">
-        <input id="trip_kgs_${vid}_${i}" class="input" placeholder="Sludge (Kgs)">
-        <input id="trip_time_${vid}_${i}" type="time" class="input">
-      </div>
-    `;
-
-    container.appendChild(row);
-
-    row.querySelectorAll("input").forEach(inp => {
-      inp.addEventListener("input", () => {
-        updateVehicleTripSludgeTotals(vid);
-        setStatusBadge(computeCompleteness());
-      });
-    });
+  // 🚫 DO NOT ALLOW LESS THAN FILLED TRIPS
+  if (inputCount < filledCount) {
+    inputCount = filledCount;
   }
 
+  tripsInput.value = inputCount;
+
+  // 🔁 KEEP ONLY FILLED TRIPS + REQUIRED EMPTY ONES
+  const existingTrips = [];
+  const rows = document.querySelectorAll(`#tripForms_${vid} .vehicle-block`);
+
+  rows.forEach((_, i) => {
+    const trip = {
+      vehicleTripId: document.getElementById(`trip_id_${vid}_${i}`)?.value || null,
+      sludgeCollectLtrs: document.getElementById(`trip_ltrs_${vid}_${i}`)?.value || "",
+      sludgeCollectKgs: document.getElementById(`trip_kgs_${vid}_${i}`)?.value || "",
+      tripTime: document.getElementById(`trip_time_${vid}_${i}`)?.value || ""
+    };
+
+    // keep only trips with data
+    if (
+      trip.sludgeCollectLtrs ||
+      trip.sludgeCollectKgs ||
+      trip.tripTime
+    ) {
+      existingTrips.push(trip);
+    }
+  });
+
+  renderTripForms(vid, inputCount, existingTrips);
+
   updateVehicleTripSludgeTotals(vid);
+  setStatusBadge(computeCompleteness());
 });
+
+
 
 
             // attach lastFuel handler safely
@@ -823,15 +1001,18 @@ tripsInput.addEventListener("input", () => {
                 const chk = document.getElementById(`lastFuel_${localVid}`);
                 const dateEl = document.getElementById(`lastFuelDate_${localVid}`);
                 const filledEl = document.getElementById(`filledLiters_${localVid}`);
+                const odoEl = document.getElementById(`currentOdo_${localVid}`); // ✅ NEW
 
                 if(!chk) return;
                 chk.addEventListener('change', ()=>{
                     if(chk.checked){
                         if(dateEl) dateEl.disabled = false;
                         if(filledEl) filledEl.disabled = false;
+                        if(odoEl) odoEl.disabled = false;   // ✅ enable
                     } else {
                         if(dateEl){ dateEl.disabled = true; dateEl.value = ""; }
                         if(filledEl){ filledEl.disabled = true; filledEl.value = ""; }
+                        if(odoEl){ odoEl.disabled = true; odoEl.value = ""; } // ✅ disable
                     }
                     setStatusBadge(computeCompleteness());
                 });
@@ -862,6 +1043,7 @@ tripsInput.addEventListener("input", () => {
               const lastFuel = document.getElementById(`lastFuel_${vid}`);
               const lastFuelDate = document.getElementById(`lastFuelDate_${vid}`);
               const filledLitersEl = document.getElementById(`filledLiters_${vid}`);
+              const odoEl = document.getElementById(`currentOdo_${vid}`);
               const trips = document.getElementById(`trips_${vid}`);
               const sludge = document.getElementById(`sludge_${vid}`);
               const sludgeKgs = document.getElementById(`sludgeKgs_${vid}`);
@@ -878,12 +1060,15 @@ tripsInput.addEventListener("input", () => {
 
               // enable/disable dependent fields based on checkbox
               if(lastFuel && lastFuel.checked){
-                  if(lastFuelDate){ lastFuelDate.disabled = false; lastFuelDate.value = op.lastFuelFilledDate ?? ""; }
-                  if(filledLitersEl){ filledLitersEl.disabled = false; filledLitersEl.value = (op.filledLiters == null ? "" : String(op.filledLiters)); }
-              } else {
-                  if(lastFuelDate){ lastFuelDate.disabled = true; lastFuelDate.value = ""; }
-                  if(filledLitersEl){ filledLitersEl.disabled = true; filledLitersEl.value = ""; }
-              }
+              if(lastFuelDate){ lastFuelDate.disabled = false; lastFuelDate.value = op.lastFuelFilledDate ?? ""; }
+              if(filledLitersEl){ filledLitersEl.disabled = false; filledLitersEl.value = (op.filledLiters == null ? "" : String(op.filledLiters)); }
+              if(odoEl){ odoEl.disabled = false; odoEl.value = op.currentOdometerReading ?? ""; }
+            } else {
+              if(lastFuelDate){ lastFuelDate.disabled = true; lastFuelDate.value = ""; }
+              if(filledLitersEl){ filledLitersEl.disabled = true; filledLitersEl.value = ""; }
+              if(odoEl){ odoEl.disabled = true; odoEl.value = ""; }
+            }
+
 
             }catch(e){
               // ignore per-vehicle error
@@ -910,21 +1095,21 @@ tripsInput.addEventListener("input", () => {
 
       /* ================== LOAD PLANT ================== */
       async function loadPrivateVehicles() {
-          try {
-            const r = await fetch(`/api/private-vehicles/privateveh/${plantID}?date=${date}`);
-            if (!r.ok) return;
+      try {
+        const r = await fetch(`/api/private-vehicles/privateveh/${plantID}?date=${date}`);
+        if (!r.ok) return;
 
-            existingPrivateVehicles = await r.json();
+        existingPrivateVehicles = await r.json();
+        savedPrivateVehicleCount = existingPrivateVehicles.length;
 
-            // RENDER FORMS AFTER DATA IS AVAILABLE
-            if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
-              renderPrivateVehicleForms(Number(privateTripsEl.value));
-            }
-          } catch (e) {
-            console.warn("Failed to load private vehicles", e);
-          }
+        if (privateToggle.checked) {
+          privateTripsEl.value = savedPrivateVehicleCount;
+          renderPrivateVehicleForms(savedPrivateVehicleCount);
         }
-
+      } catch (e) {
+        console.warn("Failed to load private vehicles", e);
+      }
+    }
 
 
       async function loadPlantOperation(){
@@ -1027,8 +1212,9 @@ tripsInput.addEventListener("input", () => {
           const trips = document.getElementById(`trips_${vid}`);
           const sludge = document.getElementById(`sludge_${vid}`);
           const sludgeKgs = document.getElementById(`sludgeKgs_${vid}`);
+          const odo = document.getElementById(`currentOdo_${vid}`);
 
-          for(const el of [am, pm, fuel, trips, sludge, sludgeKgs]){
+          for(const el of [am, pm, fuel, trips, sludge, sludgeKgs, odo]){
               if(!el) continue;
               if(!numericValid(el.value)){
                 alert("Invalid number in vehicle fields. Use digits and '.' only (no commas or colons).");
@@ -1077,6 +1263,31 @@ tripsInput.addEventListener("input", () => {
 
 
         plantPayload.operationDate = date;
+
+        /* ================= WATER DETAILS PAYLOAD ================= */
+
+const waterUsed = document.getElementById("waterUsed")?.checked;
+
+plantPayload.waterUsed = !!waterUsed;
+
+if (waterUsed) {
+  plantPayload.waterFilledDate =
+    document.getElementById("waterFilledDate").value || null;
+
+  plantPayload.waterLtrs =
+    document.getElementById("waterLtrs").value.trim() === ""
+      ? null
+      : Number(document.getElementById("waterLtrs").value);
+
+  plantPayload.totalWaterAmount =
+    document.getElementById("totalWaterAmount").value.trim() === ""
+      ? null
+      : Number(document.getElementById("totalWaterAmount").value);
+} else {
+  plantPayload.waterFilledDate = null;
+  plantPayload.waterLtrs = null;
+  plantPayload.totalWaterAmount = null;
+}
 
         const billChecked = document.getElementById("powerBill")?.checked;
 
@@ -1139,10 +1350,17 @@ if (billChecked) {
             const lastFuel = document.getElementById(`lastFuel_${vid}`);
             const lastFuelDate = document.getElementById(`lastFuelDate_${vid}`);
             const filledLitersEl = document.getElementById(`filledLiters_${vid}`);
+            const odoEl = document.getElementById(`currentOdo_${vid}`);
 
             const filledLitersVal = (lastFuel && lastFuel.checked && filledLitersEl && String(filledLitersEl.value).trim() !== "")
                 ? Number(filledLitersEl.value.trim())
                 : null;
+
+                const odoVal =
+                  lastFuel && lastFuel.checked && document.getElementById(`currentOdo_${vid}`)?.value.trim() !== ""
+                    ? Number(document.getElementById(`currentOdo_${vid}`).value.trim())
+                    : null;
+
 
             const payload = {
               operationDate: date,
@@ -1152,6 +1370,7 @@ if (billChecked) {
               lastFuelFilled: !!(lastFuel && lastFuel.checked),
               lastFuelFilledDate: (lastFuel && lastFuel.checked && lastFuelDate && String(lastFuelDate.value).trim() !== "") ? lastFuelDate.value : null,
               filledLiters: filledLitersVal,
+              currentOdometerReading: odoVal,
               noOfTrips: (document.getElementById(`trips_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`trips_${vid}`).value.trim())),
               sludgeCollect: (document.getElementById(`sludge_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`sludge_${vid}`).value.trim())),
               sludgeCollectKgs: (document.getElementById(`sludgeKgs_${vid}`).value.trim() === ""? null: Number(document.getElementById(`sludgeKgs_${vid}`).value.trim()))
@@ -1187,9 +1406,12 @@ if (billChecked) {
 for (const v of vehicles) {
   const vid = String(v.vehicleID);
 
-  const tripsCount = Number(
-    document.getElementById(`trips_${vid}`)?.value || 0
-  );
+  const tripsCount = Math.max(
+  Number(document.getElementById(`trips_${vid}`)?.value || 0),
+  savedTripCountByVehicle[vid] || 0,
+  document.querySelectorAll(`#tripForms_${vid} .vehicle-block`).length
+);
+
 
   if (tripsCount <= 0) continue;
 
@@ -1241,12 +1463,20 @@ for (const v of vehicles) {
           savedTrip.vehicleTripId;
       }
     }
+    savedTripCountByVehicle[vid] = tripsCount;
   }
 }
 
         // SAVE / UPDATE PRIVATE VEHICLES
-if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
-  for (let i = 0; i < Number(privateTripsEl.value); i++) {
+    if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
+      const pvCount = Math.max(
+  Number(privateTripsEl.value || 0),
+  savedPrivateVehicleCount,
+  document.querySelectorAll("#privateVehicleForms .vehicle-block").length
+);
+
+
+    for (let i = 0; i < pvCount; i++) {
 
     const id = document.getElementById(`pv_id_${i}`).value;
 
@@ -1352,29 +1582,40 @@ if (privateToggle.checked && Number(privateTripsEl.value) > 0) {
 
    const privateWarning = document.getElementById("privateTripsWarning");
 
-privateTripsEl.addEventListener("input", () => {
-  let count = Number(privateTripsEl.value || 0);
+   privateTripsEl.addEventListener("input", () => {
+  let inputCount = Number(privateTripsEl.value || 0);
 
-  if (count > 10) {
-    count = 10;
+  if (inputCount > 10) {
+    inputCount = 10;
     privateWarning.style.display = "block";
   } else {
     privateWarning.style.display = "none";
   }
 
-  if (count < 0) count = 0;
-  privateTripsEl.value = count;
-
-  if (count > 0) {
-    renderPrivateVehicleForms(count);
-  } else {
-    document.getElementById("privateVehicleForms").innerHTML = "";
+  if (inputCount < savedPrivateVehicleCount) {
+    inputCount = savedPrivateVehicleCount;
   }
 
+  privateTripsEl.value = inputCount;
+
+  const existing = [];
+  const rows = document.querySelectorAll("#privateVehicleForms .vehicle-block");
+
+  rows.forEach((_, i) => {
+    existing.push({
+      privateVehicleID: document.getElementById(`pv_id_${i}`)?.value || null,
+      privateVehNumber: document.getElementById(`pv_number_${i}`)?.value || "",
+      driverNumber: document.getElementById(`pv_driver_no_${i}`)?.value || "",
+      driverName: document.getElementById(`pv_driver_name_${i}`)?.value || "",
+      receivedSludgeLtrs: document.getElementById(`pv_ltrs_${i}`)?.value || "",
+      receivedSludgeKgs: document.getElementById(`pv_kgs_${i}`)?.value || ""
+    });
+  });
+
+  renderPrivateVehicleForms(inputCount, existing);
   updatePrivateSludgeTotals();
+  setStatusBadge(computeCompleteness());
 });
-
-
 
       // initial load
      (async function init(){
@@ -1392,7 +1633,13 @@ privateTripsEl.addEventListener("input", () => {
   let totalLtrs = 0;
   let totalKgs = 0;
 
-  const count = Number(privateTripsEl.value || 0);
+ const count = Math.max(
+  Number(privateTripsEl.value || 0),
+  savedPrivateVehicleCount,
+  document.querySelectorAll("#privateVehicleForms .vehicle-block").length
+);
+
+
 
   for (let i = 0; i < count; i++) {
     const ltrsEl = document.getElementById(`pv_ltrs_${i}`);
@@ -1413,13 +1660,126 @@ privateTripsEl.addEventListener("input", () => {
 
 }
 
+async function deletePrivateVehicle(index) {
+  const idEl = document.getElementById(`pv_id_${index}`);
+  if (!idEl) return;
+
+  const privateVehicleId = idEl.value;
+
+  // 🔥 DELETE FROM DB
+  if (privateVehicleId) {
+    const ok = confirm("Delete this private vehicle?");
+    if (!ok) return;
+
+    const resp = await fetch(`/api/private-vehicles/${privateVehicleId}`, {
+      method: "DELETE"
+    });
+
+    if (!resp.ok) {
+      alert("Private vehicle delete failed");
+      return;
+    }
+  }
+
+  // 🔁 READ REMAINING VEHICLES FROM DOM
+  const oldCount = document.querySelectorAll(
+    "#privateVehicleForms .vehicle-block"
+  ).length;
+
+  const remaining = [];
+  for (let i = 0; i < oldCount; i++) {
+    if (i === index) continue;
+
+    remaining.push({
+      privateVehicleID: document.getElementById(`pv_id_${i}`)?.value || null,
+      privateVehNumber: document.getElementById(`pv_number_${i}`)?.value || "",
+      driverNumber: document.getElementById(`pv_driver_no_${i}`)?.value || "",
+      driverName: document.getElementById(`pv_driver_name_${i}`)?.value || "",
+      receivedSludgeLtrs: document.getElementById(`pv_ltrs_${i}`)?.value || "",
+      receivedSludgeKgs: document.getElementById(`pv_kgs_${i}`)?.value || ""
+    });
+  }
+
+  // 🔒 UPDATE COUNTS
+  savedPrivateVehicleCount = remaining.length;
+  existingPrivateVehicles = remaining;
+  privateTripsEl.value = remaining.length;
+
+  // 🔥 REBUILD UI
+  renderPrivateVehicleForms(remaining.length, remaining);
+
+  updatePrivateSludgeTotals();
+  setStatusBadge(computeCompleteness());
+}
+
+
+async function deleteTrip(vehicleId, index) {
+  const tripIdEl = document.getElementById(`trip_id_${vehicleId}_${index}`);
+  if (!tripIdEl) return;
+
+  const tripId = tripIdEl.value;
+
+  // 🔥 DELETE FROM DB
+  if (tripId) {
+    const ok = confirm("Delete this trip?");
+    if (!ok) return;
+
+    const resp = await fetch(`/api/vehicle-trip-details/${tripId}`, {
+      method: "DELETE"
+    });
+
+    if (!resp.ok) {
+      alert("Trip delete failed in DB");
+      return;
+    }
+  }
+
+  // 🔁 READ REMAINING TRIPS FROM DOM (IMPORTANT)
+  const tripsInput = document.getElementById(`trips_${vehicleId}`);
+  const oldCount = document.querySelectorAll(
+  `#tripForms_${vehicleId} .vehicle-block`
+  ).length;
+
+
+  const remainingTrips = [];
+  for (let i = 0; i < oldCount; i++) {
+    if (i === index) continue;
+
+    remainingTrips.push({
+      vehicleTripId: document.getElementById(`trip_id_${vehicleId}_${i}`)?.value || null,
+      sludgeCollectLtrs: document.getElementById(`trip_ltrs_${vehicleId}_${i}`)?.value || "",
+      sludgeCollectKgs: document.getElementById(`trip_kgs_${vehicleId}_${i}`)?.value || "",
+      tripTime: document.getElementById(`trip_time_${vehicleId}_${i}`)?.value || ""
+    });
+  }
+
+  // 🔄 UPDATE INPUT COUNT
+  tripsInput.value = remainingTrips.length;
+
+  // 🔥 REBUILD UI
+  renderTripForms(vehicleId, remainingTrips.length, remainingTrips);
+
+  // ✅ NOW update saved count (CORRECT PLACE)
+  savedTripCountByVehicle[vehicleId] = remainingTrips.length;
+
+  updateVehicleTripSludgeTotals(vehicleId);
+  setStatusBadge(computeCompleteness());
+}
+
+
+
+
 function updateVehicleTripSludgeTotals(vehicleId) {
   let totalLtrs = 0;
   let totalKgs = 0;
 
-  const tripsCount = Number(
-    document.getElementById(`trips_${vehicleId}`)?.value || 0
-  );
+  const tripsCount = Math.max(
+  Number(document.getElementById(`trips_${vehicleId}`)?.value || 0),
+  savedTripCountByVehicle[vehicleId] || 0,
+  document.querySelectorAll(`#tripForms_${vehicleId} .vehicle-block`).length
+);
+
+
 
   for (let i = 0; i < tripsCount; i++) {
     const ltrsEl = document.getElementById(`trip_ltrs_${vehicleId}_${i}`);
@@ -1440,10 +1800,6 @@ function updateVehicleTripSludgeTotals(vehicleId) {
   if (sludgeEl) sludgeEl.value = totalLtrs === 0 ? "0" : totalLtrs;
   if (sludgeKgsEl) sludgeKgsEl.value = totalKgs === 0 ? "0" : totalKgs;
 }
-
-     // live completeness recompute
-      document.addEventListener('input', ()=> setStatusBadge(computeCompleteness()));
-      document.addEventListener('change', ()=> setStatusBadge(computeCompleteness()));
 
     })();
 </script>

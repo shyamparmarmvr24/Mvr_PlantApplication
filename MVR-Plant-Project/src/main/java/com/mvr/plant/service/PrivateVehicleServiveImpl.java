@@ -27,4 +27,9 @@ public class PrivateVehicleServiveImpl implements IPrivateVehicleService {
     public PrivateVehicleDetails updateVehicle(Long plantId, Long privateVehicleId, PrivateVehicleDetails updated) {
         return privateVehRepo.updateVehicle(plantId, privateVehicleId, updated);
     }
+
+    @Override
+    public void deletePrivateVehicle(Long privateVehicleId) {
+        privateVehRepo.deletePrivateVehicle(privateVehicleId);
+    }
 }

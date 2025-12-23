@@ -37,4 +37,11 @@ public class PrivateVehicleController {
         PrivateVehicleDetails result = privateVehicleService.updateVehicle(plantId, privateVehicleId, updated);
         return ResponseEntity.ok(result);
     }
+
+    // DELETE PRIVATE VEHICLE
+    @DeleteMapping("/{privateVehicleId}")
+    public void deletePrivateVehicle(@PathVariable Long privateVehicleId) {
+        privateVehicleService.deletePrivateVehicle(privateVehicleId);
+    }
+
 }

@@ -41,4 +41,9 @@ public class PlantOperationServiceImpl implements IPlantOperationService {
         return plantOpRepo.getLatestPowerBill(plantId);
     }
 
+    @Override
+    public PlantOperation getLatestWaterFilled(Long plantId) {
+        return plantOpRepo.getLatestWaterFilled(plantId);
+    }
+
 }

@@ -22,4 +22,9 @@ public class VehicleTripDetailServiceImpl implements IVehicleTripDetailsService 
     public List<VehicleTripDetailsDTO> getVehicleTripDetails(Long vehicleOpId) {
         return vehicleTripRepo.getVehicleTripDetails(vehicleOpId);
     }
+
+    @Override
+    public String deleteTrip(Long tripId) {
+        return vehicleTripRepo.deleteTrip(tripId);
+    }
 }

@@ -93,6 +93,14 @@ public class PlantOperation {
 
     private Double sludgeCollectPrivateVehicleKgs;
 
+    private Boolean waterUsed;
+
+    private LocalDate waterFilledDate;
+
+    private Double waterLtrs;
+
+    private Double totalWaterAmount;
+
     @Column(length = 500)
     private String remarks;
 

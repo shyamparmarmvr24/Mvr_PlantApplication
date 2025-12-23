@@ -9,4 +9,5 @@ public interface IVehicleTripDetailsService
 {
     public VehicleTripDetails updateVehicle(Long vehicleOpId, VehicleTripDetails tripDet);
     public List<VehicleTripDetailsDTO> getVehicleTripDetails(Long vehicleOpId);
+    public String deleteTrip(Long tripId);
 }

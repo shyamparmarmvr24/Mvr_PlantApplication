@@ -40,4 +40,13 @@ public interface IPlantOperationRepository extends JpaRepository<PlantOperation,
     """)
     List<PlantOperation> findLatestPowerBill(@Param("plantId") Long plantId);
 
+    @Query("""
+    SELECT p FROM PlantOperation p
+    WHERE p.plant.plantID = :plantId
+      AND p.waterUsed = true
+      AND p.waterFilledDate IS NOT NULL
+    ORDER BY p.waterFilledDate DESC
+    """)
+    List<PlantOperation> findLatestWaterFilled(@Param("plantId") Long plantId);
+
 }

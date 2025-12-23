@@ -303,6 +303,18 @@
     });
   }
 
+  /* ================= WATER ================= */
+total++; // waterUsed checkbox
+if (op && typeof op.waterUsed === "boolean") filled++;
+
+if (op && op.waterUsed === true) {
+  ["waterFilledDate", "waterLtrs", "totalWaterAmount"].forEach(f => {
+    total++;
+    if (op[f] !== null && op[f] !== "") filled++;
+  });
+}
+
+
   /* ================= PRIVATE VEHICLES ================= */
   if (privateAgg && privateAgg.privateVehicle === true) {
   total += 3;
@@ -341,13 +353,14 @@ if (Array.isArray(vehicleOps)) {
     if (v.sludgeCollectKgs !== null && v.sludgeCollectKgs !== "") filled++;
 
     if (v.lastFuelFilled === true) {
-      total += 3;
+    total += 4;
 
       // checkbox itself
       filled++;
 
       if (v.lastFuelFilledDate !== null && v.lastFuelFilledDate !== "") filled++;
       if (v.filledLiters !== null && v.filledLiters !== "") filled++;
+      if (v.currentOdometerReading !== null && v.currentOdometerReading !== "") filled++;
     }
   });
 }
@@ -433,6 +446,28 @@ try {
 } catch (e) {
     console.warn("Latest power bill fetch failed", e);
 }
+
+/* ================= ALWAYS LOAD LATEST WATER ================= */
+try {
+    const rw = await fetch(
+        `/api/operations/plant/${plantID}/latest-water`
+    );
+
+    if (rw.ok) {
+        const latestWater = await rw.json();
+
+        // Apply latest water values ONLY if missing in current day
+        if (!op.waterUsed) {
+            op.waterUsed = latestWater.waterUsed;
+            op.waterFilledDate = latestWater.waterFilledDate;
+            op.waterLtrs = latestWater.waterLtrs;
+            op.totalWaterAmount = latestWater.totalWaterAmount;
+        }
+    }
+} catch (e) {
+    console.warn("Latest water fetch failed", e);
+}
+
 
 
                 fieldsBody.innerHTML = `
@@ -558,6 +593,33 @@ fieldsBody.innerHTML += `
   </td>
 </tr>
 `;
+
+fieldsBody.innerHTML += `
+<tr class="section-header"><td colspan="2">Water Details</td></tr>
+
+<tr>
+  <th>Water Used?</th>
+  <td>${op.waterUsed ? "Yes" : "No"}</td>
+</tr>
+
+<tr>
+  <th>Water Filled Date</th>
+  <td>${op.waterUsed ? (op.waterFilledDate ?? "-") : "-"}</td>
+</tr>
+
+<tr>
+  <th>Water Filled (Liters)</th>
+  <td>${op.waterUsed ? (op.waterLtrs ?? "-") : "-"}</td>
+</tr>
+
+<tr>
+  <th>Total Water Amount</th>
+  <td>${op.waterUsed ? (op.totalWaterAmount ?? "-") : "-"}</td>
+</tr>
+`;
+
+
+
 fieldsBody.innerHTML += `
 <tr class="section-header"><td colspan="2">Polymer & Pillets Report</td></tr>
 
@@ -605,6 +667,26 @@ for (const v of vehicles) {
         );
         const tv = await rvo.text();
         vo = (tv && tv.trim()) ? JSON.parse(tv) : {};
+
+        // 🔁 FALLBACK: load latest fuel-filled details if missing
+        if (!vo.lastFuelFilled) {
+          try {
+            const rf = await fetch(
+              `/api/vehicle-operations/${v.vehicleID}/latest-fuel`
+            );
+            if (rf.ok) {
+              const latest = await rf.json();
+              if (latest) {
+                vo.lastFuelFilled = latest.lastFuelFilled;
+                vo.lastFuelFilledDate = latest.lastFuelFilledDate;
+                vo.filledLiters = latest.filledLiters;
+                vo.currentOdometerReading = latest.currentOdometerReading;
+              }
+            }
+          } catch (e) {
+            console.warn("Latest fuel fallback failed", e);
+          }
+        }
     } catch (e) {
         vo = {};
     }
@@ -653,6 +735,10 @@ for (const v of vehicles) {
                             <tr><th>Last Fuel Filled?</th><td>${vo.lastFuelFilled ? "Yes" : "No"}</td></tr>
                             <tr><th>Last Fuel Filled Date</th><td>${vo.lastFuelFilled ? (vo.lastFuelFilledDate ?? "-") : "-"}</td></tr>
                             <tr><th>Fuel Filled (Liters)</th><td>${vo.lastFuelFilled ? (vo.filledLiters ?? "-") : "-"}</td></tr>
+                            <tr>
+                              <th>Current Odometer Reading</th>
+                              <td>${vo.lastFuelFilled ? (vo.currentOdometerReading ?? "-") : "-"}</td>
+                            </tr>
                             <tr>
                               <th>No. of Trips</th>
                               <td>

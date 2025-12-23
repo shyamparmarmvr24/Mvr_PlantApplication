@@ -64,6 +64,7 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt {
         existing.setLastFuelFilled(vehicleOp.getLastFuelFilled());
         existing.setLastFuelFilledDate(vehicleOp.getLastFuelFilledDate());
         existing.setFilledLiters(vehicleOp.getFilledLiters());
+        existing.setCurrentOdometerReading(vehicleOp.getCurrentOdometerReading());
         existing.setNoOfTrips(vehicleOp.getNoOfTrips());
 
         existing.setSludgeCollect(vehicleOp.getSludgeCollect());

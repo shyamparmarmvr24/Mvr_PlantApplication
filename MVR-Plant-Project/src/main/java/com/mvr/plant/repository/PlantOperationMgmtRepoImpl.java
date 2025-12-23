@@ -113,6 +113,12 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
         } else {
             existing.setDgRunHours(0.0);
         }
+
+        existing.setWaterUsed(plantOp.getWaterUsed());
+        existing.setWaterFilledDate(plantOp.getWaterFilledDate());
+        existing.setWaterLtrs(plantOp.getWaterLtrs());
+        existing.setTotalWaterAmount(plantOp.getTotalWaterAmount());
+
         existing.setPolymerUsage(plantOp.getPolymerUsage());
         existing.setPolymerStock(plantOp.getPolymerStock());
         existing.setPillets(plantOp.getPillets());
@@ -195,6 +201,11 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
     @Override
     public PlantOperation getLatestPowerBill(Long plantId) {
         return operationRepo.findLatestPowerBill(plantId).stream().findFirst().orElse(null);
+    }
+
+    @Override
+    public PlantOperation getLatestWaterFilled(Long plantId) {
+        return operationRepo.findLatestWaterFilled(plantId).stream().findFirst().orElse(null);
     }
 
 }

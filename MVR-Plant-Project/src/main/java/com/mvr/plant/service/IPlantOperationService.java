@@ -15,4 +15,5 @@ public interface IPlantOperationService
     public List<PlantOperationDTO> getAllOperationBydate(LocalDate date);
     public List<PlantOperationBetweenDTO> findByOperationDateBetween(LocalDate startDate, LocalDate endDate);
     public PlantOperation getLatestPowerBill(Long plantId);
+    public PlantOperation getLatestWaterFilled(Long plantId);
 }

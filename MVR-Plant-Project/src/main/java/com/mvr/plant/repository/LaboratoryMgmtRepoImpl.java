@@ -1,10 +1,8 @@
 package com.mvr.plant.repository;
 
 import com.mvr.plant.DTO.LabOperationDTO;
-import com.mvr.plant.DTO.PlantOperationBetweenDTO;
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.LaboratoryOperation;
-import com.mvr.plant.entity.PlantOperation;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

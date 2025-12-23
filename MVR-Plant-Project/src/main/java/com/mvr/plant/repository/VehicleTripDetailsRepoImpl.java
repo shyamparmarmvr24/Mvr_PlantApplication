@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class VehicleTripDetailsRepoImpl implements IVehicleTripDetailsRepoMgmt {
@@ -40,5 +41,17 @@ public class VehicleTripDetailsRepoImpl implements IVehicleTripDetailsRepoMgmt {
     public List<VehicleTripDetailsDTO> getVehicleTripDetails(Long vehicleOpId) {
         return tripRepo.findVehicleTripByVehicleOperation(vehicleOpId).stream().map(t -> new VehicleTripDetailsDTO(
                 t.getVehicleTripId(), t.getSludgeCollectLtrs(), t.getSludgeCollectKgs(), t.getTripTime())).toList();
+    }
+
+    @Override
+    public String deleteTrip(Long tripId)
+    {
+        Optional<VehicleTripDetails> trip = tripRepo.findById(tripId);
+        if(trip.isPresent())
+        {
+            tripRepo.deleteById(tripId);
+            return "Trip Deleted Successfully";
+        }
+        return "Trip Not Found";
     }
 }
