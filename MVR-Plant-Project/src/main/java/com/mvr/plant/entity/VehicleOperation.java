@@ -19,8 +19,7 @@ import java.util.List;
 @Table(name = "Vehicle_Operation_Table")
 @AllArgsConstructor
 @NoArgsConstructor
-public class VehicleOperation
-{
+public class VehicleOperation {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vehicle_op_seq")
     @SequenceGenerator(
@@ -56,7 +55,7 @@ public class VehicleOperation
 
     private Double sludgeCollectKgs;
 
-    @OneToMany(mappedBy = "vehicleOp", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "vehicleOp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<VehicleTripDetails> vehicleTrips = new ArrayList<>();
 

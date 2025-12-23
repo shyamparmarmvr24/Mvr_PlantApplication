@@ -11,8 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/vehiclesinformation")
 @CrossOrigin(origins = "*")
-public class VehicleController
-{
+public class VehicleController {
     @Autowired
     private IVehicleService vehicleService;
 
@@ -33,7 +32,7 @@ public class VehicleController
     }
 
 
-     //GET ALL VEHICLES FOR A PLANT
+    //GET ALL VEHICLES FOR A PLANT
 
     @GetMapping("/plant/{plantId}")
     public ResponseEntity<List<VehicleInformation>> getVehicleByPlant(
@@ -44,7 +43,7 @@ public class VehicleController
     }
 
 
-      //UPDATE VEHICLE (BY PLANT + VEHICLE ID)
+    //UPDATE VEHICLE (BY PLANT + VEHICLE ID)
 
     @PutMapping("/update/{plantId}/{vehicleId}")
     public ResponseEntity<VehicleInformation> updateVehicle(

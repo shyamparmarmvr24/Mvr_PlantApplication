@@ -1,4 +1,5 @@
 package com.mvr.plant.repository;
+
 import com.mvr.plant.DTO.EmployeeOperationDTO;
 import com.mvr.plant.DTO.PlantOperationDTO;
 import com.mvr.plant.entity.PlantEmployee;
@@ -13,8 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRepoImpl
-{
+public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRepoImpl {
     @Autowired
     private IPlantEmployeeOperationRepo empOpRepo;
 
@@ -22,8 +22,7 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
     private IPlantEmployeeRepo empRepo;
 
     @Override
-    public Map<String, Integer> updatePlantEmployeeOperation(Long plantId,Integer empId, PlantEmployeeOperation empOp)
-    {
+    public Map<String, Integer> updatePlantEmployeeOperation(Long plantId, Integer empId, PlantEmployeeOperation empOp) {
         LocalDate date = empOp.getOperationDate();
         if (date == null) {
             throw new IllegalStateException("operationDate is required");
@@ -31,13 +30,13 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
 
         // Find existing operation for plant + date
         PlantEmployeeOperation exist = empOpRepo
-                .getEmployeeOperationByEmployeeIdAndDate(empId,date)
+                .getEmployeeOperationByEmployeeIdAndDate(empId, date)
                 .orElse(null);
 
         // If no existing operation → CREATE NEW ONE
         if (exist == null) {
             // First fetch the parent plant
-            PlantEmployee plantEmp = empRepo.getEmployeeByPlantIdAndEmployeeId(plantId,empId)
+            PlantEmployee plantEmp = empRepo.getEmployeeByPlantIdAndEmployeeId(plantId, empId)
                     .orElseThrow(() -> new IllegalStateException("Employee Not Found"));
 
             // Set parent reference and save new operation (for that date)
@@ -47,7 +46,7 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
 
         // existing operation by plant + date
         PlantEmployeeOperation existing = empOpRepo
-                .getEmployeeOperationByEmployeeIdAndDate(empId,date)
+                .getEmployeeOperationByEmployeeIdAndDate(empId, date)
                 .orElseThrow(() -> new IllegalStateException("Employee Operation Not Found For Date"));
 
         int count = 0;
@@ -66,20 +65,17 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
     }
 
     @Override
-    public PlantEmployeeOperation getEmployeeOperationByEmpIdAndDate(Integer empId, LocalDate date)
-    {
-        return empOpRepo.getEmployeeOperationByEmployeeIdAndDate(empId,date).orElseThrow(()->new IllegalStateException("Employee Operation Not Found For Date"));
+    public PlantEmployeeOperation getEmployeeOperationByEmpIdAndDate(Integer empId, LocalDate date) {
+        return empOpRepo.getEmployeeOperationByEmployeeIdAndDate(empId, date).orElseThrow(() -> new IllegalStateException("Employee Operation Not Found For Date"));
     }
 
     @Override
-    public List<PlantEmployeeOperation> getAllOperationsByEmployeeId(Integer employeeId)
-    {
+    public List<PlantEmployeeOperation> getAllOperationsByEmployeeId(Integer employeeId) {
         return empOpRepo.getAllOperationsByEmployeeId(employeeId);
     }
 
     @Override
-    public List<EmployeeOperationDTO> getAllEmployeesOperationByDate(LocalDate date)
-    {
+    public List<EmployeeOperationDTO> getAllEmployeesOperationByDate(LocalDate date) {
         // 1) fetch operations for the date with employee + plant eagerly loaded
         List<PlantEmployeeOperation> ops = empOpRepo.getAllOperationByDate(date);
 
@@ -113,8 +109,7 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
     }
 
     @Override
-    public List<EmployeeOperationDTO> getAllEmployeesOperationBetween(LocalDate start, LocalDate end)
-    {
+    public List<EmployeeOperationDTO> getAllEmployeesOperationBetween(LocalDate start, LocalDate end) {
         List<PlantEmployeeOperation> ops = empOpRepo.findByOperationDateBetween(start, end);
 
         List<EmployeeOperationDTO> result = new ArrayList<>();

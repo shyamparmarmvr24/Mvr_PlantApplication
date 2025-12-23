@@ -21,8 +21,7 @@ import java.util.List;
 @Table(name = "Plant_Employee_Table")
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlantEmployee
-{
+public class PlantEmployee {
     @Id
     private Integer employeeId;
 
@@ -31,10 +30,10 @@ public class PlantEmployee
     @JsonBackReference
     private FstpPlant plant;
 
-    @Column(nullable = false,length = 60)
+    @Column(nullable = false, length = 60)
     private String employeeName;
 
-    @Column(nullable = false,length = 60)
+    @Column(nullable = false, length = 60)
     private String designation;
 
     @Column(nullable = false)
@@ -42,7 +41,7 @@ public class PlantEmployee
 
     private Long alternateMobNo;
 
-    @Column(nullable = false,length = 100)
+    @Column(nullable = false, length = 100)
     private String address;
 
     private LocalDate dateOfBirth;
@@ -58,7 +57,7 @@ public class PlantEmployee
 
     private LocalDate licenceExpiryDate;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     //@JsonManagedReference
     @JsonIgnore
     private List<PlantEmployeeOperation> plantEmployeesOp = new ArrayList<>();

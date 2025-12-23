@@ -15,22 +15,21 @@ import java.util.List;
 @Table(name = "FSTP_PLANT")
 @AllArgsConstructor
 @NoArgsConstructor
-public class FstpPlant
-{
+public class FstpPlant {
     @Id
-    @Column(name = "PlantID",nullable = false, unique = true)
+    @Column(name = "PlantID", nullable = false, unique = true)
     private Long plantID;
 
-    @Column(name = "PlantName",nullable = false,length = 50)
+    @Column(name = "PlantName", nullable = false, length = 50)
     private String plantName;
 
-    @Column(name = "StateCode",length = 10)
+    @Column(name = "StateCode", length = 10)
     private String stateCode;
 
-    @Column(name = "District",length = 50)
+    @Column(name = "District", length = 50)
     private String district;
 
-    @Column(name = "KLD",nullable = false)
+    @Column(name = "KLD", nullable = false)
     private Long kld;
 
     @Column(name = "WardNo")
@@ -39,19 +38,19 @@ public class FstpPlant
     @Column(name = "PinCode")
     private Long pinCode;
 
-    @Column(name = "Zones",nullable = false)
+    @Column(name = "Zones", nullable = false)
     private Integer zones;
 
-    @Column(name = "MNIT", columnDefinition = "BIT DEFAULT 0",nullable = false)
+    @Column(name = "MNIT", columnDefinition = "BIT DEFAULT 0", nullable = false)
     private Boolean mnit = false;
 
-    @Column(name = "PermanentPower", columnDefinition = "BIT DEFAULT 0",nullable = false)
+    @Column(name = "PermanentPower", columnDefinition = "BIT DEFAULT 0", nullable = false)
     private Boolean permanentPower = false;
 
-    @Column(name = "Solar", columnDefinition = "BIT DEFAULT 0",nullable = false)
+    @Column(name = "Solar", columnDefinition = "BIT DEFAULT 0", nullable = false)
     private Boolean solar = false;
 
-    @Column(name = "Internet", columnDefinition = "BIT DEFAULT 0",nullable = false)
+    @Column(name = "Internet", columnDefinition = "BIT DEFAULT 0", nullable = false)
     private Boolean internet = false;
 
     @Column(name = "MnitDateOfCompletion")
@@ -114,27 +113,28 @@ public class FstpPlant
     @Column(name = "NoOfVehicle")
     private Integer noOfVehicle;
 
-    public int getNoOfEmployees()
-    {return plantEmployees != null ? plantEmployees.size() : 0;}
+    public int getNoOfEmployees() {
+        return plantEmployees != null ? plantEmployees.size() : 0;
+    }
 
 
-    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<PlantOperation> operations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<LaboratoryOperation> labOperations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<PlantEmployee> plantEmployees = new ArrayList<>();
 
-    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<VehicleInformation> vehicleInfo = new ArrayList<>();
 
-    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<PrivateVehicleDetails> privateVehicle = new ArrayList<>();
 }

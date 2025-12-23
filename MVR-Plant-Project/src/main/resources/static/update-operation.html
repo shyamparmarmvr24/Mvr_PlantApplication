@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>Update Plant Operation</title>
     <style>
         :root{
@@ -87,7 +87,12 @@
         <div id="info" class="top-info">Loading...</div>
 
         <table aria-describedby="plant-fields">
-            <thead><tr><th>Field</th><th>Value</th></tr></thead>
+            <thead>
+            <tr>
+                <th>Field</th>
+                <th>Value</th>
+            </tr>
+            </thead>
             <tbody id="fieldsBody"></tbody>
         </table>
 
@@ -123,7 +128,7 @@
                             type="number"
                             min="0"
                             max="10"
-                            placeholder="Enter No Of Trips Private" />
+                            placeholder="Enter No Of Trips Private"/>
                     <div id="privateTripsWarning" class="input-warning">
                         Maximum 10 trips allowed
                     </div>
@@ -135,15 +140,16 @@
                 <th>Sludge Collected</th>
                 <td>
                     <div class="two-inline">
-                        <input id="privateSludge" class="input" placeholder="Sludge (Ltrs)" readonly />
-                        <input id="privateSludgeKgs" class="input" placeholder="Sludge (Kgs)" readonly />
+                        <input id="privateSludge" class="input" placeholder="Sludge (Ltrs)" readonly/>
+                        <input id="privateSludgeKgs" class="input" placeholder="Sludge (Kgs)" readonly/>
                     </div>
                 </td>
             </tr>
 
             <tr>
                 <td colspan="2" class="muted-note">
-                    Note: <code>sludgeReceived</code> and <code>totalNoOfTrips</code> are computed server-side; not editable here.
+                    Note: <code>sludgeReceived</code> and <code>totalNoOfTrips</code> are computed server-side; not
+                    editable here.
                 </td>
             </tr>
         </table>

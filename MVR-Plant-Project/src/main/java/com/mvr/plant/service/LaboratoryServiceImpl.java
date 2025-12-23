@@ -11,19 +11,18 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class LaboratoryServiceImpl implements ILaboratoryOperationService
-{
+public class LaboratoryServiceImpl implements ILaboratoryOperationService {
     @Autowired
     private ILaboratoryMgmtRepo labRepo;
 
     @Override
     public Map<String, Integer> updateLabOperationById(Long plantId, LaboratoryOperation labOp) {
-        return labRepo.updateLabOperationById(plantId,labOp);
+        return labRepo.updateLabOperationById(plantId, labOp);
     }
 
     @Override
     public LaboratoryOperation getAllLabOperationDataByIdAndDate(Long plantId, LocalDate date) {
-        return labRepo.getAllLabOperationDataByIdAndDate(plantId,date);
+        return labRepo.getAllLabOperationDataByIdAndDate(plantId, date);
     }
 
     @Override
@@ -33,6 +32,6 @@ public class LaboratoryServiceImpl implements ILaboratoryOperationService
 
     @Override
     public List<LabOperationDTO> findByOperationDateBetween(LocalDate startDate, LocalDate endDate) {
-        return labRepo.findByOperationDateBetween(startDate,endDate);
+        return labRepo.findByOperationDateBetween(startDate, endDate);
     }
 }

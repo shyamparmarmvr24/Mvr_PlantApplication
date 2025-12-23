@@ -6,35 +6,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
 @Repository
-public class PlantMgmtRepoImpl implements IPlantMgmtRepo
-{
+public class PlantMgmtRepoImpl implements IPlantMgmtRepo {
     @Autowired
     private IPlantRepository plantRepo;
 
     @Override
-    public FstpPlant insertPlantDetails(FstpPlant plant)
-    {
+    public FstpPlant insertPlantDetails(FstpPlant plant) {
         return plantRepo.save(plant);
     }
 
     @Override
-    public List<FstpPlant> getAllPlants()
-    {
+    public List<FstpPlant> getAllPlants() {
         return plantRepo.getAllPlantsWhereMnitIsTrue();
     }
 
     @Override
-    public FstpPlant getPlantById(Long id)
-    {
-        return plantRepo.findPlantByPlantID(id).orElseThrow(()->new IllegalStateException("Invalid Plant Id"));
+    public FstpPlant getPlantById(Long id) {
+        return plantRepo.findPlantByPlantID(id).orElseThrow(() -> new IllegalStateException("Invalid Plant Id"));
     }
 
-      @Override
-      public String updatePlantDetails(Long id, FstpPlant plant)
-      {
+    @Override
+    public String updatePlantDetails(Long id, FstpPlant plant) {
         FstpPlant existingPlant = plantRepo.findPlantByPlantID(id)
-            .orElseThrow(() -> new IllegalStateException("Invalid Plant Id"));
+                .orElseThrow(() -> new IllegalStateException("Invalid Plant Id"));
 
         // Copy all except serialNo + plantID
         BeanUtils.copyProperties(plant, existingPlant, "serialNo", "plantID");
@@ -42,12 +38,16 @@ public class PlantMgmtRepoImpl implements IPlantMgmtRepo
         plantRepo.save(existingPlant);
 
         return "Plant Details Is Updated Successfully Having Id " + id;
-      }
+    }
 
 
     @Override
-    public List<FstpPlant> getPlantsByZone(Integer zone)
-    {
+    public List<FstpPlant> getPlantsByZone(Integer zone) {
         return plantRepo.getPlantsByZone(zone);
+    }
+
+    @Override
+    public List<FstpPlant> getAllPlantsDetails() {
+        return plantRepo.findAll();
     }
 }

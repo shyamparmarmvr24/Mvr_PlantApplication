@@ -11,20 +11,18 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class PlantEmployeeOperationServiceImpl implements IPlantEmployeeOperationService
-{
+public class PlantEmployeeOperationServiceImpl implements IPlantEmployeeOperationService {
     @Autowired
     private IPlantEmployeeOperationRepoImpl empOpRepo;
 
     @Override
-    public Map<String, Integer> updatePlantEmployeeOperation(Long plantId, Integer empId, PlantEmployeeOperation empOp)
-    {
-        return empOpRepo.updatePlantEmployeeOperation(plantId,empId,empOp);
+    public Map<String, Integer> updatePlantEmployeeOperation(Long plantId, Integer empId, PlantEmployeeOperation empOp) {
+        return empOpRepo.updatePlantEmployeeOperation(plantId, empId, empOp);
     }
 
     @Override
     public PlantEmployeeOperation getEmployeeOperationByEmpIdAndDate(Integer empId, LocalDate date) {
-        return empOpRepo.getEmployeeOperationByEmpIdAndDate(empId,date);
+        return empOpRepo.getEmployeeOperationByEmpIdAndDate(empId, date);
     }
 
     @Override
@@ -33,14 +31,13 @@ public class PlantEmployeeOperationServiceImpl implements IPlantEmployeeOperatio
     }
 
     @Override
-    public List<EmployeeOperationDTO> getAllEmployeesOperationByDate(LocalDate date)
-    {
+    public List<EmployeeOperationDTO> getAllEmployeesOperationByDate(LocalDate date) {
         return empOpRepo.getAllEmployeesOperationByDate(date);
     }
 
     @Override
     public List<EmployeeOperationDTO> getAllEmployeesOperationBetween(LocalDate start, LocalDate end) {
-        return empOpRepo.getAllEmployeesOperationBetween(start,end);
+        return empOpRepo.getAllEmployeesOperationBetween(start, end);
     }
 
 }

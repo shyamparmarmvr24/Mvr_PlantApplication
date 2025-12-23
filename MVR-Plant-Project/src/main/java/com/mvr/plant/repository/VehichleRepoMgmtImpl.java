@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
 @Repository
-public class VehichleRepoMgmtImpl implements IVehicleRepoImpl
-{
+public class VehichleRepoMgmtImpl implements IVehicleRepoImpl {
     @Autowired
     private IVehicleRepo vehicleRepo;
 
@@ -17,8 +17,7 @@ public class VehichleRepoMgmtImpl implements IVehicleRepoImpl
 
 
     @Override
-    public VehicleInformation createVehicle(Long plantId, VehicleInformation vehicle)
-    {
+    public VehicleInformation createVehicle(Long plantId, VehicleInformation vehicle) {
 
         // Fetch parent plant
         FstpPlant plant = plantRepo.findPlantByPlantID(plantId)

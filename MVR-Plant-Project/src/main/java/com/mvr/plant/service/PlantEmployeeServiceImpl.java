@@ -8,15 +8,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class PlantEmployeeServiceImpl implements IPlantEmployeeService
-{
+public class PlantEmployeeServiceImpl implements IPlantEmployeeService {
     @Autowired
     private IPlantEmployeeRepoImpl empRepo;
 
     @Override
-    public PlantEmployee createEmployee(Long plantId, PlantEmployee employee)
-    {
-        return empRepo.createEmployee(plantId,employee);
+    public PlantEmployee createEmployee(Long plantId, PlantEmployee employee) {
+        return empRepo.createEmployee(plantId, employee);
     }
 
     @Override
@@ -26,7 +24,7 @@ public class PlantEmployeeServiceImpl implements IPlantEmployeeService
 
     @Override
     public String updateOperationById(Long plantId, Integer empId, PlantEmployee employee) {
-        return empRepo.updateOperationById(plantId,empId,employee);
+        return empRepo.updateOperationById(plantId, empId, employee);
     }
 
     @Override

@@ -11,8 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/plants")
 @CrossOrigin(origins = "*")
-public class FstpPlantController
-{
+public class FstpPlantController {
     @Autowired
     private IPlantService plantService;
 
@@ -21,8 +20,7 @@ public class FstpPlantController
 
     // Create a new plant
     @PostMapping
-    public ResponseEntity<FstpPlant> createPlant(@RequestBody FstpPlant plant)
-    {
+    public ResponseEntity<FstpPlant> createPlant(@RequestBody FstpPlant plant) {
         FstpPlant result = plantService.insertPlantDetails(plant);
         sseController.broadcastUpdate();
         return ResponseEntity.ok(result);
@@ -57,4 +55,10 @@ public class FstpPlantController
         return ResponseEntity.ok(plants);
     }
 
+    //get all plants
+    @GetMapping("/all")
+    public ResponseEntity<List<FstpPlant>> getAllPlantsDetails() {
+        List<FstpPlant> plants = plantService.getAllPlantsDetails();
+        return ResponseEntity.ok(plants);
+    }
 }

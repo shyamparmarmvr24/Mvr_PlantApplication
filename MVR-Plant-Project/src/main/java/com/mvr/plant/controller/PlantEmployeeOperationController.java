@@ -14,32 +14,23 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/employee-operations")
 @CrossOrigin(origins = "*")
-public class PlantEmployeeOperationController
-{
+public class PlantEmployeeOperationController {
     @Autowired
     private IPlantEmployeeOperationService employeeOpService;
 
     @Autowired
     private SseController sseController;
 
-
-    // CREATE or UPDATE attendance for employee (AM/PM)
-
     @PostMapping("/update/{plantId}/{employeeId}")
-    public ResponseEntity<Map<String, Integer>> updateOperation(@PathVariable Long plantId, @PathVariable Integer employeeId, @RequestBody PlantEmployeeOperation empOp)
-    {
+    public ResponseEntity<Map<String, Integer>> updateOperation(@PathVariable Long plantId, @PathVariable Integer employeeId, @RequestBody PlantEmployeeOperation empOp) {
         Map<String, Integer> response = employeeOpService
                 .updatePlantEmployeeOperation(plantId, employeeId, empOp);
         sseController.broadcastUpdate();
         return ResponseEntity.ok(response);
     }
 
-
-    //Get operation for an employee on a specific date
-
     @GetMapping("/{employeeId}/date/{date}")
-    public ResponseEntity<PlantEmployeeOperation> getByDate(@PathVariable Integer employeeId, @PathVariable String date)
-    {
+    public ResponseEntity<PlantEmployeeOperation> getByDate(@PathVariable Integer employeeId, @PathVariable String date) {
         LocalDate localDate = LocalDate.parse(date);
 
         PlantEmployeeOperation op = employeeOpService
@@ -48,12 +39,8 @@ public class PlantEmployeeOperationController
         return ResponseEntity.ok(op);
     }
 
-
-     //Get all operations for an employee (sorted DESC by date)
-
     @GetMapping("/{employeeId}/all")
-    public ResponseEntity<List<PlantEmployeeOperation>> getAllByEmployee(@PathVariable Integer employeeId)
-    {
+    public ResponseEntity<List<PlantEmployeeOperation>> getAllByEmployee(@PathVariable Integer employeeId) {
         List<PlantEmployeeOperation> list =
                 employeeOpService.getAllOperationsByEmployeeId(employeeId);
 
@@ -74,8 +61,7 @@ public class PlantEmployeeOperationController
     @GetMapping("/date-range")
     public ResponseEntity<List<EmployeeOperationDTO>> getEmployeeOperationsBetween(
             @RequestParam String start,
-            @RequestParam String end)
-    {
+            @RequestParam String end) {
         LocalDate startDate = LocalDate.parse(start);
         LocalDate endDate = LocalDate.parse(end);
 
@@ -83,9 +69,4 @@ public class PlantEmployeeOperationController
 
         return ResponseEntity.ok(result);
     }
-
-
-
-
-
 }

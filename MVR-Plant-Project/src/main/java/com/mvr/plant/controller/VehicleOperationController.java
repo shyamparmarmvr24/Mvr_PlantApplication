@@ -18,8 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/vehicle-operations")
 @CrossOrigin(origins = "*")
-public class VehicleOperationController
-{
+public class VehicleOperationController {
     @Autowired
     private IVehicleOperationService vehicleOperationService;
 
@@ -82,12 +81,11 @@ public class VehicleOperationController
     @GetMapping("/vehicle/date-range")
     public ResponseEntity<List<VehicleOperationBetweenDTO>> getVehicleOperationsBetween(
             @RequestParam String start,
-            @RequestParam String end)
-    {
+            @RequestParam String end) {
         LocalDate startDate = LocalDate.parse(start);
         LocalDate endDate = LocalDate.parse(end);
 
-        List<VehicleOperationBetweenDTO> result =vehicleOperationService.getVehicleOperationsBetween(startDate, endDate);
+        List<VehicleOperationBetweenDTO> result = vehicleOperationService.getVehicleOperationsBetween(startDate, endDate);
 
         return ResponseEntity.ok(result);
     }

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -15,8 +16,7 @@ import java.time.LocalTime;
 @Table(name = "Vehicle_Trip_Details")
 @AllArgsConstructor
 @NoArgsConstructor
-public class VehicleTripDetails
-{
+public class VehicleTripDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vehicle_trips_seq")
     @SequenceGenerator(

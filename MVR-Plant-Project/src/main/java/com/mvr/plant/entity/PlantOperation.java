@@ -15,8 +15,7 @@ import java.time.LocalDateTime;
 @Table(name = "Operation_Table")
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlantOperation
-{
+public class PlantOperation {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "operation_seq")
     @SequenceGenerator(

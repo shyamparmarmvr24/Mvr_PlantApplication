@@ -16,8 +16,7 @@ import java.time.LocalDateTime;
 @Table(name = "Laboratory_Table")
 @AllArgsConstructor
 @NoArgsConstructor
-public class LaboratoryOperation
-{
+public class LaboratoryOperation {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "laboratory_seq")
     @SequenceGenerator(
@@ -93,7 +92,7 @@ public class LaboratoryOperation
 
     private Double phReading3;
 
-    private Double phReading4 ;
+    private Double phReading4;
 
     private Double cumulativeFlow;
 

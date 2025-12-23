@@ -9,14 +9,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class VehicleTripDetailServiceImpl implements IVehicleTripDetailsService
-{
+public class VehicleTripDetailServiceImpl implements IVehicleTripDetailsService {
     @Autowired
     private IVehicleTripDetailsRepoMgmt vehicleTripRepo;
 
     @Override
     public VehicleTripDetails updateVehicle(Long vehicleOpId, VehicleTripDetails tripDet) {
-        return vehicleTripRepo.updateVehicle(vehicleOpId,tripDet);
+        return vehicleTripRepo.updateVehicle(vehicleOpId, tripDet);
     }
 
     @Override

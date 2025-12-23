@@ -1,4 +1,5 @@
 package com.mvr.plant.controller;
+
 import com.mvr.plant.DTO.PlantOperationBetweenDTO;
 import com.mvr.plant.DTO.PlantOperationDTO;
 import com.mvr.plant.entity.PlantOperation;
@@ -6,6 +7,7 @@ import com.mvr.plant.service.IPlantOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +15,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/operations")
 @CrossOrigin(origins = "*")
-public class PlantOperationController
-{
+public class PlantOperationController {
     @Autowired
     private IPlantOperationService plantOpService;
 
@@ -22,11 +23,10 @@ public class PlantOperationController
     private SseController sseController;   // ADD THIS
 
     @PutMapping("/{plantId}")
-    public ResponseEntity<Map<String,Integer>> updateOperation(
+    public ResponseEntity<Map<String, Integer>> updateOperation(
             @PathVariable Long plantId,
             @RequestParam("date") String date,
-            @RequestBody PlantOperation plantOp)
-    {
+            @RequestBody PlantOperation plantOp) {
         // parse date and set into PlantOperation before service call
         LocalDate localDate = LocalDate.parse(date);
         plantOp.setOperationDate(localDate);
@@ -73,8 +73,7 @@ public class PlantOperationController
     }
 
     @GetMapping("/plant/{plantId}/latest-power-bill")
-    public ResponseEntity<PlantOperation> latestPowerBill(@PathVariable Long plantId)
-    {
+    public ResponseEntity<PlantOperation> latestPowerBill(@PathVariable Long plantId) {
         return ResponseEntity.ok(plantOpService.getLatestPowerBill(plantId));
     }
 }

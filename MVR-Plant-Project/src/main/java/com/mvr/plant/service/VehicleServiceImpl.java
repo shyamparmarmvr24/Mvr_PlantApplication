@@ -8,14 +8,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class VehicleServiceImpl implements IVehicleService
-{
+public class VehicleServiceImpl implements IVehicleService {
     @Autowired
     private IVehicleRepoImpl vehicleRepo;
 
     @Override
     public VehicleInformation createVehicle(Long plantId, VehicleInformation vehicle) {
-        return vehicleRepo.createVehicle(plantId,vehicle);
+        return vehicleRepo.createVehicle(plantId, vehicle);
     }
 
     @Override
@@ -25,6 +24,6 @@ public class VehicleServiceImpl implements IVehicleService
 
     @Override
     public VehicleInformation updateVehicle(Long plantId, Long vehicleId, VehicleInformation vehicle) {
-        return vehicleRepo.updateVehicle(plantId,vehicleId,vehicle);
+        return vehicleRepo.updateVehicle(plantId, vehicleId, vehicle);
     }
 }

@@ -12,14 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class PlantOperationServiceImpl implements IPlantOperationService
-{
+public class PlantOperationServiceImpl implements IPlantOperationService {
     @Autowired
     private IPlantOperationMgmtRepo plantOpRepo;
 
     @Override
     public Map<String, Integer> updateOperationById(Long id, PlantOperation plantOp) {
-        return plantOpRepo.updateOperationById(id,plantOp);
+        return plantOpRepo.updateOperationById(id, plantOp);
     }
 
     @Override
@@ -34,7 +33,7 @@ public class PlantOperationServiceImpl implements IPlantOperationService
 
     @Override
     public List<PlantOperationBetweenDTO> findByOperationDateBetween(LocalDate startDate, LocalDate endDate) {
-        return plantOpRepo.findByOperationDateBetween(startDate,endDate);
+        return plantOpRepo.findByOperationDateBetween(startDate, endDate);
     }
 
     @Override

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>View Operation</title>
 
     <!-- pdf libs -->
@@ -88,12 +88,19 @@
     <div class="top-info" id="infoBox">Loading...</div>
 
     <div style="text-align:center">
-        <div class="progress-bar" aria-hidden="true"><div id="progressFill" class="progress-fill progress-red"></div></div>
+        <div class="progress-bar" aria-hidden="true">
+            <div id="progressFill" class="progress-fill progress-red"></div>
+        </div>
         <div id="progressText" class="progress-text">0% Completed</div>
     </div>
 
     <table aria-describedby="operation-fields">
-        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <thead>
+        <tr>
+            <th>Field</th>
+            <th>Value</th>
+        </tr>
+        </thead>
         <tbody id="fieldsBody"></tbody>
     </table>
 
@@ -102,11 +109,25 @@
 
     <h3 style="margin-top:14px;color:#0369a1">Private Vehicles</h3>
     <table id="privateTable" style="margin-top:8px">
-        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <thead>
+        <tr>
+            <th>Field</th>
+            <th>Value</th>
+        </tr>
+        </thead>
         <tbody>
-        <tr><td>Private Vehicles Present</td><td id="pv_present">-</td></tr>
-        <tr><td>Private Vehicles No. of Trips</td><td id="pv_trips">-</td></tr>
-        <tr><td>Private Vehicles Sludge (Ltrs)</td><td id="pv_sludge">-</td></tr>
+        <tr>
+            <td>Private Vehicles Present</td>
+            <td id="pv_present">-</td>
+        </tr>
+        <tr>
+            <td>Private Vehicles No. of Trips</td>
+            <td id="pv_trips">-</td>
+        </tr>
+        <tr>
+            <td>Private Vehicles Sludge (Ltrs)</td>
+            <td id="pv_sludge">-</td>
+        </tr>
         <tr>
             <td>Private Vehicles Sludge (Kgs)</td>
             <td id="pv_sludge_kgs">-</td>

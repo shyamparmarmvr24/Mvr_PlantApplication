@@ -20,8 +20,7 @@ import java.util.List;
 @Table(name = "Vehicle_Information_Table")
 @AllArgsConstructor
 @NoArgsConstructor
-public class VehicleInformation
-{
+public class VehicleInformation {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vehicle_seq")
     @SequenceGenerator(
@@ -37,7 +36,7 @@ public class VehicleInformation
     @JsonBackReference
     private FstpPlant plant;
 
-    @Column(nullable = false,length = 50)
+    @Column(nullable = false, length = 50)
     private String vehicleModelName;
 
     @Column(nullable = false, length = 30)
@@ -95,7 +94,7 @@ public class VehicleInformation
     private String stepneySerialNo;
 
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     //@JsonManagedReference
     @JsonIgnore
     private List<VehicleOperation> vehicleOp = new ArrayList<>();

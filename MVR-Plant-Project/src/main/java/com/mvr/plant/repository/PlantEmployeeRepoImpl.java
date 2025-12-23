@@ -1,4 +1,5 @@
 package com.mvr.plant.repository;
+
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.PlantEmployee;
 import jakarta.transaction.Transactional;
@@ -11,8 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
-{
+public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl {
     @Autowired
     private IPlantEmployeeRepo empRepo;
 
@@ -40,15 +40,13 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
     }
 
     @Override
-    public List<PlantEmployee> getAllEmployeeByPlantId(Long plantId)
-    {
+    public List<PlantEmployee> getAllEmployeeByPlantId(Long plantId) {
         return empRepo.getEmployeesByPlantId(plantId);
     }
 
 
     @Override
-    public String updateOperationById(Long plantId, Integer empId, PlantEmployee employee)
-    {
+    public String updateOperationById(Long plantId, Integer empId, PlantEmployee employee) {
         // Find existing employee for this plant + employee ID
         PlantEmployee existing = empRepo.getEmployeeByPlantIdAndEmployeeId(plantId, empId).orElseThrow(() -> new IllegalStateException("Employee Not Found For This Plant"));
 
@@ -81,28 +79,27 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl
 
     @Override
     @Transactional   // ensure both deletes are part of one transaction
-    public String deleteEmployeeByEmpId(Integer empId)
-    {
-      Optional<PlantEmployee> emp = empRepo.findById(empId);
-      if (emp.isPresent()) {
-        try {
-            // delete child operations first (fast set-based delete)
-            empOpRepo.deleteByEmployeeId(empId);
+    public String deleteEmployeeByEmpId(Integer empId) {
+        Optional<PlantEmployee> emp = empRepo.findById(empId);
+        if (emp.isPresent()) {
+            try {
+                // delete child operations first (fast set-based delete)
+                empOpRepo.deleteByEmployeeId(empId);
 
-            // now delete employee
-            empRepo.deleteById(empId);
-            return "Employee Deleted Successfully";
-        } catch (DataIntegrityViolationException ex) {
-            // in case some other FK prevents delete
-            return "Cannot delete employee " + empId + " due to related data. Remove dependent records first.";
-        } catch (Exception ex) {
-            // log and return a friendly message
-            // logger.error("deleteEmployee failed", ex);
-            return "Unexpected error while deleting employee " + empId + ".";
+                // now delete employee
+                empRepo.deleteById(empId);
+                return "Employee Deleted Successfully";
+            } catch (DataIntegrityViolationException ex) {
+                // in case some other FK prevents delete
+                return "Cannot delete employee " + empId + " due to related data. Remove dependent records first.";
+            } catch (Exception ex) {
+                // log and return a friendly message
+                // logger.error("deleteEmployee failed", ex);
+                return "Unexpected error while deleting employee " + empId + ".";
+            }
         }
-        }
-    return "Employee Not Found For Id " + empId;
-   }
+        return "Employee Not Found For Id " + empId;
+    }
 
     private void handleDriverLicence(PlantEmployee employee) {
         if (!"Driver".equalsIgnoreCase(employee.getDesignation())) {

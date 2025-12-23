@@ -16,8 +16,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PrivateVehicleDetails
-{
+public class PrivateVehicleDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "private_vehicle_seq")
     @SequenceGenerator(

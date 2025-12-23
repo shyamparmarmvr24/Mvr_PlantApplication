@@ -13,9 +13,9 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @Repository
-public class LaboratoryMgmtRepoImpl implements ILaboratoryMgmtRepo
-{
+public class LaboratoryMgmtRepoImpl implements ILaboratoryMgmtRepo {
     @Autowired
     private ILaboratoryRepo labOperationRepo;
 
@@ -25,8 +25,7 @@ public class LaboratoryMgmtRepoImpl implements ILaboratoryMgmtRepo
 
     @Override
     @Transactional
-    public Map<String, Integer> updateLabOperationById(Long plantId, LaboratoryOperation labOp)
-    {
+    public Map<String, Integer> updateLabOperationById(Long plantId, LaboratoryOperation labOp) {
         LocalDate date = labOp.getOperationDate();
         if (date == null) {
             throw new IllegalStateException("operationDate is required");
@@ -182,22 +181,19 @@ public class LaboratoryMgmtRepoImpl implements ILaboratoryMgmtRepo
     }
 
     @Override
-    public LaboratoryOperation getAllLabOperationDataByIdAndDate(Long plantId, LocalDate date)
-    {
-        return labOperationRepo.getLabOperationByPlantIdAndDate(plantId,date).orElse(null);
+    public LaboratoryOperation getAllLabOperationDataByIdAndDate(Long plantId, LocalDate date) {
+        return labOperationRepo.getLabOperationByPlantIdAndDate(plantId, date).orElse(null);
     }
 
     @Override
-    public List<LabOperationDTO> getLabOperationsByDate(LocalDate date)
-    {
+    public List<LabOperationDTO> getLabOperationsByDate(LocalDate date) {
         List<LaboratoryOperation> operations = labOperationRepo.getLabOperationsByDate(date);
 
         return operations.stream().map(op -> new LabOperationDTO(op.getPlant() != null ? op.getPlant().getPlantID() : null, op)).toList();
     }
 
     @Override
-    public List<LabOperationDTO> findByOperationDateBetween(LocalDate startDate, LocalDate endDate)
-    {
+    public List<LabOperationDTO> findByOperationDateBetween(LocalDate startDate, LocalDate endDate) {
         List<LaboratoryOperation> operations = labOperationRepo.findByOperationDateBetween(startDate, endDate);
 
         return operations.stream().map(op -> new LabOperationDTO(op.getPlant() != null ? op.getPlant().getPlantID() : null, op)).toList();

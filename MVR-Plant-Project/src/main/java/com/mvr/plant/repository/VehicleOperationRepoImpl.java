@@ -1,4 +1,5 @@
 package com.mvr.plant.repository;
+
 import com.mvr.plant.DTO.VehicleOperationBetweenDTO;
 import com.mvr.plant.DTO.VehicleOperationDTO;
 import com.mvr.plant.entity.VehicleInformation;
@@ -11,9 +12,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @Repository
-public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
-{
+public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt {
 
     @Autowired
     private IVehicleOperationRepo vehicleOpRepo;
@@ -25,14 +26,12 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
     private IPlantOperationMgmtRepo plantOp;
 
     @Override
-    public VehicleOperation getVehicleOperationByVehicleIdAndDate(Long vehicleID, LocalDate date)
-    {
-        return vehicleOpRepo.getVehicleOperationByVehicleIdAndDate(vehicleID,date).orElseThrow(()->new IllegalStateException("Vehicle Operation Not Found"));
+    public VehicleOperation getVehicleOperationByVehicleIdAndDate(Long vehicleID, LocalDate date) {
+        return vehicleOpRepo.getVehicleOperationByVehicleIdAndDate(vehicleID, date).orElseThrow(() -> new IllegalStateException("Vehicle Operation Not Found"));
     }
 
     @Override
-    public VehicleOperation updateVehicleOperation(Long plantId, Long vehicleID, VehicleOperation vehicleOp)
-    {
+    public VehicleOperation updateVehicleOperation(Long plantId, Long vehicleID, VehicleOperation vehicleOp) {
 
         LocalDate date = vehicleOp.getOperationDate();
         if (date == null) {
@@ -41,13 +40,13 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
 
         // Find existing operation for plant + date
         VehicleOperation exist = vehicleOpRepo
-                .getVehicleOperationByVehicleIdAndDate(vehicleID,date)
+                .getVehicleOperationByVehicleIdAndDate(vehicleID, date)
                 .orElse(null);
 
         // If no existing operation → CREATE NEW ONE
         if (exist == null) {
             // First fetch the parent plant
-            VehicleInformation vehicleInfo = vehicleRepo.findByPlantIdAndVehicleId(plantId,vehicleID)
+            VehicleInformation vehicleInfo = vehicleRepo.findByPlantIdAndVehicleId(plantId, vehicleID)
                     .orElseThrow(() -> new IllegalStateException("Vehicle Not Found"));
 
             // Set parent reference and save new operation (for that date)
@@ -56,8 +55,8 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
         }
 
         VehicleOperation existing = vehicleOpRepo
-                .getVehicleOperationByVehicleIdAndDate(vehicleID,date)
-                .orElseThrow(()->new IllegalStateException("Vehicle Operation Not Found For Date"));
+                .getVehicleOperationByVehicleIdAndDate(vehicleID, date)
+                .orElseThrow(() -> new IllegalStateException("Vehicle Operation Not Found For Date"));
 
         existing.setVehicleReadingAm(vehicleOp.getVehicleReadingAm());
         existing.setVehicleReadingPm(vehicleOp.getVehicleReadingPm());
@@ -79,8 +78,7 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
     }
 
     @Override
-    public List<VehicleOperationDTO> getVehicleOperationsByDate(LocalDate date)
-    {
+    public List<VehicleOperationDTO> getVehicleOperationsByDate(LocalDate date) {
         // 1) fetch operations with vehicle and plant eagerly loaded
         List<VehicleOperation> ops = vehicleOpRepo.findByOperationDateWithVehicleAndPlant(date);
 
@@ -112,8 +110,7 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt
     }
 
     @Override
-    public List<VehicleOperationBetweenDTO> getVehicleOperationsBetween(LocalDate start, LocalDate end)
-    {
+    public List<VehicleOperationBetweenDTO> getVehicleOperationsBetween(LocalDate start, LocalDate end) {
         List<VehicleOperation> ops = vehicleOpRepo.findByOperationDateBetween(start, end);
 
         List<VehicleOperationBetweenDTO> result = new ArrayList<>();

@@ -13,8 +13,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/plantemployees")
 @CrossOrigin(origins = "*")
-public class PlantEmployeeController
-{
+public class PlantEmployeeController {
     @Autowired
     private IPlantEmployeeService employeeService;
 
@@ -23,8 +22,7 @@ public class PlantEmployeeController
 
     //creating employee
     @PostMapping("/create/{plantId}")
-    public ResponseEntity<PlantEmployee> createEmployee(@PathVariable Long plantId, @RequestBody PlantEmployee employee)
-    {
+    public ResponseEntity<PlantEmployee> createEmployee(@PathVariable Long plantId, @RequestBody PlantEmployee employee) {
         PlantEmployee savedEmployee = employeeService.createEmployee(plantId, employee);
         sseController.broadcastUpdate();
         return ResponseEntity.ok(savedEmployee);
@@ -32,8 +30,7 @@ public class PlantEmployeeController
 
     //getting employee data
     @GetMapping("/plant/{plantId}")
-    public ResponseEntity<List<PlantEmployee>> getEmployeesByPlant(@PathVariable Long plantId)
-    {
+    public ResponseEntity<List<PlantEmployee>> getEmployeesByPlant(@PathVariable Long plantId) {
         List<PlantEmployee> employees = employeeService.getAllEmployeeByPlantId(plantId);
 
         return ResponseEntity.ok(employees);
@@ -48,7 +45,6 @@ public class PlantEmployeeController
         String message = employeeService.updateOperationById(plantId, employeeId, employee);
 
 
-
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
         response.put("message", message);
@@ -57,8 +53,7 @@ public class PlantEmployeeController
     }
 
     @DeleteMapping("/delete/{employeeId}")
-    public ResponseEntity<String> deleteEmployee(@PathVariable Integer employeeId)
-    {
+    public ResponseEntity<String> deleteEmployee(@PathVariable Integer employeeId) {
         String result = employeeService.deleteEmployeeByEmpId(employeeId);
         // If deletion successful
         if (result.equals("Employee Deleted Successfully")) {
@@ -67,6 +62,4 @@ public class PlantEmployeeController
         // If employee not found
         return ResponseEntity.status(404).body(result); // 404 NOT FOUND
     }
-
-
 }
