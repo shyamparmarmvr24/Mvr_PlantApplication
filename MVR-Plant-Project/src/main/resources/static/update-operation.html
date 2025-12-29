@@ -160,12 +160,12 @@
                 </td>
             </tr>
 
-            <tr>
-                <td colspan="2" class="muted-note">
-                    Note: <code>sludgeReceived</code> and <code>totalNoOfTrips</code> are computed server-side; not
-                    editable here.
-                </td>
-            </tr>
+<!--            <tr>-->
+<!--                <td colspan="2" class="muted-note">-->
+<!--                    Note: <code>sludgeReceived</code> and <code>totalNoOfTrips</code> are computed server-side; not-->
+<!--                    editable here.-->
+<!--                </td>-->
+<!--            </tr>-->
         </table>
 
         <!-- 🔽 PRIVATE VEHICLE DYNAMIC FORMS -->
@@ -594,10 +594,10 @@
 
     /* ================= 3️⃣ WATER DETAILS ================= */
   fieldsBody.innerHTML += `
-    <tr class="section-header"><td colspan="2">Water Details</td></tr>
+    <tr class="section-header"><td colspan="2">Water Tanker Details</td></tr>
 
     <tr>
-      <th>Water Used?</th>
+      <th>Water Tanker Used?</th>
       <td>
         <label class="switch">
           <input type="checkbox" id="waterUsed" ${currentOp.waterUsed ? "checked" : ""}>
@@ -607,7 +607,7 @@
     </tr>
 
     <tr>
-      <th>Water Filled Date</th>
+      <th>Water Tanker Filled Date</th>
       <td>
         <input
           type="date"
@@ -619,7 +619,7 @@
     </tr>
 
     <tr>
-      <th>Water Ltrs & Amount</th>
+      <th>Water Tanker Ltrs & Amount</th>
       <td>
         <div class="two-inline">
           <input id="waterLtrs" class="input" placeholder="Enter Volume in Ltrs"

@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>View Operation</title>
 
-    <!-- pdf libs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
     <style>
         body { font-family: "Segoe UI", sans-serif; background:#eef2f7; margin:0; display:flex; justify-content:center; }
         .card { background:#fff; width:100%; max-width:960px; margin:18px; padding:22px; border-radius:10px; box-shadow:0 10px 25px rgba(2,6,23,0.06); }
@@ -140,7 +136,6 @@
     <div class="buttons">
         <button id="updateBtn" class="btn btn-update">Update</button>
         <button id="backBtn" class="btn btn-back">Back</button>
-        <button id="pdfBtn" class="btn btn-pdf">Download PDF</button>
     </div>
 </div>
 
@@ -164,7 +159,6 @@
         const progressText = document.getElementById('progressText');
         const updateBtn = document.getElementById('updateBtn');
         const backBtn = document.getElementById('backBtn');
-        const pdfBtn = document.getElementById('pdfBtn');
 
         // fields in exact order
         const fields = [
@@ -595,25 +589,25 @@ fieldsBody.innerHTML += `
 `;
 
 fieldsBody.innerHTML += `
-<tr class="section-header"><td colspan="2">Water Details</td></tr>
+<tr class="section-header"><td colspan="2">Water Tanker Details</td></tr>
 
 <tr>
-  <th>Water Used?</th>
+  <th>Water Tanker Used?</th>
   <td>${op.waterUsed ? "Yes" : "No"}</td>
 </tr>
 
 <tr>
-  <th>Water Filled Date</th>
+  <th>Water Tanker Filled Date</th>
   <td>${op.waterUsed ? (op.waterFilledDate ?? "-") : "-"}</td>
 </tr>
 
 <tr>
-  <th>Water Filled (Liters)</th>
+  <th>Water Tanker Filled (Liters)</th>
   <td>${op.waterUsed ? (op.waterLtrs ?? "-") : "-"}</td>
 </tr>
 
 <tr>
-  <th>Total Water Amount</th>
+  <th>Total Water Tanker Amount</th>
   <td>${op.waterUsed ? (op.totalWaterAmount ?? "-") : "-"}</td>
 </tr>
 `;
@@ -820,7 +814,6 @@ for (const v of vehicles) {
                 backBtn.onclick = () => {
                     window.location.href = `index.html?date=${encodeURIComponent(date)}`;
                 };
-                pdfBtn.onclick = () => downloadPdf(op, vehicles, vehicleOpsList, plantName);
 
             } catch (e){
                 fieldsBody.innerHTML = `<tr><td colspan="2" style="color:#6b7280">Error loading operation</td></tr>`;
@@ -838,78 +831,6 @@ for (const v of vehicles) {
                 .replaceAll(">","&gt;")
                 .replaceAll("\"","&quot;")
                 .replaceAll("'","&#39;");
-        }
-
-        // PDF generation: create a compact PDF covering plant + operation + vehicles + private aggregates
-        async function downloadPdf(op, vehiclesMeta, vehicleOpsList, plantName) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ unit:"pt", format:"a4", orientation:"portrait" });
-            const pageW = doc.internal.pageSize.getWidth();
-            const margin = 40;
-            let y = margin;
-
-            doc.setFontSize(16);
-            doc.setFont("helvetica", "bold");
-            const title = (plantName ? plantName + " — " : "") + `Plant Operation (${plantID})`;
-            doc.text(title, pageW/2, y, { align: "center" });
-            y += 22;
-            doc.setFontSize(11);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Operation Date: ${op.operationDate ?? date}`, pageW - margin, margin+2, { align:"right" });
-            y += 8;
-
-            // Build rows for autoTable
-            const rows = [];
-            function addRow(label, value){ rows.push([label, String(value ?? "-")]); }
-
-            // Plant fields order (same as fields array)
-            for (const f of fields) {
-                addRow(labelMap[f] || f, fmt(f, op[f]));
-            }
-
-            // Private aggregates
-            addRow("Private Vehicles Present", op.privateVehicle ? "Yes" : "No");
-            addRow("Private - No. of Trips", op.privateVehicle ? (op.noOfTripsPrivateVehicle ?? "-") : "0");
-            addRow("Private - Sludge (Ltrs)", op.privateVehicle ? (op.sludgeCollectPrivateVehicle ?? "-") : "0");
-
-            // Vehicle sections (list each vehicle and its op)
-            for (let i=0;i<vehiclesMeta.length;i++){
-                const v = vehiclesMeta[i];
-                // header row for vehicle
-                rows.push([`Vehicle: ${v.vehicleNumber} (${v.vehicleModelName || ""})`, ""]);
-                // try load its op from vehicleOpsList by index if available
-                let vo = {};
-                // attempt match by vehicleID if vehicleOpsList elements had vehicle id? We didn't store ids there.
-                // We'll fetch again quickly to be robust
-                try {
-                    const r = await fetch(`/api/vehicle-operations/${v.vehicleID}?date=${encodeURIComponent(date)}`);
-                    const t = await r.text();
-                    vo = (t && t.trim()) ? JSON.parse(t) : {};
-                } catch(e){ vo = {}; }
-                addRow("Vehicle Reading AM (Km)", vo.vehicleReadingAm ?? "-");
-                addRow("Vehicle Reading PM (Km)", vo.vehicleReadingPm ?? "-");
-                addRow("Vehicle Fuel Level (0-6 %)", vo.vehicleFuelLevel ?? "-");
-                addRow("Last Fuel Filled?", vo.lastFuelFilled ? "Yes" : "No");
-                addRow("Last Fuel Filled Date", vo.lastFuelFilled ? (vo.lastFuelFilledDate ?? "-") : "-");
-                addRow("No. of Trips", vo.noOfTrips ?? "-");
-                addRow("Sludge Collect (Ltrs)", vo.sludgeCollect ?? "-");
-                addRow("Sludge Collect (Kgs)", vo.sludgeCollectKgs ?? "-");
-            }
-
-            doc.autoTable({
-                startY: y,
-                head: [["Field","Value"]],
-                body: rows,
-                styles: { fontSize: 10, cellPadding: 6 },
-                headStyles: { fillColor: [3,105,161], textColor: [255,255,255], fontStyle: "bold" },
-                columnStyles: { 0: { cellWidth: 220 }, 1: { cellWidth: pageW - margin*2 - 220 } },
-                theme: "grid",
-                didDrawPage: function (data) {
-                    // nothing extra
-                }
-            });
-
-            doc.save(`Plant_${plantName || plantID}_Operation_${date}.pdf`);
         }
 
         // Simple SSE refresh (throttled)
