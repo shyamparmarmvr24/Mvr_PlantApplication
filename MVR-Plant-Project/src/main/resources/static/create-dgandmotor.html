@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DG & Motor Details</title>
+
+    <style>
+        :root{
+          --blue:#0369a1;
+          --dark:#0f172a;
+          --bg:#f5f7fa;
+          --card:#ffffff;
+          --border:#d1d5db;
+          --green:#059669;
+          --gray:#6b7280;
+        }
+
+        *{box-sizing:border-box}
+        body{
+          margin:0;
+          background:var(--bg);
+          font-family:"Segoe UI",sans-serif;
+          display:flex;
+          justify-content:center;
+        }
+
+        .card{
+          width:100%;
+          max-width:900px;
+          background:var(--card);
+          margin:24px;
+          padding:24px;
+          border-radius:12px;
+          box-shadow:0 10px 25px rgba(2,6,23,.08);
+        }
+
+        h2{
+          text-align:center;
+          color:var(--blue);
+          margin-bottom:14px;
+        }
+
+        table{
+          width:100%;
+          border-collapse:collapse;
+        }
+
+        th,td{
+          border:1px solid var(--border);
+          padding:12px;
+          font-size:14px;
+        }
+
+        th{
+          width:35%;
+          background:#e0f2fe;
+          text-align:left;
+          color:#075985;
+        }
+
+        input{
+          width:100%;
+          padding:8px 10px;
+          border-radius:6px;
+          border:1px solid var(--border);
+          font-size:14px;
+        }
+
+        .buttons{
+          margin-top:18px;
+          display:flex;
+          justify-content:space-between;
+        }
+
+        button{
+          padding:10px 18px;
+          border:none;
+          border-radius:6px;
+          font-weight:700;
+          cursor:pointer;
+          color:#fff;
+        }
+
+        .btn-next{background:var(--blue)}
+        .btn-back{background:var(--gray)}
+        .btn-submit{background:var(--green)}
+
+        .hidden{display:none}
+
+        @media(max-width:600px){
+          th{width:45%}
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <!-- ================= STEP 1 : DG DETAILS ================= -->
+    <div id="dgForm">
+        <h2>DG Details</h2>
+
+        <table>
+            <tr>
+                <th>Plant ID <span style="color:red">*</span></th>
+                <td>
+                    <input type="number" id="plantId" min="1" required placeholder="Enter Plant ID For Update Or Create">
+                </td>
+            </tr>
+            <tr>
+                <th>DG Company Name</th>
+                <td><input id="dgCompanyName"></td>
+            </tr>
+            <tr>
+                <th>DG Purchase Date</th>
+                <td><input type="date" id="dgPurchaseDate"></td>
+            </tr>
+            <tr>
+                <th>DG Serial No</th>
+                <td><input id="dgSerialNo"></td>
+            </tr>
+            <tr>
+                <th>DG Frame No</th>
+                <td><input id="dgFrameNo"></td>
+            </tr>
+            <tr>
+                <th>Battery Make</th>
+                <td><input id="dgBatteryMake"></td>
+            </tr>
+            <tr>
+                <th>Battery Purchase Date</th>
+                <td><input type="date" id="dgBatteryPurchaseDate"></td>
+            </tr>
+            <tr>
+                <th>Battery No</th>
+                <td><input id="dgBatteryNo"></td>
+            </tr>
+            <tr>
+                <th>Battery Expiry Date</th>
+                <td><input type="date" id="dgBatteryExpiryDate"></td>
+            </tr>
+        </table>
+
+        <div class="buttons">
+            <button class="btn-back" onclick="goIndex()">Back</button>
+
+            <button class="btn-back" id="deleteDgBtn"
+                    style="display:none;background:#dc2626"
+                    onclick="deleteDg()">
+                🗑 Delete DG
+            </button>
+
+            <button class="btn-next" onclick="nextStep()">Next</button>
+        </div>
+
+    </div>
+
+    <!-- ================= STEP 2 : MOTOR DETAILS ================= -->
+    <div id="motorForm" class="hidden">
+        <h2>Motor Details</h2>
+
+        <div id="motorList"></div>
+
+        <button class="btn-next" style="margin-top:12px" onclick="addMotorRow()">
+            ➕ Add Motor
+        </button>
+
+        <div class="buttons">
+            <button class="btn-back" onclick="prevStep()">Back</button>
+            <button class="btn-submit" onclick="submitAll()">Submit</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    function showDeleteDg(show) {
+  document.getElementById("deleteDgBtn").style.display =
+    show ? "inline-block" : "none";
+}
+
+    // 🔒 Disable future dates for DG & Battery purchase dates
+    (function disableFutureDates() {
+      const today = new Date().toISOString().split("T")[0];
+
+      const dgPurchase = document.getElementById("dgPurchaseDate");
+      const batteryPurchase = document.getElementById("dgBatteryPurchaseDate");
+
+      if (dgPurchase) dgPurchase.max = today;
+      if (batteryPurchase) batteryPurchase.max = today;
+    })();
+
+
+    let dgId = null;
+
+    async function loadPlantData(plantId) {
+
+  showDeleteDg(false); // default
+
+  if (!plantId) {
+    dgId = null;
+
+    dgCompanyName.value = "";
+    dgPurchaseDate.value = "";
+    dgSerialNo.value = "";
+    dgFrameNo.value = "";
+    dgBatteryMake.value = "";
+    dgBatteryPurchaseDate.value = "";
+    dgBatteryNo.value = "";
+    dgBatteryExpiryDate.value = "";
+
+    document.getElementById("motorList").innerHTML = "";
+    addMotorRow();
+    return;
+  }
+
+  /* ========= FETCH DG ========= */
+  try {
+    const dgRes = await fetch(`/api/dg-details/plant/${plantId}`);
+
+    if (dgRes.status === 200) {
+      const dg = await dgRes.json();
+
+      dgId = dg.dgId; // ✅ IMPORTANT
+
+      dgCompanyName.value = dg.dgCompanyName ?? "";
+      dgPurchaseDate.value = dg.dgPurchaseDate?.split("T")[0] ?? "";
+      dgSerialNo.value = dg.dgSerialNo ?? "";
+      dgFrameNo.value = dg.dgFrameNo ?? "";
+      dgBatteryMake.value = dg.dgBatteryMake ?? "";
+      dgBatteryPurchaseDate.value = dg.dgBatteryPurchaseDate?.split("T")[0] ?? "";
+      dgBatteryNo.value = dg.dgBatteryNo ?? "";
+      dgBatteryExpiryDate.value = dg.dgBatteryExpiryDate?.split("T")[0] ?? "";
+
+      showDeleteDg(true); // ✅ SHOW DELETE
+    }
+    else {
+      dgId = null;
+      showDeleteDg(false);
+    }
+  } catch (e) {
+    console.error("DG fetch failed", e);
+  }
+
+  /* ========= FETCH MOTORS ========= */
+  try {
+    const mRes = await fetch(`/api/motor-details/plant/${plantId}`);
+    if (mRes.ok) {
+      const motors = await mRes.json();
+      document.getElementById("motorList").innerHTML = "";
+
+      if (Array.isArray(motors) && motors.length > 0) {
+        motors.forEach(m => addMotorRow(m));
+      } else {
+        addMotorRow();
+      }
+    }
+  } catch {}
+}
+
+
+const plantInput = document.getElementById("plantId");
+
+// when user types and leaves field
+plantInput.addEventListener("change", e => {
+  loadPlantData(e.target.value);
+});
+
+// when user presses ENTER
+plantInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    loadPlantData(e.target.value);
+    document.getElementById("dgCompanyName").focus();
+  }
+});
+
+
+    function nextStep(){
+      document.getElementById("dgForm").classList.add("hidden");
+      document.getElementById("motorForm").classList.remove("hidden");
+    }
+
+    function prevStep(){
+      document.getElementById("motorForm").classList.add("hidden");
+      document.getElementById("dgForm").classList.remove("hidden");
+    }
+
+    function goIndex(){
+      window.location.href="index.html";
+    }
+
+
+  let motorCounter = 0;
+
+function addMotorRow(motor = {}) {
+  motorCounter++;
+
+  const div = document.createElement("div");
+  div.className = "card";
+  div.style.marginTop = "14px";
+  div.dataset.motorId = motor.motorId || "";
+
+  div.innerHTML = `
+    <table>
+      <tr>
+        <th>Motor Model Name</th>
+        <td><input value="${motor.motorModelName || ""}"></td>
+      </tr>
+      <tr>
+        <th>Motor Type</th>
+        <td><input value="${motor.motorType || ""}"></td>
+      </tr>
+      <tr>
+        <th>Motor Serial No</th>
+        <td><input value="${motor.motorSerialNo || ""}"></td>
+      </tr>
+      <tr>
+        <th>Motor Make</th>
+        <td><input value="${motor.motorMake || ""}"></td>
+      </tr>
+    </table>
+
+    <button class="btn-back" style="margin-top:8px"
+      onclick="removeMotor(this)">
+      ❌ Remove Motor
+    </button>
+
+  `;
+
+  document.getElementById("motorList").appendChild(div);
+}
+
+
+
+async function submitAll() {
+
+  const plantId = document.getElementById("plantId").value;
+
+  if (!plantId) {
+    alert("Plant ID is required");
+    prevStep();
+    return;
+  }
+
+  /* ================= DG PAYLOAD ================= */
+  const dgPayload = {
+  dgCompanyName: dgCompanyName.value,
+  dgPurchaseDate: dgPurchaseDate.value || null,
+  dgSerialNo: dgSerialNo.value,
+  dgFrameNo: dgFrameNo.value,
+  dgBatteryMake: dgBatteryMake.value,
+  dgBatteryPurchaseDate: dgBatteryPurchaseDate.value || null,
+  dgBatteryNo: dgBatteryNo.value,
+  dgBatteryExpiryDate: dgBatteryExpiryDate.value || null
+};
+
+
+  try {
+    /* ================= SAVE / UPDATE DG ================= */
+    const dgUrl = dgId
+      ? `/api/dg-details/${dgId}`                 // UPDATE
+      : `/api/dg-details/plant/${plantId}`;      // CREATE
+
+    const dgMethod = dgId ? "PUT" : "POST";
+
+    const dgResp = await fetch(dgUrl, {
+      method: dgMethod,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dgPayload)
+    });
+
+    if (!dgResp.ok) {
+      alert("Failed to save DG details");
+      return;
+    }
+
+    /* ================= SAVE / UPDATE MOTORS ================= */
+    const motorCards = document.querySelectorAll("#motorList > div");
+
+    for (const card of motorCards) {
+
+      const inputs = card.querySelectorAll("input");
+      const motorId = card.dataset.motorId; // empty for new motor
+
+      const motorPayload = {
+        motorModelName: inputs[0].value,
+        motorType: inputs[1].value,
+        motorSerialNo: inputs[2].value,
+        motorMake: inputs[3].value
+      };
+
+      const motorUrl = motorId
+        ? `/api/motor-details/${motorId}`          // UPDATE
+        : `/api/motor-details/plant/${plantId}`;  // CREATE
+
+      const motorMethod = motorId ? "PUT" : "POST";
+
+      const motorResp = await fetch(motorUrl, {
+        method: motorMethod,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(motorPayload)
+      });
+
+      if (!motorResp.ok) {
+        alert("Failed to save motor details");
+        return;
+      }
+    }
+
+        /* ================= SUCCESS ================= */
+        alert("DG & Motor details saved successfully ✅");
+        window.location.href = "index.html";
+
+      } catch (err) {
+        console.error(err);
+        alert("Server error while saving data");
+      }
+    }
+
+    document.addEventListener("keydown", function (e) {
+
+      if (e.key !== "Enter") return;
+
+      const active = document.activeElement;
+
+      if (active && active.id === "plantId") {
+        e.preventDefault();
+        loadPlantData(active.value);
+        document.getElementById("dgCompanyName").focus();
+        return;
+      }
+
+      const inputs = Array.from(
+        document.querySelectorAll("input")
+      ).filter(el => !el.disabled && el.type !== "hidden");
+
+      const index = inputs.indexOf(active);
+      if (index === -1) return;
+
+      e.preventDefault();
+
+      if (index === inputs.length - 1) {
+        submitAll();
+      } else {
+        inputs[index + 1].focus();
+      }
+    });
+
+
+    async function removeMotor(btn) {
+
+          const card = btn.parentElement;
+          const motorId = card.dataset.motorId;
+
+          // If motor already exists → delete from DB
+          if (motorId) {
+            if (!confirm("Delete this motor permanently?")) return;
+
+            try {
+              const res = await fetch(`/api/motor-details/${motorId}`, {
+                method: "DELETE"
+              });
+
+              if (!res.ok) {
+                alert("Failed to delete motor from server");
+                return;
+              }
+            } catch (e) {
+              alert("Server error while deleting motor");
+              return;
+            }
+          }
+
+          // Remove UI card
+          card.remove();
+     }
+
+
+    async function deleteDg() {
+
+      if (!dgId) return;
+
+      if (!confirm("Delete DG details permanently?")) return;
+
+      try {
+        const res = await fetch(`/api/dg-details/${dgId}`, {
+          method: "DELETE"
+        });
+
+        if (!res.ok) {
+          alert("Failed to delete DG");
+          return;
+        }
+
+        // Reset UI
+        dgId = null;
+        document.getElementById("plantId").value = "";
+        loadPlantData("");
+
+        alert("DG deleted successfully");
+      } catch (e) {
+        alert("Server error while deleting DG");
+      }
+    }
+
+
+    // Show 1 empty motor form on page load
+    addMotorRow();
+
+
+</script>
+
+</body>
+</html>

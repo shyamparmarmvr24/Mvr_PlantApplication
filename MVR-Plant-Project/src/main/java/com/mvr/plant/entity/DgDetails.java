@@ -26,7 +26,7 @@ public class DgDetails
             allocationSize = 1,
             initialValue = 1000
     )
-    private Long DgId;
+    private Long dgId;
 
     @ManyToOne
     @JoinColumn(name = "PlantID", referencedColumnName = "PlantID")

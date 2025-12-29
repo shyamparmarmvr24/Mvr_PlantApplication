@@ -19,6 +19,11 @@ public class DgDetailsRepoImpl implements IDgDetailsRepoMgmt
     @Override
     public DgDetails createDgDetails(Long plantId, DgDetails dg)
     {
+        // 🔥 PREVENT DUPLICATE DG FOR SAME PLANT
+        dgRepo.getDgDetailsByPlantId(plantId).ifPresent(existing -> {
+            throw new IllegalStateException("DG already exists for this plant");
+        });
+
         // Fetch Plant
         FstpPlant plant = plantRepo.findPlantByPlantID(plantId).orElseThrow(() -> new RuntimeException("Plant not found: " + plantId));
 
@@ -59,9 +64,9 @@ public class DgDetailsRepoImpl implements IDgDetailsRepoMgmt
     }
 
     @Override
-    public DgDetails getDgDetailsByPlantId(Long plantId)
+    public Optional<DgDetails> getDgDetailsByPlantId(Long plantId)
     {
-        return dgRepo.getDgDetailsByPlantId(plantId).orElseThrow(()->new IllegalStateException("Dg Not Found For That Plant"));
+        return dgRepo.getDgDetailsByPlantId(plantId);
     }
 
 }

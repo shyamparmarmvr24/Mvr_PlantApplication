@@ -30,12 +30,12 @@ public class DgDetailsController
         return ResponseEntity.ok(updated);
     }
 
-    // GET /api/dg-details/plant/{plantId}
     @GetMapping("/plant/{plantId}")
-    public ResponseEntity<DgDetails> getDgDetailsByPlantId(@PathVariable Long plantId)
-    {
-        DgDetails dgDetails = dgService.getDgDetailsByPlantId(plantId);
-        return ResponseEntity.ok(dgDetails);
+    public ResponseEntity<DgDetails> getDgDetailsByPlantId(@PathVariable Long plantId) {
+
+        return dgService.getDgDetailsByPlantId(plantId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // DELETE /api/dg-details/{dgId}

@@ -5,6 +5,8 @@ import com.mvr.plant.repository.IDgDetailsRepoMgmt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class DgDetailsServiceImpl implements IDgDetailsService
 {
@@ -28,7 +30,7 @@ public class DgDetailsServiceImpl implements IDgDetailsService
     }
 
     @Override
-    public DgDetails getDgDetailsByPlantId(Long plantId) {
+    public Optional<DgDetails> getDgDetailsByPlantId(Long plantId) {
         return dgRepo.getDgDetailsByPlantId(plantId);
     }
 }
