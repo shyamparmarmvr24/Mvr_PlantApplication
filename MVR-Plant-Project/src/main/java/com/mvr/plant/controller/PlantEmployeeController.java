@@ -1,5 +1,6 @@
 package com.mvr.plant.controller;
 
+import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.PlantEmployee;
 import com.mvr.plant.service.IPlantEmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,9 @@ public class PlantEmployeeController {
     @PostMapping("/create/{plantId}")
     public ResponseEntity<PlantEmployee> createEmployee(@PathVariable Long plantId, @RequestBody PlantEmployee employee) {
         PlantEmployee savedEmployee = employeeService.createEmployee(plantId, employee);
-        sseController.broadcastUpdate();
+        sseController.sendEvent(
+                new SseEvent("EMPLOYEE", "CREATE", plantId, savedEmployee.getEmployeeId().longValue())
+        );
         return ResponseEntity.ok(savedEmployee);
     }
 
@@ -48,7 +51,9 @@ public class PlantEmployeeController {
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
         response.put("message", message);
-        sseController.broadcastUpdate();
+        sseController.sendEvent(
+                new SseEvent("EMPLOYEE", "UPDATE", plantId, employeeId.longValue())
+        );
         return ResponseEntity.ok(response);
     }
 
@@ -57,6 +62,9 @@ public class PlantEmployeeController {
         String result = employeeService.deleteEmployeeByEmpId(employeeId);
         // If deletion successful
         if (result.equals("Employee Deleted Successfully")) {
+            sseController.sendEvent(
+                    new SseEvent("EMPLOYEE", "DELETE", null, employeeId.longValue())
+            );
             return ResponseEntity.ok(result); // 200 OK
         }
         // If employee not found

@@ -202,6 +202,53 @@
     const url = new URLSearchParams(window.location.search);
     const plantID = url.get("plantID");
     const date = url.get("date");
+    let sseConnection = null;
+
+
+function startSSE() {
+    try {
+        if (sseConnection) return;
+
+        sseConnection = new EventSource("/api/events/updates");
+
+        sseConnection.addEventListener("DATA_UPDATE", async (e) => {
+            let data;
+            try {
+                data = JSON.parse(e.data);
+            } catch {
+                return;
+            }
+
+            // 🔁 Attendance updated elsewhere
+            if (
+                (data.entity === "EMP_OP" || data.entity === "EMPLOYEE") &&
+                String(data.plantId) === String(plantID)
+            ) {
+                // reload ONLY existing attendance (safe)
+                await loadExistingAttendance();
+            }
+        });
+
+        sseConnection.onerror = () => {
+            sseConnection.close();
+            sseConnection = null;
+            setTimeout(startSSE, 2000);
+        };
+
+    } catch (err) {
+        console.warn("SSE failed", err);
+    }
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && sseConnection) {
+        sseConnection.close();
+        sseConnection = null;
+    } else if (!document.hidden) {
+        startSSE();
+    }
+});
+
 
     async function loadPlantInfo() {
     let plantName = "-";
@@ -333,6 +380,8 @@
 
     loadPlantInfo();
     loadEmployees();
+    startSSE();
+
 
 </script>
 

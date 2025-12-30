@@ -1,5 +1,6 @@
 package com.mvr.plant.controller;
 
+import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.DTO.VehicleOperationBetweenDTO;
 import com.mvr.plant.DTO.VehicleOperationDTO;
 import com.mvr.plant.entity.VehicleInformation;
@@ -62,7 +63,9 @@ public class VehicleOperationController {
         VehicleOperation response = vehicleOperationService.updateVehicleOperation(plantId, vehicleId, vehicleOp);
 
         // SSE broadcast event
-        sseController.broadcastUpdate();
+        sseController.sendEvent(
+                new SseEvent("VEHICLE_OP", "UPDATE", plantId, vehicleId)
+        );
 
         return ResponseEntity.ok(response);
     }

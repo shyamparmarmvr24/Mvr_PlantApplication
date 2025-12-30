@@ -164,6 +164,7 @@
 
 <script>
     const plantID = new URLSearchParams(window.location.search).get("plantID");
+    let sseConnection = null;
 
     document.getElementById("addEmployeeBtn").href =
         `create-employee.html?plantID=${plantID}`;
@@ -236,7 +237,52 @@
         });
     }
 
+    function startSSE() {
+    try {
+        if (sseConnection) return;
+
+        sseConnection = new EventSource("/api/events/updates");
+
+        sseConnection.addEventListener("DATA_UPDATE", async (e) => {
+            let data;
+            try {
+                data = JSON.parse(e.data);
+            } catch {
+                return;
+            }
+
+            // 🔁 Employee updated elsewhere
+            if (
+                data.entity === "EMPLOYEE" &&
+                String(data.plantId) === String(plantID)
+            ) {
+                loadEmployees(); // safe reload
+            }
+        });
+
+        sseConnection.onerror = () => {
+            sseConnection.close();
+            sseConnection = null;
+            setTimeout(startSSE, 2000);
+        };
+
+    } catch (err) {
+        console.warn("SSE failed", err);
+    }
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && sseConnection) {
+        sseConnection.close();
+        sseConnection = null;
+    } else if (!document.hidden) {
+        startSSE();
+    }
+});
+
+
     loadEmployees();
+    startSSE();
 </script>
 
 </body>

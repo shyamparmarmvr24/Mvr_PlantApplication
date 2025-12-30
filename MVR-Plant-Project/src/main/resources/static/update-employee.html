@@ -187,6 +187,10 @@
     const plantID = params.get("plantID");
     const empID = params.get("employeeId");
 
+    let sseConnection = null;
+    let isDirty = false;   // track user edits
+
+
     const today = new Date().toISOString().split("T")[0];
     ["dateOfBirth","dateOfJoining","licenceIssueDate"]
     .forEach(id => document.getElementById(id)?.setAttribute("max", today));
@@ -228,6 +232,85 @@
         toggleDriver();
     })();
 
+    document.querySelectorAll("input, select").forEach(el => {
+    el.addEventListener("change", () => isDirty = true);
+});
+
+
+function startSSE() {
+    try {
+        if (sseConnection) return;
+
+        sseConnection = new EventSource("/api/events/updates");
+
+        sseConnection.addEventListener("DATA_UPDATE", async (e) => {
+            let data;
+            try {
+                data = JSON.parse(e.data);
+            } catch {
+                return;
+            }
+
+            // 👇 Employee updated elsewhere
+            if (
+                data.entity === "EMPLOYEE" &&
+                String(data.plantId) === String(plantID) &&
+                String(data.employeeId) === String(empID)
+            ) {
+                if (isDirty) {
+                    alert("This employee was updated by another user. Please refresh.");
+                } else {
+                    reloadEmployee();
+                }
+            }
+        });
+
+        sseConnection.onerror = () => {
+            sseConnection.close();
+            sseConnection = null;
+            setTimeout(startSSE, 2000);
+        };
+
+    } catch (err) {
+        console.warn("SSE failed", err);
+    }
+}
+
+async function reloadEmployee() {
+    const res = await fetch(`/api/plantemployees/plant/${plantID}`);
+    const list = await res.json();
+    const emp = list.find(e => String(e.employeeId) === empID);
+    if (!emp) {
+        alert("Employee was deleted");
+        history.back();
+        return;
+    }
+
+    employeeName.value = emp.employeeName;
+    designation.value = emp.designation;
+    mobileNo.value = emp.mobileNo;
+    alternateMobNo.value = emp.alternateMobNo ?? "";
+    address.value = emp.address;
+    dateOfBirth.value = emp.dateOfBirth ?? "";
+    dateOfJoining.value = emp.dateOfJoining ?? "";
+    licenceType.value = emp.licenceType ?? "";
+    licenceNumber.value = emp.licenceNumber ?? "";
+    licenceIssueDate.value = emp.licenceIssueDate ?? "";
+    licenceExpiryDate.value = emp.licenceExpiryDate ?? "";
+
+    toggleDriver();
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && sseConnection) {
+        sseConnection.close();
+        sseConnection = null;
+    } else if (!document.hidden) {
+        startSSE();
+    }
+});
+
+
     async function updateEmployee() {
 
         if (!/^\d{10}$/.test(mobileNo.value)) {
@@ -268,6 +351,9 @@
         alert("Employee updated successfully");
         location.href = `view-employees.html?plantID=${plantID}`;
     }
+
+    startSSE();
+
 </script>
 
 </body>
