@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <link rel="icon" href="mvrlogo.png">
     <title>Update Plant Operation</title>
     <style>
         :root{
@@ -160,12 +161,12 @@
                 </td>
             </tr>
 
-<!--            <tr>-->
-<!--                <td colspan="2" class="muted-note">-->
-<!--                    Note: <code>sludgeReceived</code> and <code>totalNoOfTrips</code> are computed server-side; not-->
-<!--                    editable here.-->
-<!--                </td>-->
-<!--            </tr>-->
+            <!--            <tr>-->
+            <!--                <td colspan="2" class="muted-note">-->
+            <!--                    Note: <code>sludgeReceived</code> and <code>totalNoOfTrips</code> are computed server-side; not-->
+            <!--                    editable here.-->
+            <!--                </td>-->
+            <!--            </tr>-->
         </table>
 
         <!-- 🔽 PRIVATE VEHICLE DYNAMIC FORMS -->
@@ -225,6 +226,7 @@
 
       let sseConnection = null;
       let isDirty = false;
+      let isSaving = false;
 
 
       const endpoints = {
@@ -1180,6 +1182,14 @@ tripsInput.addEventListener("input", () => {
 
       /* ================== SAVE / SUBMIT ================== */
       async function onSubmit(){
+
+       isSaving = true;
+
+        if (sseConnection) {
+          sseConnection.close();
+          sseConnection = null;
+        }
+
         submitBtn.disabled = true;
         submitBtn.textContent = "Submitting...";
 
@@ -1651,6 +1661,10 @@ function startSSE() {
     sseConnection = new EventSource("/api/events/updates");
 
     sseConnection.addEventListener("DATA_UPDATE", async (e) => {
+
+      // 🔒 DO NOTHING while saving
+      if (isSaving) return;
+
       let data;
       try {
         data = JSON.parse(e.data);
@@ -1658,21 +1672,22 @@ function startSSE() {
         return;
       }
 
-      // 🔁 Plant or Vehicle ops updated elsewhere
       if (
-        (data.entity === "PLANT_OP" || data.entity === "VEHICLE_OP" || data.entity === "PRIVATE_VEHICLE") &&
+        (data.entity === "PLANT_OP" ||
+         data.entity === "VEHICLE_OP" ||
+         data.entity === "PRIVATE_VEHICLE") &&
         String(data.plantId) === String(plantID)
       ) {
         if (isDirty) {
           alert("This operation was updated by another user. Please refresh.");
         } else {
-          // SAFE reload
           await loadPlantOperation();
           await loadVehiclesAndOps();
           await loadPrivateVehicles();
         }
       }
     });
+
 
     sseConnection.onerror = () => {
       sseConnection.close();
@@ -1706,6 +1721,8 @@ document.addEventListener("visibilitychange", () => {
       bindStatusWatcher();
       setStatusBadge(computeCompleteness());
       document.getElementById("privateTripsWarning").style.display = "none";
+
+      startSSE();   // ✅ ADD THIS LINE
     })();
 
     function updatePrivateSludgeTotals() {
@@ -1881,7 +1898,7 @@ function updateVehicleTripSludgeTotals(vehicleId) {
 }
 
     })();
-    startSSE();
+
 </script>
 </body>
 </html>

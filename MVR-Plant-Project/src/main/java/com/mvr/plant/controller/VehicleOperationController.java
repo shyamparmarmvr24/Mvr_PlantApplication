@@ -32,6 +32,9 @@ public class VehicleOperationController {
     @GetMapping("/plant/{plantId}/vehicles")
     public ResponseEntity<List<VehicleInformation>> getVehiclesByPlant(@PathVariable Long plantId) {
         List<VehicleInformation> list = vehicleRepo.getVehicleInformationByPlantId(plantId);
+        if (list == null) {
+            return ResponseEntity.ok().build(); // empty 200
+        }
         return ResponseEntity.ok(list);
     }
 

@@ -27,7 +27,7 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt {
 
     @Override
     public VehicleOperation getVehicleOperationByVehicleIdAndDate(Long vehicleID, LocalDate date) {
-        return vehicleOpRepo.getVehicleOperationByVehicleIdAndDate(vehicleID, date).orElseThrow(() -> new IllegalStateException("Vehicle Operation Not Found"));
+        return vehicleOpRepo.getVehicleOperationByVehicleIdAndDate(vehicleID, date).orElse(null);
     }
 
     @Override

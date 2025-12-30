@@ -49,6 +49,10 @@ public class LabOperationController {
     ) {
         LocalDate localDate = LocalDate.parse(date);
         LaboratoryOperation labOp = labService.getAllLabOperationDataByIdAndDate(plantId, localDate);
+        if (labOp == null) {
+            return ResponseEntity.ok().build(); // ✅ 200 with empty body
+        }
+
         return ResponseEntity.ok(labOp);
     }
 

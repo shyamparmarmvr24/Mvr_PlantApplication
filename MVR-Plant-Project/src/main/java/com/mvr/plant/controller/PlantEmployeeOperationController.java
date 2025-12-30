@@ -39,6 +39,9 @@ public class PlantEmployeeOperationController {
         PlantEmployeeOperation op = employeeOpService
                 .getEmployeeOperationByEmpIdAndDate(employeeId, localDate);
 
+        if (op == null) {
+            return ResponseEntity.ok().build();
+        }
         return ResponseEntity.ok(op);
     }
 

@@ -49,6 +49,10 @@ public class PlantOperationController {
     ) {
         LocalDate localDate = LocalDate.parse(date);
         PlantOperation op = plantOpService.getAllOperationDataByIdAndDate(plantId, localDate);
+        if (op == null) {
+            return ResponseEntity.ok().build(); // ✅ NO DATA ≠ ERROR
+        }
+
         return ResponseEntity.ok(op);
     }
 

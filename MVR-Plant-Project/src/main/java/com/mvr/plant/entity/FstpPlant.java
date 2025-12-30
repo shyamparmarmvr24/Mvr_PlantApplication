@@ -62,6 +62,12 @@ public class FstpPlant {
     @Column(name = "PpMeterSerialNo",length = 50)
     private String ppMeterSerialNo;
 
+    @Column(name = "SanctionLoad")
+    private Integer sanctionLoad;
+
+    @Column(name = "MultiplicationFactor")
+    private Integer multiplicationFactor;
+
     @Column(name = "InternetDateOfCompletion")
     private LocalDate internetDateOfCompletion;
 

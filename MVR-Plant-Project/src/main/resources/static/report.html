@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <link rel="icon" href="mvrlogo.png">
     <title>MVR TECHNOLOGY — Daily Plant Operations Report</title>
 
     <style>
@@ -343,8 +344,8 @@
     (function() {
         'use strict';
 
-        const API_BASE = 'http://172.18.99.96:3050/api/operations/date?date=';
-        const PLANT_API = 'http://172.18.99.96:3050/api/plants';
+        const API_BASE = 'http://172.18.99.96:8081/api/operations/date?date=';
+        const PLANT_API = 'http://172.18.99.96:8081/api/plants';
 
         const dateInput = document.getElementById('dateInput');
         const loadBtn = document.getElementById('loadBtn');

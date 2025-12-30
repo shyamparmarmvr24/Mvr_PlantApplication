@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="icon" href="mvrlogo.png">
     <title>Create Plant & Vehicles - MVR TECHNOLOGY</title>
 
     <style>
@@ -211,6 +212,19 @@
                 <div class="form-group">
                     <label for="ppMeterSerialNo">PP Meter Serial No</label>
                     <input type="text" id="ppMeterSerialNo" maxlength="50"/>
+                </div>
+            </div>
+
+            <!-- Sanction Load & Multiplication Factor -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="sanctionLoad">Sanction Load</label>
+                    <input type="number" id="sanctionLoad" min="0"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="multiplicationFactor">Multiplication Factor</label>
+                    <input type="number" id="multiplicationFactor" min="0"/>
                 </div>
             </div>
 
@@ -705,6 +719,9 @@
 
 
             document.getElementById("ppMeterSerialNo").value = plantData.ppMeterSerialNo || "";
+
+            document.getElementById("sanctionLoad").value = plantData.sanctionLoad ?? "";
+            document.getElementById("multiplicationFactor").value = plantData.multiplicationFactor ?? "";
 
             document.getElementById("solarMeterSerialNo").value = plantData.solarMeterSerialNo || "";
 
@@ -1220,7 +1237,17 @@
             cteIssuedDate: document.getElementById("cteIssuedDate").value || null,
 
             ppMeterSerialNo: document.getElementById("ppMeterSerialNo").value.trim() || null,
+
+            sanctionLoad: document.getElementById("sanctionLoad").value
+                ? Number(document.getElementById("sanctionLoad").value)
+                : null,
+
+            multiplicationFactor: document.getElementById("multiplicationFactor").value
+                ? Number(document.getElementById("multiplicationFactor").value)
+                : null,
+
             solarMeterSerialNo: document.getElementById("solarMeterSerialNo").value.trim() || null
+
         };
     }
 

@@ -66,7 +66,7 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
 
     @Override
     public PlantEmployeeOperation getEmployeeOperationByEmpIdAndDate(Integer empId, LocalDate date) {
-        return empOpRepo.getEmployeeOperationByEmployeeIdAndDate(empId, date).orElseThrow(() -> new IllegalStateException("Employee Operation Not Found For Date"));
+        return empOpRepo.getEmployeeOperationByEmployeeIdAndDate(empId, date).orElse(null);
     }
 
     @Override
