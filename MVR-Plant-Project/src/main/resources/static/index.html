@@ -224,11 +224,11 @@
         <button class="addBtn" onclick="window.location.href='create-plant.html'" style="background:#16a34a;">
             Add Plant
         </button>
-<!--        <button class="addBtn"-->
-<!--                onclick="window.location.href='report.html?date=' + document.getElementById('reportDate').value"-->
-<!--                style="background:#2563eb;">-->
-<!--            Generate Report-->
-<!--        </button>-->
+        <button class="addBtn"
+                onclick="window.location.href='report.html?date=' + document.getElementById('reportDate').value"
+                style="background:#2563eb;">
+            Generate Report
+        </button>
         <button class="addBtn"
                 onclick="window.location.href='create-dgandmotor.html'"
                 style="background:#2563eb;">
@@ -262,6 +262,8 @@
 
 <script>
 
+    let sseConnection = null;
+
     let isRendering = false;   // 🚀 prevents overlapping renders
     let latestRenderToken = 0; // 🚀 prevents duplicates during async refresh
 
@@ -280,6 +282,17 @@
 
     let filterType = null;
     let filterValue = null;
+
+
+    document.addEventListener("visibilitychange", () => {
+    if (document.hidden && sseConnection) {
+        sseConnection.close();
+        sseConnection = null;
+    } else if (!document.hidden) {
+        startSSE();
+    }
+});
+
 
     /* ----------------------------------------------------
        FIX 1: prevent duplicate renders by locking state
@@ -312,19 +325,6 @@
         isRendering = false;
     }
 
-    /* ----------------------------------------------------
-       FIX 2: throttle SSE so refresh runs once per update
-    ---------------------------------------------------- */
-    let sseCooldown = false;
-
-    function handleSSEUpdate() {
-        if (sseCooldown) return;
-        sseCooldown = true;
-
-        fetchPlants();
-
-        setTimeout(() => (sseCooldown = false), 1500); // limit refresh bursts
-    }
 
     /* ----------------------------------------------------
        REST OF YOUR ORIGINAL LOGIC BELOW (unchanged)
@@ -617,31 +617,70 @@ function calcPlantStatus(op, vehicleOps, plantSolar) {
     const color = getPlantInfoStatus(p);
 
     return `
-        <tr>
+        <tr data-plant="${p.plantID}">
             <td>${p.serialNo}</td>
             <td>${p.plantID}</td>
             <td class="${color}">${p.plantName}</td>
             <td>${p.kld}</td>
             <td>${p.zones}</td>
 
-            <td><button class="btn-status ${plantOpStatus}"
+            <td><button class="btn-status ${plantOpStatus} plant-op-btn"
                 onclick="openPlantOperation(${p.plantID}, '${date}', '${plantOpStatus}')">
                 ${plantOpStatus}</button></td>
 
             <td>
-                <button class="btn-status ${labOpStatus}"
+                <button class="btn-status ${labOpStatus} lab-op-btn"
                     onclick="openLabOperation(${p.plantID}, '${date}', '${labOpStatus}')"
                     ${p.codAndBodSenserDate == null ? "disabled style='background:#9ca3af; cursor:not-allowed'" : ""}>
                     ${labOpStatus}
                 </button>
             </td>
 
-            <td><button class="btn-status ${empOpStatus}"
+            <td><button class="btn-status ${empOpStatus} att-op-btn"
                 onclick="openAttendance(${p.plantID}, '${date}', '${empOpStatus}')">
                 ${empOpStatus}</button></td>
         </tr>
     `;
 }
+
+/* ------------------ PARTIAL ROW UPDATE HELPERS ------------------ */
+
+async function updatePlantOpCell(plantId) {
+    const date = reportDateInput.value;
+    const btn = document.querySelector(
+        `tr[data-plant='${plantId}'] .plant-op-btn`
+    );
+    if (!btn) return;
+
+    const status = await getPlantStatus(plantId, date);
+    btn.className = `btn-status ${status} plant-op-btn`;
+    btn.textContent = status;
+}
+
+async function updateLabOpCell(plantId) {
+    const date = reportDateInput.value;
+    const btn = document.querySelector(
+        `tr[data-plant='${plantId}'] .lab-op-btn`
+    );
+    if (!btn) return;
+
+    const status = await getLabStatus(plantId, date);
+    btn.className = `btn-status ${status} lab-op-btn`;
+    btn.textContent = status;
+}
+
+async function updateAttendanceCell(plantId) {
+    const date = reportDateInput.value;
+    const btn = document.querySelector(
+        `tr[data-plant='${plantId}'] .att-op-btn`
+    );
+    if (!btn) return;
+
+    const status = await getAttendanceStatus(plantId, date);
+    btn.className = `btn-status ${status} att-op-btn`;
+    btn.textContent = status;
+}
+
 
 
     async function renderTable(date) {
@@ -744,14 +783,55 @@ function calcPlantStatus(op, vehicleOps, plantSolar) {
     /* ---------------------------- SSE ---------------------------- */
 
     function startSSE() {
+    try {
+        if (sseConnection) return; // 🚫 prevent duplicate connections
+        sseConnection = new EventSource("/api/events/updates");
+        const evt = sseConnection;
+
+
+        evt.addEventListener("DATA_UPDATE", async (e) => {
+        let data;
         try {
-            const evt = new EventSource("/api/events/updates");
-            evt.onmessage = handleSSEUpdate; // 🚀 throttled refresh
-            evt.onerror = () => setTimeout(startSSE, 2000);
-        } catch (e) {
-            console.warn("SSE failed:", e);
+            data = JSON.parse(e.data);
+        } catch {
+            return; // ignore bad event
         }
+
+
+        const row = document.querySelector(
+            `tr[data-plant='${data.plantId}']`
+        );
+        if (!row) return;
+
+        if (data.entity === "PLANT_OP") {
+            await updatePlantOpCell(data.plantId);
+        }
+
+        if (data.entity === "LAB") {
+            await updateLabOpCell(data.plantId);
+        }
+
+        if (data.entity === "EMPLOYEE" || data.entity === "EMP_OP") {
+            await updateAttendanceCell(data.plantId);
+        }
+
+        if (data.entity === "PLANT") {
+            fetchPlants();
+        }
+    });
+
+
+        evt.onerror = () => {
+            sseConnection.close();
+            sseConnection = null;
+            setTimeout(startSSE, 2000);
+        };
+
+    } catch (e) {
+        console.warn("SSE failed:", e);
     }
+}
+
 
     startSSE();
     fetchPlants();

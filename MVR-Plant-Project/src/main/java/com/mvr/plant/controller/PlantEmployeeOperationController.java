@@ -1,6 +1,7 @@
 package com.mvr.plant.controller;
 
 import com.mvr.plant.DTO.EmployeeOperationDTO;
+import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.PlantEmployeeOperation;
 import com.mvr.plant.service.IPlantEmployeeOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,11 @@ public class PlantEmployeeOperationController {
 
     @PostMapping("/update/{plantId}/{employeeId}")
     public ResponseEntity<Map<String, Integer>> updateOperation(@PathVariable Long plantId, @PathVariable Integer employeeId, @RequestBody PlantEmployeeOperation empOp) {
-        Map<String, Integer> response = employeeOpService
-                .updatePlantEmployeeOperation(plantId, employeeId, empOp);
-        sseController.broadcastUpdate();
+        Map<String, Integer> response = employeeOpService.updatePlantEmployeeOperation(plantId, employeeId, empOp);
+
+        sseController.sendEvent(
+                new SseEvent("EMP_OP", "UPDATE", plantId, employeeId.longValue())
+        );
         return ResponseEntity.ok(response);
     }
 

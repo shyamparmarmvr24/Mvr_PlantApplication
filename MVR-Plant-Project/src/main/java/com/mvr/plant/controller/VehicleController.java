@@ -1,5 +1,6 @@
 package com.mvr.plant.controller;
 
+import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.VehicleInformation;
 import com.mvr.plant.service.IVehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,9 @@ public class VehicleController {
             @RequestBody VehicleInformation vehicle
     ) {
         VehicleInformation saved = vehicleService.createVehicle(plantId, vehicle);
-        sseController.broadcastUpdate();
+        sseController.sendEvent(
+                new SseEvent("VEHICLE", "CREATE", plantId, saved.getVehicleID())
+        );
         return ResponseEntity.ok(saved);
     }
 
@@ -52,7 +55,9 @@ public class VehicleController {
             @RequestBody VehicleInformation updatedVehicle
     ) {
         VehicleInformation updated = vehicleService.updateVehicle(plantId, vehicleId, updatedVehicle);
-        sseController.broadcastUpdate();
+        sseController.sendEvent(
+                new SseEvent("VEHICLE", "UPDATE", plantId, vehicleId)
+        );
         return ResponseEntity.ok(updated);
     }
 }

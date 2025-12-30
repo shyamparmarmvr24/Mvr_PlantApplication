@@ -1,5 +1,6 @@
 package com.mvr.plant.controller;
 
+import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.service.IPlantService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,9 @@ public class FstpPlantController {
     @PostMapping
     public ResponseEntity<FstpPlant> createPlant(@RequestBody FstpPlant plant) {
         FstpPlant result = plantService.insertPlantDetails(plant);
-        sseController.broadcastUpdate();
+        sseController.sendEvent(
+                new SseEvent("PLANT", "CREATE", result.getPlantID(), null)
+        );
         return ResponseEntity.ok(result);
     }
 
@@ -44,7 +47,9 @@ public class FstpPlantController {
     @PutMapping("/{id}")
     public ResponseEntity<String> updatePlant(@PathVariable Long id, @RequestBody FstpPlant plant) {
         String result = plantService.updatePlantDetails(id, plant);
-        sseController.broadcastUpdate();
+        sseController.sendEvent(
+                new SseEvent("PLANT", "UPDATE", id, null)
+        );
         return ResponseEntity.ok(result);
     }
 

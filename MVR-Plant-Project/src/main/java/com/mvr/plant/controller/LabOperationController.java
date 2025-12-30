@@ -1,6 +1,7 @@
 package com.mvr.plant.controller;
 
 import com.mvr.plant.DTO.LabOperationDTO;
+import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.LaboratoryOperation;
 import com.mvr.plant.service.ILaboratoryOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,9 @@ public class LabOperationController {
 
         Map<String, Integer> result = labService.updateLabOperationById(plantId, labOp);
 
-        sseController.broadcastUpdate();
+        sseController.sendEvent(
+                new SseEvent("LAB", "UPDATE", plantId, null)
+        );
 
         return ResponseEntity.ok(result);
     }

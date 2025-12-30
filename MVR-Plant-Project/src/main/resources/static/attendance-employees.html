@@ -6,6 +6,7 @@
     <title>Plant Employees - MVR TECHNOLOGY</title>
 
     <style>
+
         body {
             margin: 0;
             background: #f5f7fa;
@@ -128,6 +129,50 @@
     const params = new URLSearchParams(window.location.search);
     const plantID = params.get("plantID");
     const date = params.get("date");
+     let sseConnection = null;
+
+    function startSSE() {
+    try {
+        if (sseConnection) return; // 🚫 prevent duplicate connections
+
+        sseConnection = new EventSource("/api/events/updates");
+
+        sseConnection.addEventListener("DATA_UPDATE", async (e) => {
+            let data;
+            try {
+                data = JSON.parse(e.data);
+            } catch {
+                return;
+            }
+
+            // 👇 Attendance-related updates
+            if (data.entity === "EMPLOYEE" || data.entity === "EMP_OP") {
+                if (String(data.plantId) === String(plantID)) {
+                    loadEmployees();
+                }
+            }
+        });
+
+        sseConnection.onerror = () => {
+            sseConnection.close();
+            sseConnection = null;
+            setTimeout(startSSE, 2000);
+        };
+
+    } catch (err) {
+        console.warn("SSE failed", err);
+    }
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && sseConnection) {
+        sseConnection.close();
+        sseConnection = null;
+    } else if (!document.hidden) {
+        startSSE();
+    }
+});
+
 
     async function loadPlantInfo() {
     let plantName = "-";
@@ -211,6 +256,8 @@
 
     loadPlantInfo();
     loadEmployees();
+    startSSE();
+
 
 </script>
 

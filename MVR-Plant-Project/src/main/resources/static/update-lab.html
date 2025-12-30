@@ -193,6 +193,9 @@
     const params = new URLSearchParams(window.location.search);
     const plantID = params.get("plantID");
     const date = params.get("date");
+    let sseConnection = null;
+let isDirty = false; // track user edits
+
 
     async function loadPlantInfo() {
     let plantName = "-";
@@ -228,6 +231,62 @@
         "flowMeterReadingAm","flowMeterReadingPm"
     ];
 
+    fields.forEach(id => {
+    document.getElementById(id).addEventListener("input", () => {
+        isDirty = true;
+    });
+
+});
+
+
+function startSSE() {
+    try {
+        if (sseConnection) return;
+
+        sseConnection = new EventSource("/api/events/updates");
+
+        sseConnection.addEventListener("DATA_UPDATE", async (e) => {
+            let data;
+            try {
+                data = JSON.parse(e.data);
+            } catch {
+                return;
+            }
+
+            // 👇 Lab updated elsewhere
+            if (
+                data.entity === "LAB" &&
+                String(data.plantId) === String(plantID)
+            ) {
+                if (isDirty) {
+                    alert("Lab data was updated by another user. Please refresh.");
+                } else {
+                    await loadLab();
+                }
+            }
+        });
+
+        sseConnection.onerror = () => {
+            sseConnection.close();
+            sseConnection = null;
+            setTimeout(startSSE, 2000);
+        };
+
+    } catch (err) {
+        console.warn("SSE failed", err);
+    }
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && sseConnection) {
+        sseConnection.close();
+        sseConnection = null;
+    } else if (!document.hidden) {
+        startSSE();
+    }
+});
+
+
     async function loadLab() {
         const res = await fetch(`/api/laboperations/plant/${plantID}?date=${date}`);
         if (!res.ok) return;
@@ -237,6 +296,7 @@
                 document.getElementById(f).value = data[f];
             }
         });
+        isDirty = false;
     }
 
     document.getElementById("saveBtn").onclick = async () => {
@@ -261,6 +321,12 @@
     }
 
     alert("✔ Laboratory Operation Updated Successfully!");
+
+    if (sseConnection) {
+    sseConnection.close();
+    sseConnection = null;
+}
+
     window.location.href = `index.html?date=${encodeURIComponent(date)}`;
 };
 
@@ -294,6 +360,7 @@
 
     loadPlantInfo();
     loadLab();
+    startSSE();
 
 </script>
 

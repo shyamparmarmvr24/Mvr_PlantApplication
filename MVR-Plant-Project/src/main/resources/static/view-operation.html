@@ -141,6 +141,8 @@
 
 <script>
     let plantSolar = false;
+    let sseConnection = null;
+    let sseReloading = false;   // ✅ ADD THIS LINE
     (function(){
         // get params
         const params = new URLSearchParams(window.location.search);
@@ -833,20 +835,58 @@ for (const v of vehicles) {
                 .replaceAll("'","&#39;");
         }
 
-        // Simple SSE refresh (throttled)
-        let sseCooldown = false;
-        function startSSE(){
+       function startSSE() {
+    try {
+        if (sseConnection) return;
+
+        sseConnection = new EventSource("/api/events/updates");
+
+        sseConnection.addEventListener("DATA_UPDATE", async (e) => {
+            let data;
             try {
-                const es = new EventSource("/api/events/updates");
-                es.onmessage = () => {
-                    if (sseCooldown) return;
-                    sseCooldown = true;
-                    loadAll();
-                    setTimeout(()=> sseCooldown = false, 1000);
-                };
-                es.onerror = ()=> setTimeout(startSSE, 2000);
-            } catch(e){}
-        }
+                data = JSON.parse(e.data);
+            } catch {
+                return;
+            }
+
+            // ✅ Only refresh when THIS plant changes
+            if (
+                String(data.plantId) === String(plantID) &&
+                (
+                    data.entity === "PLANT_OP" ||
+                    data.entity === "VEHICLE_OP" ||
+                    data.entity === "PRIVATE_VEHICLE"
+                )
+            ) {
+                if (sseReloading) return;
+                    sseReloading = true;
+
+                    await loadAll();
+
+                    setTimeout(() => {
+                        sseReloading = false;
+                    }, 800);
+            }
+        });
+
+        sseConnection.onerror = () => {
+            sseConnection.close();
+            sseConnection = null;
+            setTimeout(startSSE, 2000);
+        };
+
+    } catch (err) {
+        console.warn("SSE failed", err);
+    }
+}
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && sseConnection) {
+        sseConnection.close();
+        sseConnection = null;
+    } else if (!document.hidden) {
+        startSSE();
+    }
+});
 
         // initial load
         loadAll();

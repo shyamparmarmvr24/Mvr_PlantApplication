@@ -18,7 +18,7 @@ public class SseController {
 
     @GetMapping(path = "/updates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribeUpdates() {
-        SseEmitter emitter = new SseEmitter(0L);  // never timeout
+        SseEmitter emitter = new SseEmitter(0L);
         clients.add(emitter);
 
         emitter.onCompletion(() -> clients.remove(emitter));
@@ -27,19 +27,20 @@ public class SseController {
         return emitter;
     }
 
-    // 🔥 Notify all browsers
-    public void broadcastUpdate() {
-        List<SseEmitter> deadEmitters = new ArrayList<>();
+    // 🔥 SEND SPECIFIC EVENT
+    public void sendEvent(Object event) {
+        List<SseEmitter> dead = new ArrayList<>();
 
         for (SseEmitter emitter : clients) {
             try {
-                emitter.send(SseEmitter.event().data("update"));
-            } catch (IOException e) {
-                deadEmitters.add(emitter);  // mark dead client
+                emitter.send(SseEmitter.event()
+                        .name("DATA_UPDATE")
+                        .data(event));
+            } catch (Exception e) {
+                dead.add(emitter);
             }
         }
-
-        clients.removeAll(deadEmitters);   //  remove disconnected clients
+        clients.removeAll(dead);
     }
 
 }

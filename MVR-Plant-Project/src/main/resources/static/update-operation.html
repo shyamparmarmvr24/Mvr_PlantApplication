@@ -184,6 +184,9 @@
 </div>
 
 <script>
+
+
+
     (function(){
       /* ================== CONFIG ================== */
       const plantFieldDefs = [
@@ -219,6 +222,10 @@
 
         { id: "remarks", label: "Remarks", type: "textarea", placeholder: "Enter remarks" } // free-text, not counted
       ];
+
+      let sseConnection = null;
+      let isDirty = false;
+
 
       const endpoints = {
         plantGet: (plantId, date) => `/api/operations/plant/${plantId}?date=${encodeURIComponent(date)}`,
@@ -1082,6 +1089,7 @@ tripsInput.addEventListener("input", () => {
 
         attachEnterNav();
         setStatusBadge(computeCompleteness());
+        isDirty = false;
       }
               function togglePowerBillFields(enabled) {
           ["lastBillDate", "TotalNoOfUnits", "totalBillAmount"].forEach(id => {
@@ -1106,6 +1114,7 @@ tripsInput.addEventListener("input", () => {
           privateTripsEl.value = savedPrivateVehicleCount;
           renderPrivateVehicleForms(savedPrivateVehicleCount);
         }
+        isDirty = false;
       } catch (e) {
         console.warn("Failed to load private vehicles", e);
       }
@@ -1166,6 +1175,7 @@ tripsInput.addEventListener("input", () => {
         if(remarksEl && currentOp.remarks != null) remarksEl.value = currentOp.remarks;
 
         setStatusBadge(computeCompleteness());
+        isDirty = false;
       }
 
       /* ================== SAVE / SUBMIT ================== */
@@ -1514,15 +1524,32 @@ for (const v of vehicles) {
 
 
         alert("✔ Operation updated successfully!");
+
+        if (sseConnection) {
+          sseConnection.close();
+          sseConnection = null;
+        }
+
         window.location.href = `index.html?date=${encodeURIComponent(date)}`;
       }
 
       /* ================== UTILITIES & EVENTS ================== */
       function bindStatusWatcher(){
         function tick(){ setTimeout(()=> setStatusBadge(computeCompleteness()), 0); }
-        document.addEventListener('input', tick);
-        document.addEventListener('change', tick);
+        document.addEventListener('input', () => {
+          isDirty = true;
+          tick();
+        });
+        document.addEventListener('change', () => {
+          isDirty = true;
+          tick();
+        });
       }
+
+      function markDirty() {
+          isDirty = true;
+        }
+
 
       function attachEnterNav(){
         const all = Array.from(document.querySelectorAll("input:not([type=radio]), textarea")).filter(el => el.offsetParent !== null);
@@ -1616,6 +1643,58 @@ for (const v of vehicles) {
   updatePrivateSludgeTotals();
   setStatusBadge(computeCompleteness());
 });
+
+function startSSE() {
+  try {
+    if (sseConnection) return;
+
+    sseConnection = new EventSource("/api/events/updates");
+
+    sseConnection.addEventListener("DATA_UPDATE", async (e) => {
+      let data;
+      try {
+        data = JSON.parse(e.data);
+      } catch {
+        return;
+      }
+
+      // 🔁 Plant or Vehicle ops updated elsewhere
+      if (
+        (data.entity === "PLANT_OP" || data.entity === "VEHICLE_OP" || data.entity === "PRIVATE_VEHICLE") &&
+        String(data.plantId) === String(plantID)
+      ) {
+        if (isDirty) {
+          alert("This operation was updated by another user. Please refresh.");
+        } else {
+          // SAFE reload
+          await loadPlantOperation();
+          await loadVehiclesAndOps();
+          await loadPrivateVehicles();
+        }
+      }
+    });
+
+    sseConnection.onerror = () => {
+      sseConnection.close();
+      sseConnection = null;
+      setTimeout(startSSE, 2000);
+    };
+
+  } catch (err) {
+    console.warn("SSE failed", err);
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && sseConnection) {
+    sseConnection.close();
+    sseConnection = null;
+  } else if (!document.hidden) {
+    startSSE();
+  }
+});
+
+
 
       // initial load
      (async function init(){
@@ -1802,6 +1881,7 @@ function updateVehicleTripSludgeTotals(vehicleId) {
 }
 
     })();
+    startSSE();
 </script>
 </body>
 </html>

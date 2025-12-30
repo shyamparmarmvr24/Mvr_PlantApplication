@@ -2,6 +2,7 @@ package com.mvr.plant.controller;
 
 import com.mvr.plant.DTO.PlantOperationBetweenDTO;
 import com.mvr.plant.DTO.PlantOperationDTO;
+import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.PlantOperation;
 import com.mvr.plant.service.IPlantOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,9 @@ public class PlantOperationController {
 
         Map<String, Integer> result = plantOpService.updateOperationById(plantId, plantOp);
 
-        sseController.broadcastUpdate();
+        sseController.sendEvent(
+                new SseEvent("PLANT_OP", "UPDATE", plantId, null)
+        );
 
         return ResponseEntity.ok(result);
     }

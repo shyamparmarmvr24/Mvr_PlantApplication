@@ -1,5 +1,6 @@
 package com.mvr.plant.controller;
 
+import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.DgDetails;
 import com.mvr.plant.service.IDgDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,17 @@ public class DgDetailsController
     @Autowired
     private IDgDetailsService dgService;
 
+    @Autowired
+    private SseController sseController;
+
     // POST /api/dg-details/plant/{plantId}
     @PostMapping("/plant/{plantId}")
     public ResponseEntity<DgDetails> createDgDetails(@PathVariable Long plantId, @RequestBody DgDetails dgDetails)
     {
         DgDetails saved = dgService.createDgDetails(plantId, dgDetails);
+        sseController.sendEvent(
+                new SseEvent("DG", "CREATE", plantId, saved.getDgId())
+        );
         return ResponseEntity.status(201).body(saved);
     }
 
@@ -27,6 +34,9 @@ public class DgDetailsController
     public ResponseEntity<DgDetails> updateDgDetails(@PathVariable Long dgId, @RequestBody DgDetails dgDetails)
     {
         DgDetails updated = dgService.updateDgDetails(dgId, dgDetails);
+        sseController.sendEvent(
+                new SseEvent("DG", "UPDATE", updated.getPlant().getPlantID(), dgId)
+        );
         return ResponseEntity.ok(updated);
     }
 
