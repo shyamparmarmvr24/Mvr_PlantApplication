@@ -1,5 +1,6 @@
 package com.mvr.plant.repository;
 
+import com.mvr.plant.DTO.FuelDTO;
 import com.mvr.plant.entity.VehicleOperation;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,12 +25,75 @@ public interface IVehicleOperationRepo extends JpaRepository<VehicleOperation,Lo
     @EntityGraph(attributePaths = {"vehicle", "vehicle.plant"})
     List<VehicleOperation> findByOperationDateBetween(LocalDate start, LocalDate end);
 
+//    @Query("""
+//    SELECT v FROM VehicleOperation v
+//    WHERE v.vehicle.vehicleID = :vehicleId
+//      AND v.lastFuelFilled = true
+//      AND v.lastFuelFilledDate IS NOT NULL
+//    ORDER BY v.lastFuelFilledDate DESC
+//    """)
+//    List<VehicleOperation> findLatestFuelFilled(@Param("vehicleId") Long vehicleId);
+
+//    @Query("""
+//    SELECT v FROM VehicleOperation v
+//    WHERE v.vehicle.vehicleID = :vehicleId
+//      AND v.lastFuelFilled = true
+//      AND v.lastFuelFilledDate IS NOT NULL
+//      AND v.operationDate <= :selectedDate
+//    ORDER BY v.operationDate DESC
+//    """)
+//    List<VehicleOperation> findLatestFuelFilledTillDate(@Param("vehicleId") Long vehicleId, @Param("selectedDate") LocalDate selectedDate);
+
     @Query("""
-    SELECT v FROM VehicleOperation v
+    SELECT new com.mvr.plant.DTO.FuelDTO(
+        v.vehicle.plant.plantID,
+        v.vehicle.vehicleID,
+        v.lastFuelFilled,
+        v.lastFuelFilledDate,
+        v.filledLiters,
+        v.currentOdometerReading
+    )
+    FROM VehicleOperation v
     WHERE v.vehicle.vehicleID = :vehicleId
       AND v.lastFuelFilled = true
       AND v.lastFuelFilledDate IS NOT NULL
-    ORDER BY v.lastFuelFilledDate DESC
+      AND v.operationDate <= :selectedDate
+    ORDER BY v.operationDate DESC
     """)
-    List<VehicleOperation> findLatestFuelFilled(@Param("vehicleId") Long vehicleId);
+    List<FuelDTO> findLatestFuelFilledTillDate(@Param("vehicleId") Long vehicleId, @Param("selectedDate") LocalDate selectedDate);
+
+//    @Query("""
+//    SELECT new com.mvr.plant.DTO.FuelDTO(
+//        v.vehicle.plant.plantID,
+//        v.vehicle.vehicleID,
+//        v.lastFuelFilled,
+//        v.lastFuelFilledDate,
+//        v.filledLiters,
+//        v.currentOdometerReading
+//    )
+//    FROM VehicleOperation v
+//    WHERE v.lastFuelFilled = true
+//      AND v.lastFuelFilledDate IS NOT NULL
+//    ORDER BY v.lastFuelFilledDate DESC
+//    """)
+//    List<FuelDTO> findAllFuelDetails();
+
+    @Query("""
+    SELECT new com.mvr.plant.DTO.FuelDTO(
+        v.vehicle.plant.plantID,
+        v.vehicle.vehicleID,
+        v.lastFuelFilled,
+        v.lastFuelFilledDate,
+        v.filledLiters,
+        v.currentOdometerReading
+    )
+    FROM VehicleOperation v
+    WHERE v.lastFuelFilled = true
+      AND v.lastFuelFilledDate IS NOT NULL
+      AND v.vehicle.vehicleID = :vehicleId
+    ORDER BY v.lastFuelFilledDate DESC
+""")
+    List<FuelDTO> findFuelDetailsByVehicleId(@Param("vehicleId") Long vehicleId);
+
+
 }

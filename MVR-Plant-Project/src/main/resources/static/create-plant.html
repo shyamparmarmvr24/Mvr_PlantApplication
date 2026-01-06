@@ -145,6 +145,17 @@
                     <label for="zones">Zone <span class="req">*</span></label>
                     <input type="number" id="zones" required/>
                 </div>
+
+                <div class="form-group">
+                    <label for="waterType">Water Type <span class="req">*</span></label>
+                    <select id="waterType" required>
+                        <option value="">-- Select Water Type --</option>
+                        <option value="Salt Water">Salt Water</option>
+                        <option value="Normal Water">Normal Water</option>
+                        <option value="No Borewell">No Borewell</option>
+                    </select>
+                </div>
+
             </div>
 
             <div class="section-title">MNIT & Construction</div>
@@ -212,6 +223,29 @@
                 <div class="form-group">
                     <label for="ppMeterSerialNo">PP Meter Serial No</label>
                     <input type="text" id="ppMeterSerialNo" maxlength="50"/>
+                </div>
+            </div>
+
+            <!-- NEW DISCOM BILLING FIELDS -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="discomName">Discom Name</label>
+                    <select id="discomName">
+                        <option value="">-- Select Discom --</option>
+                        <option value="Ajmer">Ajmer</option>
+                        <option value="Jaipur">Jaipur</option>
+                        <option value="Jodhpur">Jodhpur</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fixedChargesInRs">Fixed Charges (₹)</label>
+                    <input type="number" id="fixedChargesInRs" step="0.01"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="fixedChargesPerKW">Fixed Charges Per KW</label>
+                    <input type="number" id="fixedChargesPerKW" step="0.01"/>
                 </div>
             </div>
 
@@ -573,7 +607,7 @@
         const step = currentStep;
 
         if (step === 1) {
-            const requiredIds = ["plantID", "plantName", "kld", "zones", "mnit"];
+            const requiredIds = ["plantID", "plantName", "kld", "zones", "waterType" , "mnit"];
             for (const id of requiredIds) {
                 const el = document.getElementById(id);
                 if (!el) continue;
@@ -679,6 +713,7 @@
             document.getElementById("wardNo").value = plantData.wardNo ?? "";
             document.getElementById("pinCode").value = plantData.pinCode ?? "";
             document.getElementById("zones").value = plantData.zones ?? "";
+            document.getElementById("waterType").value = plantData.waterType || "";
 
             const setYesNo = (id, value) => {
                 const sel = document.getElementById(id);
@@ -719,6 +754,10 @@
 
 
             document.getElementById("ppMeterSerialNo").value = plantData.ppMeterSerialNo || "";
+
+            document.getElementById("discomName").value = plantData.discomName || "";
+            document.getElementById("fixedChargesInRs").value = plantData.fixedChargesInRs ?? "";
+            document.getElementById("fixedChargesPerKW").value = plantData.fixedChargesPerKW ?? "";
 
             document.getElementById("sanctionLoad").value = plantData.sanctionLoad ?? "";
             document.getElementById("multiplicationFactor").value = plantData.multiplicationFactor ?? "";
@@ -1202,6 +1241,8 @@
             pinCode: document.getElementById("pinCode").value ? Number(document.getElementById("pinCode").value) : null,
             zones: Number(document.getElementById("zones").value),
 
+            waterType: document.getElementById("waterType").value,
+
             mnit: document.getElementById("mnit").value === "yes",
             permanentPower: document.getElementById("permanentPower").value === "yes",
             solar: document.getElementById("solar").value === "yes",
@@ -1237,6 +1278,16 @@
             cteIssuedDate: document.getElementById("cteIssuedDate").value || null,
 
             ppMeterSerialNo: document.getElementById("ppMeterSerialNo").value.trim() || null,
+
+            discomName: document.getElementById("discomName").value.trim() || null,
+
+            fixedChargesInRs: document.getElementById("fixedChargesInRs").value
+                ? Number(document.getElementById("fixedChargesInRs").value)
+                : null,
+
+            fixedChargesPerKW: document.getElementById("fixedChargesPerKW").value
+                ? Number(document.getElementById("fixedChargesPerKW").value)
+                : null,
 
             sanctionLoad: document.getElementById("sanctionLoad").value
                 ? Number(document.getElementById("sanctionLoad").value)

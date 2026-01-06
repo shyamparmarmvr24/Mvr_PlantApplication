@@ -14,4 +14,5 @@ public interface IPlantEmployeeOperationService
     public List<PlantEmployeeOperation> getAllOperationsByEmployeeId(Integer employeeId);
     public List<EmployeeOperationDTO> getAllEmployeesOperationByDate(LocalDate date);
     public List<EmployeeOperationDTO> getAllEmployeesOperationBetween(LocalDate start, LocalDate end);
+    public PlantEmployeeOperation updatePlantEmployeeOperationByDate(Long plantId, Integer empId,PlantEmployeeOperation empOp);
 }

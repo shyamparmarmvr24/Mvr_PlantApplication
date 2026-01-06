@@ -417,53 +417,50 @@ if (Array.isArray(vehicleOps)) {
                 const textOp = await resOp.text();
                 const op = (textOp && textOp.trim()) ? JSON.parse(textOp) : {};
 
-                /* ================= ALWAYS LOAD LATEST POWER BILL ================= */
 
-try {
-    const rb = await fetch(
-        `/api/operations/plant/${plantID}/latest-power-bill`
-    );
 
-    if (rb.ok) {
-        const latestBill = await rb.json();
+                /* ================= LOAD POWER BILL TILL SELECTED DATE ================= */
 
-        // Apply latest bill values ONLY if missing in current day
-        if (!op.lastBillDate) {
-            op.lastBillDate = latestBill.lastBillDate;
-        }
+                try {
+                    if (!op.powerBill) {
+                        const rb = await fetch(
+                            `/api/operations/plant/${plantID}/latest-power-bill?date=${encodeURIComponent(date)}`
+                        );
 
-        if (!op.TotalNoOfUnits) {
-            op.TotalNoOfUnits = latestBill.TotalNoOfUnits;
-        }
+                        if (rb.ok) {
+                            const latestBill = await rb.json();
+                            if (latestBill) {
+                                op.lastBillDate = latestBill.lastBillDate ?? null;
+                                op.TotalNoOfUnits = latestBill.totalNoOfUnits ?? null;
+                                op.totalBillAmount = latestBill.totalBillAmount ?? null;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Power bill till date fetch failed", e);
+                }
 
-        if (!op.totalBillAmount) {
-            op.totalBillAmount = latestBill.totalBillAmount;
-        }
-    }
-} catch (e) {
-    console.warn("Latest power bill fetch failed", e);
-}
 
-/* ================= ALWAYS LOAD LATEST WATER ================= */
-try {
-    const rw = await fetch(
-        `/api/operations/plant/${plantID}/latest-water`
-    );
+                /* ================= ALWAYS LOAD LATEST WATER ================= */
+                try {
+                    if (!op.waterUsed) {
+                        const rw = await fetch(
+                            `/api/operations/plant/${plantID}/latest-water?date=${encodeURIComponent(date)}`
+                        );
 
-    if (rw.ok) {
-        const latestWater = await rw.json();
-
-        // Apply latest water values ONLY if missing in current day
-        if (!op.waterUsed) {
-            op.waterUsed = latestWater.waterUsed;
-            op.waterFilledDate = latestWater.waterFilledDate;
-            op.waterLtrs = latestWater.waterLtrs;
-            op.totalWaterAmount = latestWater.totalWaterAmount;
-        }
-    }
-} catch (e) {
-    console.warn("Latest water fetch failed", e);
-}
+                        if (rw.ok) {
+                            const latestWater = await rw.json();
+                            if (latestWater) {
+                                op.waterUsed = latestWater.waterUsed ?? false;
+                                op.waterFilledDate = latestWater.waterFilledDate ?? null;
+                                op.waterLtrs = latestWater.waterLtrs ?? null;
+                                op.totalWaterAmount = latestWater.totalWaterAmount ?? null;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Water till date fetch failed", e);
+                }
 
 
 
@@ -666,24 +663,26 @@ for (const v of vehicles) {
         vo = (tv && tv.trim()) ? JSON.parse(tv) : {};
 
         // 🔁 FALLBACK: load latest fuel-filled details if missing
-        if (!vo.lastFuelFilled) {
-          try {
-            const rf = await fetch(
-              `/api/vehicle-operations/${v.vehicleID}/latest-fuel`
-            );
-            if (rf.ok) {
-              const latest = await rf.json();
-              if (latest) {
-                vo.lastFuelFilled = latest.lastFuelFilled;
-                vo.lastFuelFilledDate = latest.lastFuelFilledDate;
-                vo.filledLiters = latest.filledLiters;
-                vo.currentOdometerReading = latest.currentOdometerReading;
-              }
-            }
-          } catch (e) {
-            console.warn("Latest fuel fallback failed", e);
+    // 🔁 FALLBACK: load fuel till selected date
+    if (!vo.lastFuelFilled) {
+      try {
+        const rf = await fetch(
+          `/api/vehicle-operations/${v.vehicleID}/latest-fuel?date=${encodeURIComponent(date)}`
+        );
+        if (rf.ok) {
+          const latest = await rf.json();
+          if (latest) {
+            vo.lastFuelFilled = latest.lastFuelFilled ?? false;
+            vo.lastFuelFilledDate = latest.lastFuelFilledDate ?? null;
+            vo.filledLiters = latest.filledLiters ?? null;
+            vo.currentOdometerReading = latest.currentOdometerReading ?? null;
           }
         }
+      } catch (e) {
+        console.warn("Fuel till date fallback failed", e);
+      }
+    }
+
     } catch (e) {
         vo = {};
     }

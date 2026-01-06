@@ -2,6 +2,8 @@ package com.mvr.plant.service;
 
 import com.mvr.plant.DTO.PlantOperationBetweenDTO;
 import com.mvr.plant.DTO.PlantOperationDTO;
+import com.mvr.plant.DTO.PowerBillDTO;
+import com.mvr.plant.DTO.WaterDTO;
 import com.mvr.plant.entity.PlantOperation;
 import com.mvr.plant.repository.IPlantOperationMgmtRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +39,24 @@ public class PlantOperationServiceImpl implements IPlantOperationService {
     }
 
     @Override
-    public PlantOperation getLatestPowerBill(Long plantId) {
-        return plantOpRepo.getLatestPowerBill(plantId);
+    public PowerBillDTO getLatestPowerBill(Long plantId, LocalDate date) {
+        return plantOpRepo.getLatestPowerBill(plantId,date);
     }
 
     @Override
-    public PlantOperation getLatestWaterFilled(Long plantId) {
-        return plantOpRepo.getLatestWaterFilled(plantId);
+    public WaterDTO getLatestWaterFilled(Long plantId, LocalDate date) {
+        return plantOpRepo.getLatestWaterFilled(plantId,date);
     }
+
+    @Override
+    public List<WaterDTO> getWaterDetailsByPlantId(Long plantId) {
+        return plantOpRepo.getWaterDetailsByPlantId(plantId);
+    }
+
+    @Override
+    public List<PowerBillDTO> getPowerBillDetailsByPlantId(Long plantId) {
+        return plantOpRepo.getPowerBillDetailsByPlantId(plantId);
+    }
+
 
 }

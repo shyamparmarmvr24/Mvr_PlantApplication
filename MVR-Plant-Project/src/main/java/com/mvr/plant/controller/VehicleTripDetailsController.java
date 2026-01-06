@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/vehicle-trip-details")
+@CrossOrigin(origins = "*")
 public class VehicleTripDetailsController {
     @Autowired
     private IVehicleTripDetailsService vehicleTripService;

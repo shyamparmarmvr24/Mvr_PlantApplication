@@ -1,8 +1,6 @@
 package com.mvr.plant.controller;
 
-import com.mvr.plant.DTO.PlantOperationBetweenDTO;
-import com.mvr.plant.DTO.PlantOperationDTO;
-import com.mvr.plant.DTO.SseEvent;
+import com.mvr.plant.DTO.*;
 import com.mvr.plant.entity.PlantOperation;
 import com.mvr.plant.service.IPlantOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,15 +77,47 @@ public class PlantOperationController {
         return ResponseEntity.ok(operations);
     }
 
+//    @GetMapping("/plant/{plantId}/latest-power-bill")
+//    public ResponseEntity<PlantOperation> latestPowerBill(@PathVariable Long plantId) {
+//        return ResponseEntity.ok(plantOpService.getLatestPowerBill(plantId));
+//    }
+//
+//    @GetMapping("/plant/{plantId}/latest-water")
+//    public ResponseEntity<PlantOperation> latestWater(@PathVariable Long plantId) {
+//        return ResponseEntity.ok(plantOpService.getLatestWaterFilled(plantId)
+//        );
+//    }
+
     @GetMapping("/plant/{plantId}/latest-power-bill")
-    public ResponseEntity<PlantOperation> latestPowerBill(@PathVariable Long plantId) {
-        return ResponseEntity.ok(plantOpService.getLatestPowerBill(plantId));
+    public ResponseEntity<PowerBillDTO> latestPowerBill(@PathVariable Long plantId, @RequestParam("date") LocalDate date)
+    {
+        return ResponseEntity.ok(plantOpService.getLatestPowerBill(plantId, date));
     }
 
     @GetMapping("/plant/{plantId}/latest-water")
-    public ResponseEntity<PlantOperation> latestWater(@PathVariable Long plantId) {
-        return ResponseEntity.ok(plantOpService.getLatestWaterFilled(plantId)
-        );
+    public ResponseEntity<WaterDTO> latestWater(@PathVariable Long plantId, @RequestParam("date") LocalDate date)
+    {
+        return ResponseEntity.ok(plantOpService.getLatestWaterFilled(plantId, date));
+    }
+
+//    @GetMapping("/water/all")
+//    public ResponseEntity<List<WaterDTO>> getAllWaterDetails() {
+//        return ResponseEntity.ok(plantOpService.getAllWaterDetails());
+//    }
+//
+//    @GetMapping("/power-bill/all")
+//    public ResponseEntity<List<PowerBillDTO>> getAllPowerBillDetails() {
+//        return ResponseEntity.ok(plantOpService.getAllPowerBillDetails());
+//    }
+
+    @GetMapping("/water/{plantId}")
+    public ResponseEntity<List<WaterDTO>> getWaterDetails(@PathVariable Long plantId) {
+        return ResponseEntity.ok(plantOpService.getWaterDetailsByPlantId(plantId));
+    }
+
+    @GetMapping("/powerbill/{plantId}")
+    public ResponseEntity<List<PowerBillDTO>> getPowerBillDetails(@PathVariable Long plantId) {
+        return ResponseEntity.ok(plantOpService.getPowerBillDetailsByPlantId(plantId));
     }
 
 }

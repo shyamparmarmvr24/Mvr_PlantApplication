@@ -673,10 +673,16 @@
 
    const powerBillChk = document.getElementById("powerBill");
     if (powerBillChk) {
-      powerBillChk.addEventListener("change", () => {
-        togglePowerBillFields(powerBillChk.checked);
-        setStatusBadge(computeCompleteness());
-      });
+      powerBillChk.addEventListener("change", async () => {
+          togglePowerBillFields(powerBillChk.checked);
+
+          if (!powerBillChk.checked) {
+            await loadLatestPowerBillTillDate();
+          }
+
+          setStatusBadge(computeCompleteness());
+        });
+
     }
 
       const waterUsedChk = document.getElementById("waterUsed");
@@ -695,10 +701,16 @@
       if (waterUsedChk) {
         toggleWaterFields(!!waterUsedChk.checked);
 
-        waterUsedChk.addEventListener("change", () => {
+        waterUsedChk.addEventListener("change", async () => {
           toggleWaterFields(waterUsedChk.checked);
+
+          if (!waterUsedChk.checked) {
+            await loadLatestWaterTillDate();
+          }
+
           setStatusBadge(computeCompleteness());
         });
+
   }
 
 
@@ -1013,18 +1025,26 @@ tripsInput.addEventListener("input", () => {
                 const odoEl = document.getElementById(`currentOdo_${localVid}`); // ✅ NEW
 
                 if(!chk) return;
-                chk.addEventListener('change', ()=>{
-                    if(chk.checked){
-                        if(dateEl) dateEl.disabled = false;
-                        if(filledEl) filledEl.disabled = false;
-                        if(odoEl) odoEl.disabled = false;   // ✅ enable
-                    } else {
-                        if(dateEl){ dateEl.disabled = true; dateEl.value = ""; }
-                        if(filledEl){ filledEl.disabled = true; filledEl.value = ""; }
-                        if(odoEl){ odoEl.disabled = true; odoEl.value = ""; } // ✅ disable
-                    }
-                    setStatusBadge(computeCompleteness());
+                chk.addEventListener('change', async () => {
+                  if (chk.checked) {
+                    dateEl.disabled = false;
+                    filledEl.disabled = false;
+                    odoEl.disabled = false;
+                  } else {
+                    dateEl.disabled = true;
+                    filledEl.disabled = true;
+                    odoEl.disabled = true;
+
+                    dateEl.value = "";
+                    filledEl.value = "";
+                    odoEl.value = "";
+
+                    await loadLatestFuelTillDate(localVid);
+                  }
+
+                  setStatusBadge(computeCompleteness());
                 });
+
             })(vid);
           }
 
@@ -1078,6 +1098,9 @@ tripsInput.addEventListener("input", () => {
               if(odoEl){ odoEl.disabled = true; odoEl.value = ""; }
             }
 
+            if (!lastFuel.checked) {
+              await loadLatestFuelTillDate(vid);
+            }
 
             }catch(e){
               // ignore per-vehicle error
@@ -1178,6 +1201,15 @@ tripsInput.addEventListener("input", () => {
 
         setStatusBadge(computeCompleteness());
         isDirty = false;
+
+        if (!currentOp.waterUsed) {
+        await loadLatestWaterTillDate();
+        }
+
+        if (!currentOp.powerBill) {
+          await loadLatestPowerBillTillDate();
+        }
+
       }
 
       /* ================== SAVE / SUBMIT ================== */
@@ -1423,14 +1455,14 @@ if (billChecked) {
         }
 
         // ================== SAVE VEHICLE TRIP DETAILS ==================
-for (const v of vehicles) {
-  const vid = String(v.vehicleID);
+        for (const v of vehicles) {
+          const vid = String(v.vehicleID);
 
-  const tripsCount = Math.max(
-  Number(document.getElementById(`trips_${vid}`)?.value || 0),
-  savedTripCountByVehicle[vid] || 0,
-  document.querySelectorAll(`#tripForms_${vid} .vehicle-block`).length
-);
+          const tripsCount = Math.max(
+          Number(document.getElementById(`trips_${vid}`)?.value || 0),
+          savedTripCountByVehicle[vid] || 0,
+          document.querySelectorAll(`#tripForms_${vid} .vehicle-block`).length
+        );
 
 
   if (tripsCount <= 0) continue;
@@ -1501,19 +1533,19 @@ for (const v of vehicles) {
     const id = document.getElementById(`pv_id_${i}`).value;
 
     const payload = {
-  privateVehNumber: document.getElementById(`pv_number_${i}`).value || null,
-  driverNumber: document.getElementById(`pv_driver_no_${i}`).value
-      ? Number(document.getElementById(`pv_driver_no_${i}`).value)
-      : null,
-  driverName: document.getElementById(`pv_driver_name_${i}`).value || null,
-  receivedSludgeLtrs: document.getElementById(`pv_ltrs_${i}`).value
-      ? Number(document.getElementById(`pv_ltrs_${i}`).value)
-      : null,
-  receivedSludgeKgs: document.getElementById(`pv_kgs_${i}`).value
-      ? Number(document.getElementById(`pv_kgs_${i}`).value)
-      : null,
-  operationDate: date
-};
+      privateVehNumber: document.getElementById(`pv_number_${i}`).value || null,
+      driverNumber: document.getElementById(`pv_driver_no_${i}`).value
+          ? Number(document.getElementById(`pv_driver_no_${i}`).value)
+          : null,
+      driverName: document.getElementById(`pv_driver_name_${i}`).value || null,
+      receivedSludgeLtrs: document.getElementById(`pv_ltrs_${i}`).value
+          ? Number(document.getElementById(`pv_ltrs_${i}`).value)
+          : null,
+      receivedSludgeKgs: document.getElementById(`pv_kgs_${i}`).value
+          ? Number(document.getElementById(`pv_kgs_${i}`).value)
+          : null,
+      operationDate: date
+    };
 
 
     if (id) {
@@ -1662,31 +1694,29 @@ function startSSE() {
 
     sseConnection.addEventListener("DATA_UPDATE", async (e) => {
 
-      // 🔒 DO NOTHING while saving
-      if (isSaving) return;
+  // 🚫 ignore SSE while saving
+  if (isDirty || isSaving) return;
 
-      let data;
-      try {
-        data = JSON.parse(e.data);
-      } catch {
-        return;
-      }
+  let data;
+  try {
+    data = JSON.parse(e.data);
+  } catch {
+    return;
+  }
 
-      if (
-        (data.entity === "PLANT_OP" ||
-         data.entity === "VEHICLE_OP" ||
-         data.entity === "PRIVATE_VEHICLE") &&
-        String(data.plantId) === String(plantID)
-      ) {
-        if (isDirty) {
-          alert("This operation was updated by another user. Please refresh.");
-        } else {
-          await loadPlantOperation();
-          await loadVehiclesAndOps();
-          await loadPrivateVehicles();
-        }
-      }
-    });
+  if (
+    (data.entity === "PLANT_OP" ||
+     data.entity === "VEHICLE_OP" ||
+     data.entity === "PRIVATE_VEHICLE") &&
+    String(data.plantId) === String(plantID)
+  ) {
+    // 🔄 always reload latest data silently
+    await loadPlantOperation();
+    await loadVehiclesAndOps();
+    await loadPrivateVehicles();
+
+  }
+});
 
 
     sseConnection.onerror = () => {
@@ -1861,6 +1891,78 @@ async function deleteTrip(vehicleId, index) {
   updateVehicleTripSludgeTotals(vehicleId);
   setStatusBadge(computeCompleteness());
 }
+
+async function loadLatestWaterTillDate() {
+  try {
+    const r = await fetch(
+      `/api/operations/plant/${plantID}/latest-water?date=${encodeURIComponent(date)}`
+    );
+    if (!r.ok) return;
+
+    const op = await r.json();
+    if (!op) return;
+
+    // fill UI ONLY if user has not checked waterUsed
+    if (!document.getElementById("waterUsed").checked) {
+      document.getElementById("waterFilledDate").value = op.waterFilledDate || "";
+      document.getElementById("waterLtrs").value = op.waterLtrs ?? "";
+      document.getElementById("totalWaterAmount").value = op.totalWaterAmount ?? "";
+    }
+  } catch (e) {
+    console.warn("Failed to load latest water", e);
+  }
+}
+
+async function loadLatestPowerBillTillDate() {
+  try {
+    const r = await fetch(
+      `/api/operations/plant/${plantID}/latest-power-bill?date=${encodeURIComponent(date)}`
+    );
+    if (!r.ok) return;
+
+    const op = await r.json();
+    if (!op) return;
+
+    const billChk = document.getElementById("powerBill");
+    if (billChk.checked) return;
+
+    document.getElementById("lastBillDate").value = op.lastBillDate || "";
+    document.getElementById("TotalNoOfUnits").value = op.totalNoOfUnits ?? "";
+    document.getElementById("totalBillAmount").value = op.totalBillAmount ?? "";
+  } catch (e) {
+    console.warn("Failed to load latest power bill", e);
+  }
+}
+
+
+async function loadLatestFuelTillDate(vehicleId) {
+  try {
+    const r = await fetch(
+      `/api/vehicle-operations/${vehicleId}/latest-fuel?date=${encodeURIComponent(date)}`
+    );
+    if (!r.ok) return;
+
+    const op = await r.json();
+    if (!op) return;
+
+    const vid = String(vehicleId);
+
+    // only auto-fill when checkbox is OFF
+    if (!document.getElementById(`lastFuel_${vid}`).checked) {
+      document.getElementById(`lastFuelDate_${vid}`).value =
+        op.lastFuelFilledDate || "";
+
+      document.getElementById(`filledLiters_${vid}`).value =
+        op.filledLiters ?? "";
+
+      document.getElementById(`currentOdo_${vid}`).value =
+        op.currentOdometerReading ?? "";
+    }
+  } catch (e) {
+    console.warn("Failed to load latest fuel", e);
+  }
+}
+
 
 
 

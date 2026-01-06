@@ -1,5 +1,6 @@
 package com.mvr.plant.controller;
 
+import com.mvr.plant.DTO.FuelDTO;
 import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.DTO.VehicleOperationBetweenDTO;
 import com.mvr.plant.DTO.VehicleOperationDTO;
@@ -96,10 +97,20 @@ public class VehicleOperationController {
         return ResponseEntity.ok(result);
     }
 
+//    @GetMapping("/{vehicleId}/latest-fuel")
+//    public ResponseEntity<VehicleOperation> latestFuel(@PathVariable Long vehicleId) {
+//        return ResponseEntity.ok(vehicleOperationService.getLatestFuelFilled(vehicleId));
+//    }
+
     @GetMapping("/{vehicleId}/latest-fuel")
-    public ResponseEntity<VehicleOperation> latestFuel(@PathVariable Long vehicleId) {
-        return ResponseEntity.ok(vehicleOperationService.getLatestFuelFilled(vehicleId));
+    public ResponseEntity<FuelDTO> latestFuel(@PathVariable Long vehicleId, @RequestParam("date") String date)
+    {
+        LocalDate localDate = LocalDate.parse(date);
+        return ResponseEntity.ok(vehicleOperationService.getLatestFuelFilled(vehicleId, localDate));
     }
 
-
+    @GetMapping("/fuel/{vehicleId}")
+    public ResponseEntity<List<FuelDTO>> getFuelDetails(@PathVariable Long vehicleId) {
+        return ResponseEntity.ok(vehicleOperationService.getFuelDetailsByVehicleId(vehicleId));
+    }
 }

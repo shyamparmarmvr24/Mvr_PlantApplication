@@ -62,6 +62,15 @@ public class FstpPlant {
     @Column(name = "PpMeterSerialNo",length = 50)
     private String ppMeterSerialNo;
 
+    @Column(name = "DiscomName",length = 50)
+    private String discomName;
+
+    @Column(name = "FixedChargesInRs")
+    private Double fixedChargesInRs;
+
+    @Column(name = "FixedChargesPerKW")
+    private Double fixedChargesPerKW;
+
     @Column(name = "SanctionLoad")
     private Integer sanctionLoad;
 
@@ -115,6 +124,9 @@ public class FstpPlant {
 
     @Column(name = "CteIssuedDate")
     private LocalDate cteIssuedDate;
+
+    @Column(name="WaterType")
+    private String waterType;
 
     @Column(name = "NoOfVehicle")
     private Integer noOfVehicle;

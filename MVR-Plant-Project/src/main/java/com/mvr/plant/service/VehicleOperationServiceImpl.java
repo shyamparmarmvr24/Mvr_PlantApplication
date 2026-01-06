@@ -1,4 +1,5 @@
 package com.mvr.plant.service;
+import com.mvr.plant.DTO.FuelDTO;
 import com.mvr.plant.DTO.VehicleOperationBetweenDTO;
 import com.mvr.plant.DTO.VehicleOperationDTO;
 import com.mvr.plant.entity.VehicleOperation;
@@ -35,7 +36,12 @@ public class VehicleOperationServiceImpl implements IVehicleOperationService {
     }
 
     @Override
-    public VehicleOperation getLatestFuelFilled(Long vehicleId) {
-        return vehicleOpRepo.getLatestFuelFilled(vehicleId);
+    public FuelDTO getLatestFuelFilled(Long vehicleId, LocalDate date) {
+        return vehicleOpRepo.getLatestFuelFilled(vehicleId,date);
+    }
+
+    @Override
+    public List<FuelDTO> getFuelDetailsByVehicleId(Long vehicleId) {
+        return vehicleOpRepo.getFuelDetailsByVehicleId(vehicleId);
     }
 }

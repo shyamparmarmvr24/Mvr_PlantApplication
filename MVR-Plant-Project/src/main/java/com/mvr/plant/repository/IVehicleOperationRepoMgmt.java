@@ -1,5 +1,6 @@
 package com.mvr.plant.repository;
 
+import com.mvr.plant.DTO.FuelDTO;
 import com.mvr.plant.DTO.VehicleOperationBetweenDTO;
 import com.mvr.plant.DTO.VehicleOperationDTO;
 import com.mvr.plant.entity.PlantEmployeeOperation;
@@ -17,5 +18,6 @@ public interface IVehicleOperationRepoMgmt
     public VehicleOperation updateVehicleOperation(Long plantId, Long vehicleID, VehicleOperation vehicleOp);
     public List<VehicleOperationDTO> getVehicleOperationsByDate(LocalDate date);
     public List<VehicleOperationBetweenDTO> getVehicleOperationsBetween(LocalDate start, LocalDate end);
-    public VehicleOperation getLatestFuelFilled(Long vehicleId);
+    public FuelDTO getLatestFuelFilled(Long vehicleId, LocalDate date);
+    public List<FuelDTO> getFuelDetailsByVehicleId(Long vehicleId);
 }

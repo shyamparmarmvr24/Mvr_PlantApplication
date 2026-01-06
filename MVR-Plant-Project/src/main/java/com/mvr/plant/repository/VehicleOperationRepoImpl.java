@@ -1,5 +1,6 @@
 package com.mvr.plant.repository;
 
+import com.mvr.plant.DTO.FuelDTO;
 import com.mvr.plant.DTO.VehicleOperationBetweenDTO;
 import com.mvr.plant.DTO.VehicleOperationDTO;
 import com.mvr.plant.entity.VehicleInformation;
@@ -139,9 +140,19 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt {
         return result;
     }
 
+//    @Override
+//    public VehicleOperation getLatestFuelFilled(Long vehicleId) {
+//        return vehicleOpRepo.findLatestFuelFilled(vehicleId).stream().findFirst().orElse(null);
+//    }
+
     @Override
-    public VehicleOperation getLatestFuelFilled(Long vehicleId) {
-        return vehicleOpRepo.findLatestFuelFilled(vehicleId).stream().findFirst().orElse(null);
+    public FuelDTO getLatestFuelFilled(Long vehicleId, LocalDate date) {
+        return vehicleOpRepo.findLatestFuelFilledTillDate(vehicleId, date).stream().findFirst().orElse(null);
+    }
+
+    @Override
+    public List<FuelDTO> getFuelDetailsByVehicleId(Long vehicleId) {
+        return vehicleOpRepo.findFuelDetailsByVehicleId(vehicleId);
     }
 
 }

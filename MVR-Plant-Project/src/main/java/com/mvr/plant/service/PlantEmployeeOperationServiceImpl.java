@@ -40,4 +40,9 @@ public class PlantEmployeeOperationServiceImpl implements IPlantEmployeeOperatio
         return empOpRepo.getAllEmployeesOperationBetween(start, end);
     }
 
+    @Override
+    public PlantEmployeeOperation updatePlantEmployeeOperationByDate(Long plantId, Integer empId, PlantEmployeeOperation empOp) {
+        return empOpRepo.updatePlantEmployeeOperationByDate(plantId,empId,empOp);
+    }
+
 }

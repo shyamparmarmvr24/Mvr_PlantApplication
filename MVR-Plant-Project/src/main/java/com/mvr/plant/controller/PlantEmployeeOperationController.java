@@ -75,4 +75,21 @@ public class PlantEmployeeOperationController {
 
         return ResponseEntity.ok(result);
     }
+
+    @PutMapping("/employee/{plantId}/{empId}")
+    public ResponseEntity<PlantEmployeeOperation> updateEmployeeOperation(@PathVariable Long plantId, @PathVariable Integer empId,@RequestParam("date") String date, @RequestBody PlantEmployeeOperation empOp)
+    {
+        // parse and set date
+        LocalDate localDate = LocalDate.parse(date);
+        empOp.setOperationDate(localDate);
+
+        PlantEmployeeOperation updated = employeeOpService.updatePlantEmployeeOperationByDate(plantId, empId, empOp);
+
+        sseController.sendEvent(
+                new SseEvent("EMP_OP", "UPDATE", plantId, empId.longValue())
+        );
+
+        return ResponseEntity.ok(updated);
+    }
+
 }

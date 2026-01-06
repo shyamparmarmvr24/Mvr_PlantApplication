@@ -1,5 +1,7 @@
 package com.mvr.plant.repository;
 
+import com.mvr.plant.DTO.PowerBillDTO;
+import com.mvr.plant.DTO.WaterDTO;
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.PlantOperation;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -31,22 +33,139 @@ public interface IPlantOperationRepository extends JpaRepository<PlantOperation,
     @EntityGraph(attributePaths = {"plant"})
     List<PlantOperation> findByOperationDateBetween(LocalDate startDate, LocalDate endDate);
 
-    @Query("""
-        SELECT p FROM PlantOperation p
-        WHERE p.plant.plantID = :plantId
-          AND p.powerBill = true
-          AND p.lastBillDate IS NOT NULL
-        ORDER BY p.lastBillDate DESC
-    """)
-    List<PlantOperation> findLatestPowerBill(@Param("plantId") Long plantId);
+//    @Query("""
+//        SELECT p FROM PlantOperation p
+//        WHERE p.plant.plantID = :plantId
+//          AND p.powerBill = true
+//          AND p.lastBillDate IS NOT NULL
+//        ORDER BY p.lastBillDate DESC
+//    """)
+//    List<PlantOperation> findLatestPowerBill(@Param("plantId") Long plantId);
+//
+//    @Query("""
+//    SELECT p FROM PlantOperation p
+//    WHERE p.plant.plantID = :plantId
+//      AND p.waterUsed = true
+//      AND p.waterFilledDate IS NOT NULL
+//    ORDER BY p.waterFilledDate DESC
+//    """)
+//    List<PlantOperation> findLatestWaterFilled(@Param("plantId") Long plantId);
+
+//    @Query("""
+//    SELECT p FROM PlantOperation p
+//    WHERE p.plant.plantID = :plantId
+//      AND p.powerBill = true
+//      AND p.lastBillDate IS NOT NULL
+//      AND p.operationDate <= :selectedDate
+//    ORDER BY p.operationDate DESC
+//    """)
+//    List<PlantOperation> findLatestPowerBillTillDate(@Param("plantId") Long plantId, @Param("selectedDate") LocalDate selectedDate);
+//
+//    @Query("""
+//    SELECT p FROM PlantOperation p
+//    WHERE p.plant.plantID = :plantId
+//      AND p.waterUsed = true
+//      AND p.waterFilledDate IS NOT NULL
+//      AND p.operationDate <= :selectedDate
+//    ORDER BY p.operationDate DESC
+//    """)
+//    List<PlantOperation> findLatestWaterFilledTillDate(@Param("plantId") Long plantId, @Param("selectedDate") LocalDate selectedDate);
 
     @Query("""
-    SELECT p FROM PlantOperation p
+    SELECT new com.mvr.plant.DTO.PowerBillDTO(
+        p.plant.plantID,
+        p.powerBill,
+        p.lastBillDate,
+        p.TotalNoOfUnits,
+        p.totalBillAmount
+    )
+    FROM PlantOperation p
+    WHERE p.plant.plantID = :plantId
+      AND p.powerBill = true
+      AND p.lastBillDate IS NOT NULL
+      AND p.operationDate <= :selectedDate
+    ORDER BY p.operationDate DESC
+    """)
+    List<PowerBillDTO> findLatestPowerBillTillDate(@Param("plantId") Long plantId, @Param("selectedDate") LocalDate selectedDate);
+
+    @Query("""
+    SELECT new com.mvr.plant.DTO.WaterDTO(
+        p.plant.plantID,
+        p.waterUsed,
+        p.waterFilledDate,
+        p.waterLtrs,
+        p.totalWaterAmount
+    )
+    FROM PlantOperation p
     WHERE p.plant.plantID = :plantId
       AND p.waterUsed = true
       AND p.waterFilledDate IS NOT NULL
-    ORDER BY p.waterFilledDate DESC
+      AND p.operationDate <= :selectedDate
+    ORDER BY p.operationDate DESC
     """)
-    List<PlantOperation> findLatestWaterFilled(@Param("plantId") Long plantId);
+    List<WaterDTO> findLatestWaterFilledTillDate(@Param("plantId") Long plantId, @Param("selectedDate") LocalDate selectedDate);
+
+//    @Query("""
+//    SELECT new com.mvr.plant.DTO.WaterDTO(
+//        p.plant.plantID,
+//        p.waterUsed,
+//        p.waterFilledDate,
+//        p.waterLtrs,
+//        p.totalWaterAmount
+//    )
+//    FROM PlantOperation p
+//    WHERE p.waterUsed = true
+//      AND p.waterFilledDate IS NOT NULL
+//    ORDER BY p.waterFilledDate DESC
+//    """)
+//    List<WaterDTO> findAllWaterDetails();
+//
+//    @Query("""
+//    SELECT new com.mvr.plant.DTO.PowerBillDTO(
+//        p.plant.plantID,
+//        p.powerBill,
+//        p.lastBillDate,
+//        p.TotalNoOfUnits,
+//        p.totalBillAmount
+//    )
+//    FROM PlantOperation p
+//    WHERE p.powerBill = true
+//      AND p.lastBillDate IS NOT NULL
+//    ORDER BY p.lastBillDate DESC
+//    """)
+//    List<PowerBillDTO> findAllPowerBillDetails();
+
+    @Query("""
+    SELECT new com.mvr.plant.DTO.WaterDTO(
+        p.plant.plantID,
+        p.waterUsed,
+        p.waterFilledDate,
+        p.waterLtrs,
+        p.totalWaterAmount
+    )
+    FROM PlantOperation p
+    WHERE p.waterUsed = true
+      AND p.waterFilledDate IS NOT NULL
+      AND p.plant.plantID = :plantId
+    ORDER BY p.waterFilledDate DESC
+""")
+    List<WaterDTO> findWaterDetailsByPlantId(@Param("plantId") Long plantId);
+
+    @Query("""
+    SELECT new com.mvr.plant.DTO.PowerBillDTO(
+        p.plant.plantID,
+        p.powerBill,
+        p.lastBillDate,
+        p.TotalNoOfUnits,
+        p.totalBillAmount
+    )
+    FROM PlantOperation p
+    WHERE p.powerBill = true
+      AND p.lastBillDate IS NOT NULL
+      AND p.plant.plantID = :plantId
+    ORDER BY p.lastBillDate DESC
+""")
+    List<PowerBillDTO> findPowerBillDetailsByPlantId(@Param("plantId") Long plantId);
+
 
 }

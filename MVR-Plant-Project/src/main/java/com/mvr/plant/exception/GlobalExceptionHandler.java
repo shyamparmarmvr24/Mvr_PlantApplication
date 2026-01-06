@@ -161,7 +161,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    // ---------------------- COMMON RESPONSE BUILDER ----------------------
+    // <--------------------- COMMON RESPONSE BUILDER ---------------------->
 
     private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message) {
         Map<String, Object> body = new HashMap<>();

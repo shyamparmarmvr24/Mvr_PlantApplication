@@ -2,6 +2,8 @@ package com.mvr.plant.repository;
 
 import com.mvr.plant.DTO.PlantOperationBetweenDTO;
 import com.mvr.plant.DTO.PlantOperationDTO;
+import com.mvr.plant.DTO.PowerBillDTO;
+import com.mvr.plant.DTO.WaterDTO;
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.PlantOperation;
 import com.mvr.plant.entity.VehicleOperation;
@@ -198,14 +200,44 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
         operationRepo.save(plantOp);
     }
 
+//    @Override
+//    public PlantOperation getLatestPowerBill(Long plantId) {
+//        return operationRepo.findLatestPowerBill(plantId).stream().findFirst().orElse(null);
+//    }
+//
+//    @Override
+//    public PlantOperation getLatestWaterFilled(Long plantId) {
+//        return operationRepo.findLatestWaterFilled(plantId).stream().findFirst().orElse(null);
+//    }
+
     @Override
-    public PlantOperation getLatestPowerBill(Long plantId) {
-        return operationRepo.findLatestPowerBill(plantId).stream().findFirst().orElse(null);
+    public PowerBillDTO getLatestPowerBill(Long plantId, LocalDate date) {
+        return operationRepo.findLatestPowerBillTillDate(plantId, date).stream().findFirst().orElse(null);
     }
 
     @Override
-    public PlantOperation getLatestWaterFilled(Long plantId) {
-        return operationRepo.findLatestWaterFilled(plantId).stream().findFirst().orElse(null);
+    public WaterDTO getLatestWaterFilled(Long plantId, LocalDate date) {
+        return operationRepo.findLatestWaterFilledTillDate(plantId, date).stream().findFirst().orElse(null);
+    }
+
+//    @Override
+//    public List<WaterDTO> getAllWaterDetails() {
+//        return operationRepo.findAllWaterDetails();
+//    }
+//
+//    @Override
+//    public List<PowerBillDTO> getAllPowerBillDetails() {
+//        return operationRepo.findAllPowerBillDetails();
+//    }
+
+    @Override
+    public List<WaterDTO> getWaterDetailsByPlantId(Long plantId) {
+        return operationRepo.findWaterDetailsByPlantId(plantId);
+    }
+
+    @Override
+    public List<PowerBillDTO> getPowerBillDetailsByPlantId(Long plantId) {
+        return operationRepo.findPowerBillDetailsByPlantId(plantId);
     }
 
 }

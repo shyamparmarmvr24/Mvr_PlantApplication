@@ -2,6 +2,8 @@ package com.mvr.plant.repository;
 
 import com.mvr.plant.DTO.PlantOperationBetweenDTO;
 import com.mvr.plant.DTO.PlantOperationDTO;
+import com.mvr.plant.DTO.PowerBillDTO;
+import com.mvr.plant.DTO.WaterDTO;
 import com.mvr.plant.entity.PlantOperation;
 
 import java.time.LocalDate;
@@ -15,6 +17,8 @@ public interface IPlantOperationMgmtRepo
     public List<PlantOperationDTO> getAllOperationBydate(LocalDate date);
     public  List<PlantOperationBetweenDTO> findByOperationDateBetween(LocalDate startDate, LocalDate endDate);
     public void recomputePlantTotals(Long plantId, LocalDate date);
-    public PlantOperation getLatestPowerBill(Long plantId);
-    public PlantOperation getLatestWaterFilled(Long plantId);
+    public PowerBillDTO getLatestPowerBill(Long plantId, LocalDate date);
+    public WaterDTO getLatestWaterFilled(Long plantId, LocalDate date);
+    public List<WaterDTO> getWaterDetailsByPlantId(Long plantId);
+    public List<PowerBillDTO> getPowerBillDetailsByPlantId(Long plantId);
 }
