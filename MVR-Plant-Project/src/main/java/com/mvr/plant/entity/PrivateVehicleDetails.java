@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "PrivateVehicleDetails")
@@ -41,6 +42,8 @@ public class PrivateVehicleDetails {
     private Double receivedSludgeLtrs;
 
     private Double receivedSludgeKgs;
+
+    private LocalTime privateVehTripTime;
 
     private LocalDate operationDate;
 

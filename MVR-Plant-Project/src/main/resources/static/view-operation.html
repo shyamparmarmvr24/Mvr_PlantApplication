@@ -222,6 +222,8 @@
             sludgeProcessed: "Ltrs", biocharProduced: "Kgs", plantRunningHrs: "Hrs",
             powerReadingAmImport: "Kwh", powerReadingAmExport: "Kwh", powerReadingPmImport: "Kwh",
             powerReadingPmExport: "Kwh", powerConsumed: "Kwh",
+            powerReadingMorningImportKvah: "Kvah",
+            powerReadingEveningImportKvah: "Kvah",
             dgReadingAm: "Hrs", dgReadingPm: "Hrs", dgRunHours: "Hrs",
             dgDiesalPercentageAm: "%", dgDiesalPercentagePm: "%",
             polymerUsage: "grms", polymerStock: "Kgs", pillets: "Kgs", pilletsStock: "Kgs"
@@ -245,6 +247,20 @@
             const num = Number(val);
             return isNaN(num) ? "-" : num.toFixed(2);
         }
+
+       function formatHrsMin(val) {
+            if (val === null || val === undefined || val === "" || val === "-") {
+                return "-";
+            }
+
+            // keep 2 decimal places always
+            const str = Number(val).toFixed(2);
+
+            const [hrs, mins] = str.split(".");
+
+            return `${parseInt(hrs)} Hrs ${mins} Min`;
+        }
+
 
 
         // compute progress according to rules:
@@ -508,6 +524,16 @@ fieldsBody.innerHTML += `
 </tr>
 `;
 
+fieldsBody.innerHTML += `
+<tr>
+  <th>Power Import (Kvah)</th>
+  <td class="inline-row">
+    <div>Morning: <strong>${fmt("powerReadingMorningImportKvah", op.powerReadingMorningImportKvah)}</strong></div>
+    <div>Evening: <strong>${fmt("powerReadingEveningImportKvah", op.powerReadingEveningImportKvah)}</strong></div>
+  </td>
+</tr>
+`;
+
 if (plantSolar === true) {
   fieldsBody.innerHTML += `
   <tr>
@@ -519,15 +545,15 @@ if (plantSolar === true) {
   </tr>
 
   <tr>
-  <th>Solar Power Generated (Kwh)</th>
-  <td style="background:#dcfce7;font-weight:700">
-    ${
-      (op.powerReadingPmExport != null && op.powerReadingAmExport != null)
-        ? to2(op.powerReadingPmExport - op.powerReadingAmExport)
-        : "-"
-    }
-  </td>
-</tr>
+    <th>Solar Power Generated (Kwh)</th>
+    <td style="background:#dcfce7;font-weight:700">
+      ${
+        (op.powerReadingPmExport != null && op.powerReadingAmExport != null)
+          ? to2(op.powerReadingPmExport - op.powerReadingAmExport)
+          : "-"
+      }
+    </td>
+  </tr>
   `;
 }
 fieldsBody.innerHTML += `
@@ -574,7 +600,10 @@ fieldsBody.innerHTML += `
 
 <tr>
   <th>DG Total Run Hours (Hrs)</th>
-  <td style="background:#dcfce7;font-weight:700">${to2(op.dgRunHours)}</td>
+<!--  <td style="background:#dcfce7;font-weight:700">${to2(op.dgRunHours)}</td>-->
+<td style="background:#dcfce7;font-weight:700">
+  ${formatHrsMin(op.dgRunHours)}
+</td>
 </tr>
 <tr>
   <th>DG Used Fuel (%)</th>
@@ -609,6 +638,10 @@ fieldsBody.innerHTML += `
 <tr>
   <th>Total Water Tanker Amount</th>
   <td>${op.waterUsed ? (op.totalWaterAmount ?? "-") : "-"}</td>
+</tr>
+<tr>
+  <th>Water Tanker Remark</th>
+  <td>${op.waterUsed ? (op.waterRemark ?? "-") : "-"}</td>
 </tr>
 `;
 
@@ -751,6 +784,10 @@ for (const v of vehicles) {
                                     <span>Kgs: ${vo.sludgeCollectKgs ?? "-"}</span>
                                   </div>
                                </td>
+                            </tr>
+                            <tr>
+                              <th>Vehicle Remark</th>
+                              <td>${vo.vehicleRemark ?? "-"}</td>
                             </tr>
 
                         </table>

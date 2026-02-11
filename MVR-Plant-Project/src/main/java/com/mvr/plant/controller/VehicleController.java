@@ -1,5 +1,7 @@
 package com.mvr.plant.controller;
 
+import com.mvr.plant.DTO.SseActions;
+import com.mvr.plant.DTO.SseEntities;
 import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.VehicleInformation;
 import com.mvr.plant.service.IVehicleService;
@@ -19,9 +21,6 @@ public class VehicleController {
     @Autowired
     private SseController sseController;
 
-
-    //CREATE VEHICLE FOR PLANT
-
     @PostMapping("/create/{plantId}")
     public ResponseEntity<VehicleInformation> createVehicle(
             @PathVariable Long plantId,
@@ -29,7 +28,7 @@ public class VehicleController {
     ) {
         VehicleInformation saved = vehicleService.createVehicle(plantId, vehicle);
         sseController.sendEvent(
-                new SseEvent("VEHICLE", "CREATE", plantId, saved.getVehicleID())
+                new SseEvent(SseEntities.VEHICLE, SseActions.CREATE, plantId, saved.getVehicleID())
         );
         return ResponseEntity.ok(saved);
     }
@@ -56,8 +55,18 @@ public class VehicleController {
     ) {
         VehicleInformation updated = vehicleService.updateVehicle(plantId, vehicleId, updatedVehicle);
         sseController.sendEvent(
-                new SseEvent("VEHICLE", "UPDATE", plantId, vehicleId)
+                new SseEvent(SseEntities.VEHICLE,SseActions.UPDATE, plantId, vehicleId)
         );
         return ResponseEntity.ok(updated);
     }
+
+    @DeleteMapping("/delete/{vehicleId}")
+    public ResponseEntity<String> deleteVehicle(@PathVariable Long vehicleId)
+    {
+        sseController.sendEvent(
+                new SseEvent(SseEntities.VEHICLE,SseActions.DELETE, null, vehicleId)
+        );
+        return ResponseEntity.ok(vehicleService.deleteVehicleByVehicleId(vehicleId));
+    }
+
 }

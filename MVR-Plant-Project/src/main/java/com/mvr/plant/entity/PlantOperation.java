@@ -41,6 +41,10 @@ public class PlantOperation {
 
     private Double sludgeReceivedKgs;
 
+    private Boolean isSludgeTankCleaning;
+
+    private LocalDate sludgeTankCleaningDate;
+
     private Integer totalNoOfTrips;
 
     private Double sludgeProcessed;
@@ -56,6 +60,24 @@ public class PlantOperation {
     private Double powerReadingPmImport;
 
     private Double powerReadingPmExport;
+
+    private Double powerReadingMorningImportKvah;
+
+    private Double powerReadingEveningImportKvah;
+
+//    raw data storage
+
+    private Double rawPowerMeterReadingAmImport;
+
+    private Double rawPowerMeterReadingAmExport;
+
+    private Double rawPowerMeterReadingPmImport;
+
+    private Double rawPowerMeterReadingPmExport;
+
+    private Double rawPowerMeterReadingMorningImportKvah;
+
+    private Double rawPowerMeterReadingEveningImportKvah;
 
     private Boolean powerBill;
 
@@ -81,9 +103,21 @@ public class PlantOperation {
 
     private Double polymerStock;
 
+    private Boolean isPolymerStockReceived;
+
+    private LocalDate ploymerStockReceivedDate;
+
+    private Double ploymerStockQuantity;
+
     private Double pillets;
 
     private Double pilletsStock;
+
+    private Boolean isPilletsStockReceived;
+
+    private LocalDate pilletsStockReceivedDate;
+
+    private Double pilletsStockQuantity;
 
     private Boolean privateVehicle;
 
@@ -100,6 +134,9 @@ public class PlantOperation {
     private Double waterLtrs;
 
     private Double totalWaterAmount;
+
+    @Column(length = 500)
+    private String waterRemark;
 
     @Column(length = 500)
     private String remarks;

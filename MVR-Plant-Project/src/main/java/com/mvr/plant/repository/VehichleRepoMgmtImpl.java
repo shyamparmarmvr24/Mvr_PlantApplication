@@ -1,27 +1,33 @@
 package com.mvr.plant.repository;
-
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.VehicleInformation;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
 @Repository
-public class VehichleRepoMgmtImpl implements IVehicleRepoImpl {
+public class VehichleRepoMgmtImpl implements IVehicleRepoImpl
+{
     @Autowired
     private IVehicleRepo vehicleRepo;
 
     @Autowired
     private IPlantRepository plantRepo;
 
+    @Autowired
+    private IVehicleOperationRepo vehicleOpRepo;
+
+    @Autowired
+    private IVehicleTripDetailsRepo vehicleTripRepo;
+
 
     @Override
     public VehicleInformation createVehicle(Long plantId, VehicleInformation vehicle) {
 
         // Fetch parent plant
-        FstpPlant plant = plantRepo.findPlantByPlantID(plantId)
-                .orElseThrow(() -> new IllegalStateException("Plant not found: " + plantId));
+        FstpPlant plant = plantRepo.findPlantByPlantID(plantId).orElseThrow(() -> new IllegalStateException("Plant not found: " + plantId));
 
         // Set FK reference
         vehicle.setPlant(plant);
@@ -129,5 +135,33 @@ public class VehichleRepoMgmtImpl implements IVehicleRepoImpl {
             existing.setStepneySerialNo(updated.getStepneySerialNo());
 
         return vehicleRepo.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public String deleteVehicleByVehicleId(Long vehicleId)
+    {
+
+        if (!vehicleRepo.existsById(vehicleId))
+            return "Vehicle Not Found For Id " + vehicleId;
+
+        try {
+            // Delete grandchild first
+            vehicleTripRepo.deleteTripsByVehicleId(vehicleId);
+
+            // Delete child
+            vehicleOpRepo.deleteOperationsByVehicleId(vehicleId);
+
+            // Delete parent
+            vehicleRepo.deleteById(vehicleId);
+
+            return "Vehicle Deleted Successfully";
+        }
+        catch (DataIntegrityViolationException ex) {
+            return "Cannot delete vehicle due to related records.";
+        }
+        catch (Exception ex) {
+            return "Unexpected error while deleting vehicle.";
+        }
     }
 }

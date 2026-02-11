@@ -1,5 +1,6 @@
 package com.mvr.plant.controller;
-
+import com.mvr.plant.DTO.SseActions;
+import com.mvr.plant.DTO.SseEntities;
 import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.DgDetails;
 import com.mvr.plant.service.IDgDetailsService;
@@ -24,7 +25,7 @@ public class DgDetailsController
     {
         DgDetails saved = dgService.createDgDetails(plantId, dgDetails);
         sseController.sendEvent(
-                new SseEvent("DG", "CREATE", plantId, saved.getDgId())
+                new SseEvent(SseEntities.DG, SseActions.CREATE, plantId, saved.getDgId())
         );
         return ResponseEntity.status(201).body(saved);
     }
@@ -35,7 +36,7 @@ public class DgDetailsController
     {
         DgDetails updated = dgService.updateDgDetails(dgId, dgDetails);
         sseController.sendEvent(
-                new SseEvent("DG", "UPDATE", updated.getPlant().getPlantID(), dgId)
+                new SseEvent(SseEntities.DG, SseActions.UPDATE, updated.getPlant().getPlantID(), dgId)
         );
         return ResponseEntity.ok(updated);
     }
@@ -53,6 +54,9 @@ public class DgDetailsController
     public ResponseEntity<String> deleteDgDetails(@PathVariable Long dgId)
     {
         String msg = dgService.deleteDgDetails(dgId);
+        sseController.sendEvent(
+                new SseEvent(SseEntities.DG, SseActions.DELETE, null, dgId)
+        );
         return ResponseEntity.ok(msg); // 204 NO CONTENT
     }
 

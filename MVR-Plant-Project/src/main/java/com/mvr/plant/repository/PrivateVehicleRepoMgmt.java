@@ -57,6 +57,7 @@ public class PrivateVehicleRepoMgmt implements IPrivateVehicleRepoImpl {
         existing.setReceivedSludgeLtrs(updated.getReceivedSludgeLtrs());
         existing.setReceivedSludgeKgs(updated.getReceivedSludgeKgs());
         existing.setOperationDate(updated.getOperationDate());
+        existing.setPrivateVehTripTime(updated.getPrivateVehTripTime());
         return privateVehRepo.save(existing);
     }
 

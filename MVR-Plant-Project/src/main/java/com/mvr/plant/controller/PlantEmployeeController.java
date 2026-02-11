@@ -1,12 +1,12 @@
 package com.mvr.plant.controller;
-
+import com.mvr.plant.DTO.SseActions;
+import com.mvr.plant.DTO.SseEntities;
 import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.PlantEmployee;
 import com.mvr.plant.service.IPlantEmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class PlantEmployeeController {
     public ResponseEntity<PlantEmployee> createEmployee(@PathVariable Long plantId, @RequestBody PlantEmployee employee) {
         PlantEmployee savedEmployee = employeeService.createEmployee(plantId, employee);
         sseController.sendEvent(
-                new SseEvent("EMPLOYEE", "CREATE", plantId, savedEmployee.getEmployeeId().longValue())
+                new SseEvent(SseEntities.EMPLOYEE, SseActions.CREATE, plantId, savedEmployee.getEmployeeId().longValue())
         );
         return ResponseEntity.ok(savedEmployee);
     }
@@ -52,7 +52,7 @@ public class PlantEmployeeController {
         response.put("status", "success");
         response.put("message", message);
         sseController.sendEvent(
-                new SseEvent("EMPLOYEE", "UPDATE", plantId, employeeId.longValue())
+                new SseEvent(SseEntities.EMPLOYEE, SseActions.UPDATE, plantId, employeeId.longValue())
         );
         return ResponseEntity.ok(response);
     }
@@ -63,7 +63,7 @@ public class PlantEmployeeController {
         // If deletion successful
         if (result.equals("Employee Deleted Successfully")) {
             sseController.sendEvent(
-                    new SseEvent("EMPLOYEE", "DELETE", null, employeeId.longValue())
+                    new SseEvent(SseEntities.EMPLOYEE, SseActions.DELETE, null, employeeId.longValue())
             );
             return ResponseEntity.ok(result); // 200 OK
         }

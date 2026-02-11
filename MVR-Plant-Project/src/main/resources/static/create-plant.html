@@ -224,6 +224,16 @@
                     <label for="ppMeterSerialNo">PP Meter Serial No</label>
                     <input type="text" id="ppMeterSerialNo" maxlength="50"/>
                 </div>
+
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option value="">-- Select Category --</option>
+                        <option value="NDS-LT">NDS-LT</option>
+                        <option value="MIP-LT">MIP-LT</option>
+                        <option value="NDS-HT">NDS-HT</option>
+                    </select>
+                </div>
             </div>
 
             <!-- NEW DISCOM BILLING FIELDS -->
@@ -239,13 +249,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="fixedChargesInRs">Fixed Charges (₹)</label>
-                    <input type="number" id="fixedChargesInRs" step="0.01"/>
-                </div>
-
-                <div class="form-group">
-                    <label for="fixedChargesPerKW">Fixed Charges Per KW</label>
-                    <input type="number" id="fixedChargesPerKW" step="0.01"/>
+                    <label for="headquarterName">Headquarter Name</label>
+                    <select id="headquarterName">
+                        <option value="">-- Select Headquarter --</option>
+                        <option value="Reengus">Reengus</option>
+                        <option value="Nadbai">Nadbai</option>
+                        <option value="Mukundgarh">Mukundgarh</option>
+                        <option value="Todaraisingh">Todaraisingh</option>
+                    </select>
                 </div>
             </div>
 
@@ -281,6 +292,17 @@
                     <label for="solarMeterSerialNo">Solar Meter Serial No</label>
                     <input type="text" id="solarMeterSerialNo" maxlength="50"/>
                 </div>
+
+                <div class="form-group">
+                    <label for="solarPlantCapacity">Solar Power Capacity (kW)</label>
+                    <input type="number" id="solarPlantCapacity"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="solarMultiplicationFactor">Solar Multiplication Factor</label>
+                    <input type="number" step="0.01" id="solarMultiplicationFactor"/>
+                </div>
+
             </div>
 
             <div class="form-row">
@@ -331,13 +353,6 @@
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="solarPlantCapacity">Solar Power Capacity (kW)</label>
-                    <input type="number" id="solarPlantCapacity"/>
-                </div>
-            </div>
-
             <div class="buttons">
                 <button type="button" class="btn btn-prev" onclick="goToStep(1)">◂ Back</button>
                 <button type="button" class="btn btn-next" onclick="goToStep(3)">Next ▸</button>
@@ -368,12 +383,75 @@
                         <option value="yes">Yes</option>
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label for="tabsReceivedDate">Tabs Received Date</label>
                     <input type="date" id="tabsReceivedDate" disabled/>
                     <div class="note">Future dates not allowed</div>
                 </div>
+
+                <div class="form-group">
+                    <label for="tabImeiNo">Tab IMEI No</label>
+                    <input type="text" id="tabImeiNo" maxlength="70" disabled/>
+                </div>
+
+                <div class="form-group">
+                    <label for="tabMake">Tab Make</label>
+                    <input type="text" id="tabMake" maxlength="70" disabled/>
+                </div>
             </div>
+
+                <div class="section-title">Infrastructure Installation</div>
+            <div class="divider"></div>
+
+                <!-- Sludge Screen -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="isSludgeScreenInstall">Sludge Screen Installed</label>
+                        <select id="isSludgeScreenInstall">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sludgeScreenInstallationDate">Installation Date</label>
+                        <input type="date" id="sludgeScreenInstallationDate" disabled/>
+                    </div>
+                </div>
+
+                <!-- Guard Room -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="isGuardRoomPrepared">Guard Room Prepared</label>
+                        <select id="isGuardRoomPrepared">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="guardRoomPreparedDate">Prepared Date</label>
+                        <input type="date" id="guardRoomPreparedDate" disabled/>
+                    </div>
+                </div>
+
+                <!-- Solar Fencing -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="isSolarFencingDone">Solar Fencing Done</label>
+                        <select id="isSolarFencingDone">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="solarFencingDoneDate">Done Date</label>
+                        <input type="date" id="solarFencingDoneDate" disabled/>
+                    </div>
+                </div>
+
 
             <div class="form-row">
                 <div class="form-group">
@@ -482,7 +560,10 @@
         "tabsReceivedDate",
         "codAndBodSenserDate",
         "ctoIssuedDate",
-        "cteIssuedDate"
+        "cteIssuedDate",
+        "sludgeScreenInstallationDate",
+        "guardRoomPreparedDate",
+        "solarFencingDoneDate"
     ].forEach(setMaxDate);
 
     // ----------------------- YES/NO → ENABLE/DISABLE DATES -----------------------
@@ -529,7 +610,38 @@
     setupToggleWithDate("permanentPower", "permanentPowerDate");
     setupToggleWithDate("solar", "solarDate");
     setupToggleWithDate("internet", "internetDate");
-    setupToggleWithDate("tabs", "tabsReceivedDate");
+    setupTabsToggle();
+<!--    setupToggleWithDate("tabs", "tabsReceivedDate");-->
+
+    function setupTabsToggle() {
+    const sel = document.getElementById("tabs");
+    const dateInput = document.getElementById("tabsReceivedDate");
+    const imeiInput = document.getElementById("tabImeiNo");
+    const makeInput = document.getElementById("tabMake");
+
+    function refresh() {
+        if (sel.value === "yes") {
+            dateInput.disabled = false;
+            imeiInput.disabled = false;
+            makeInput.disabled = false;
+        } else {
+            dateInput.disabled = true;
+            imeiInput.disabled = true;
+            makeInput.disabled = true;
+
+            dateInput.value = "";
+            imeiInput.value = "";
+            makeInput.value = "";
+        }
+    }
+
+    sel.addEventListener("change", refresh);
+    refresh();
+}
+
+    setupToggleWithDate("isSludgeScreenInstall", "sludgeScreenInstallationDate");
+    setupToggleWithDate("isGuardRoomPrepared", "guardRoomPreparedDate");
+    setupToggleWithDate("isSolarFencingDone", "solarFencingDoneDate");
 
     setupToggleWithText("permanentPower", "ppMeterSerialNo");
     setupToggleWithText("solar", "solarMeterSerialNo");
@@ -752,22 +864,43 @@
                 document.getElementById("cteIssuedDate").value = plantData.cteIssuedDate;
             }
 
+            setYesNo("isSludgeScreenInstall", plantData.isSludgeScreenInstall);
+            if (plantData.sludgeScreenInstallationDate) {
+                document.getElementById("sludgeScreenInstallationDate").value =
+                    plantData.sludgeScreenInstallationDate;
+            }
+
+            setYesNo("isGuardRoomPrepared", plantData.isGuardRoomPrepared);
+            if (plantData.guardRoomPreparedDate) {
+                document.getElementById("guardRoomPreparedDate").value =
+                    plantData.guardRoomPreparedDate;
+            }
+
+            setYesNo("isSolarFencingDone", plantData.isSolarFencingDone);
+            if (plantData.solarFencingDoneDate) {
+                document.getElementById("solarFencingDoneDate").value =
+                    plantData.solarFencingDoneDate;
+            }
+
 
             document.getElementById("ppMeterSerialNo").value = plantData.ppMeterSerialNo || "";
 
             document.getElementById("discomName").value = plantData.discomName || "";
-            document.getElementById("fixedChargesInRs").value = plantData.fixedChargesInRs ?? "";
-            document.getElementById("fixedChargesPerKW").value = plantData.fixedChargesPerKW ?? "";
+            document.getElementById("headquarterName").value = plantData.headquarterName || "";
 
             document.getElementById("sanctionLoad").value = plantData.sanctionLoad ?? "";
             document.getElementById("multiplicationFactor").value = plantData.multiplicationFactor ?? "";
 
             document.getElementById("solarMeterSerialNo").value = plantData.solarMeterSerialNo || "";
 
+            document.getElementById("category").value = plantData.category || "";
+
             document.getElementById("permanentPower").dispatchEvent(new Event("change"));
             document.getElementById("solar").dispatchEvent(new Event("change"));
 
             document.getElementById("solarPlantCapacity").value = plantData.solarPlantCapacity ?? "";
+
+            document.getElementById("solarMultiplicationFactor").value = plantData.solarMultiplicationFactor ?? "";
 
             document.getElementById("constructionStartedDate").value = plantData.constructionStartedDate || "";
             document.getElementById("civilWorkCompletedDate").value = plantData.civilWorkCompletedDate || "";
@@ -781,6 +914,11 @@
             if (plantData.tabsReceivedDate) {
                 document.getElementById("tabsReceivedDate").value = plantData.tabsReceivedDate;
             }
+
+            document.getElementById("tabImeiNo").value = plantData.tabImeiNo || "";
+            document.getElementById("tabMake").value = plantData.tabMake || "";
+
+            document.getElementById("tabs").dispatchEvent(new Event("change"));
 
             const noOfVehicle = plantData.noOfVehicle ?? 0;
             const noOfEmployees = plantData.noOfEmployees ?? 0;
@@ -1257,6 +1395,10 @@
                 ? Number(document.getElementById("solarPlantCapacity").value)
                 : null,
 
+            solarMultiplicationFactor: document.getElementById("solarMultiplicationFactor").value
+            ? Number(document.getElementById("solarMultiplicationFactor").value)
+            : null,
+
             constructionStartedDate: document.getElementById("constructionStartedDate").value || null,
             civilWorkCompletedDate: document.getElementById("civilWorkCompletedDate").value || null,
             machinaryAssembleDate: document.getElementById("machinaryAssembleDate").value || null,
@@ -1267,6 +1409,18 @@
 
             tabs: document.getElementById("tabs").value === "yes",
             tabsReceivedDate: document.getElementById("tabsReceivedDate").value || null,
+
+            tabImeiNo: document.getElementById("tabImeiNo").value.trim() || null,
+            tabMake: document.getElementById("tabMake").value.trim() || null,
+
+            isSludgeScreenInstall: document.getElementById("isSludgeScreenInstall").value === "yes",
+            sludgeScreenInstallationDate: document.getElementById("sludgeScreenInstallationDate").value || null,
+
+            isGuardRoomPrepared: document.getElementById("isGuardRoomPrepared").value === "yes",
+            guardRoomPreparedDate: document.getElementById("guardRoomPreparedDate").value || null,
+
+            isSolarFencingDone: document.getElementById("isSolarFencingDone").value === "yes",
+            solarFencingDoneDate: document.getElementById("solarFencingDoneDate").value || null,
 
             noOfVehicle: Number(document.getElementById("noOfVehicle").value || 0),
             noOfEmployees: Number(document.getElementById("noOfEmployees").value || 0),
@@ -1279,15 +1433,11 @@
 
             ppMeterSerialNo: document.getElementById("ppMeterSerialNo").value.trim() || null,
 
+            category: document.getElementById("category").value || null,
+
             discomName: document.getElementById("discomName").value.trim() || null,
 
-            fixedChargesInRs: document.getElementById("fixedChargesInRs").value
-                ? Number(document.getElementById("fixedChargesInRs").value)
-                : null,
-
-            fixedChargesPerKW: document.getElementById("fixedChargesPerKW").value
-                ? Number(document.getElementById("fixedChargesPerKW").value)
-                : null,
+            headquarterName: document.getElementById("headquarterName").value.trim() || null,
 
             sanctionLoad: document.getElementById("sanctionLoad").value
                 ? Number(document.getElementById("sanctionLoad").value)

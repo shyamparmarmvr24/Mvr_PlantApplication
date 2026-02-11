@@ -57,6 +57,9 @@ public class VehicleOperation {
 
     private Double sludgeCollectKgs;
 
+    @Column(length = 500)
+    private String vehicleRemark;
+
     @OneToMany(mappedBy = "vehicleOp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<VehicleTripDetails> vehicleTrips = new ArrayList<>();

@@ -1,13 +1,13 @@
 package com.mvr.plant.controller;
-
 import com.mvr.plant.DTO.LabOperationDTO;
+import com.mvr.plant.DTO.SseActions;
+import com.mvr.plant.DTO.SseEntities;
 import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.LaboratoryOperation;
 import com.mvr.plant.service.ILaboratoryOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +35,7 @@ public class LabOperationController {
         Map<String, Integer> result = labService.updateLabOperationById(plantId, labOp);
 
         sseController.sendEvent(
-                new SseEvent("LAB", "UPDATE", plantId, null)
+                new SseEvent(SseEntities.LAB, SseActions.UPDATE, plantId, labOp.getLabID())
         );
 
         return ResponseEntity.ok(result);

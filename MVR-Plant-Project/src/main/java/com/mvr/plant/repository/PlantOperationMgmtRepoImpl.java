@@ -1,16 +1,11 @@
 package com.mvr.plant.repository;
-
-import com.mvr.plant.DTO.PlantOperationBetweenDTO;
-import com.mvr.plant.DTO.PlantOperationDTO;
-import com.mvr.plant.DTO.PowerBillDTO;
-import com.mvr.plant.DTO.WaterDTO;
+import com.mvr.plant.DTO.*;
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.PlantOperation;
 import com.mvr.plant.entity.VehicleOperation;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +83,9 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
         existing.setSludgeTankLevelAm(plantOp.getSludgeTankLevelAm());
         existing.setSludgeTankLevelPm(plantOp.getSludgeTankLevelPm());
 
+        existing.setIsSludgeTankCleaning(plantOp.getIsSludgeTankCleaning());
+        existing.setSludgeTankCleaningDate(plantOp.getSludgeTankCleaningDate());
+
         existing.setSludgeProcessed(plantOp.getSludgeProcessed());
         existing.setBiocharProduced(plantOp.getBiocharProduced());
         existing.setPlantRunningHrs(plantOp.getPlantRunningHrs());
@@ -95,6 +93,18 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
         existing.setPowerReadingAmExport(plantOp.getPowerReadingAmExport());
         existing.setPowerReadingPmImport(plantOp.getPowerReadingPmImport());
         existing.setPowerReadingPmExport(plantOp.getPowerReadingPmExport());
+
+        existing.setPowerReadingMorningImportKvah(plantOp.getPowerReadingMorningImportKvah());
+        existing.setPowerReadingEveningImportKvah(plantOp.getPowerReadingEveningImportKvah());
+
+//        raw data storage
+        existing.setRawPowerMeterReadingAmImport(plantOp.getRawPowerMeterReadingAmImport());
+        existing.setRawPowerMeterReadingAmExport(plantOp.getRawPowerMeterReadingAmExport());
+        existing.setRawPowerMeterReadingPmImport(plantOp.getRawPowerMeterReadingPmImport());
+        existing.setRawPowerMeterReadingPmExport(plantOp.getRawPowerMeterReadingPmExport());
+
+        existing.setRawPowerMeterReadingMorningImportKvah(plantOp.getRawPowerMeterReadingMorningImportKvah());
+        existing.setRawPowerMeterReadingEveningImportKvah(plantOp.getRawPowerMeterReadingEveningImportKvah());
 
         existing.setPowerBill(plantOp.getPowerBill());
         existing.setLastBillDate(plantOp.getLastBillDate());
@@ -110,21 +120,26 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
         existing.setDgReadingPm(plantOp.getDgReadingPm());
         existing.setDgDiesalPercentageAm(plantOp.getDgDiesalPercentageAm());
         existing.setDgDiesalPercentagePm(plantOp.getDgDiesalPercentagePm());
-        if (plantOp.getDgReadingAm() != null && plantOp.getDgReadingPm() != null) {
-            existing.setDgRunHours(Math.abs(plantOp.getDgReadingAm() - plantOp.getDgReadingPm()));
-        } else {
-            existing.setDgRunHours(0.0);
-        }
+        existing.setDgRunHours(calculateHourMinuteDifference(plantOp.getDgReadingAm(), plantOp.getDgReadingPm()));
 
         existing.setWaterUsed(plantOp.getWaterUsed());
         existing.setWaterFilledDate(plantOp.getWaterFilledDate());
         existing.setWaterLtrs(plantOp.getWaterLtrs());
         existing.setTotalWaterAmount(plantOp.getTotalWaterAmount());
+        existing.setWaterRemark(plantOp.getWaterRemark());
 
         existing.setPolymerUsage(plantOp.getPolymerUsage());
         existing.setPolymerStock(plantOp.getPolymerStock());
+        existing.setIsPolymerStockReceived(plantOp.getIsPolymerStockReceived());
+        existing.setPloymerStockReceivedDate(plantOp.getPloymerStockReceivedDate());
+        existing.setPloymerStockQuantity(plantOp.getPloymerStockQuantity());
+
         existing.setPillets(plantOp.getPillets());
         existing.setPilletsStock(plantOp.getPilletsStock());
+        existing.setIsPilletsStockReceived(plantOp.getIsPilletsStockReceived());
+        existing.setPilletsStockReceivedDate(plantOp.getPilletsStockReceivedDate());
+        existing.setPilletsStockQuantity(plantOp.getPilletsStockQuantity());
+
         existing.setRemarks(plantOp.getRemarks());
 
         //save the update on db
@@ -200,16 +215,6 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
         operationRepo.save(plantOp);
     }
 
-//    @Override
-//    public PlantOperation getLatestPowerBill(Long plantId) {
-//        return operationRepo.findLatestPowerBill(plantId).stream().findFirst().orElse(null);
-//    }
-//
-//    @Override
-//    public PlantOperation getLatestWaterFilled(Long plantId) {
-//        return operationRepo.findLatestWaterFilled(plantId).stream().findFirst().orElse(null);
-//    }
-
     @Override
     public PowerBillDTO getLatestPowerBill(Long plantId, LocalDate date) {
         return operationRepo.findLatestPowerBillTillDate(plantId, date).stream().findFirst().orElse(null);
@@ -220,15 +225,6 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
         return operationRepo.findLatestWaterFilledTillDate(plantId, date).stream().findFirst().orElse(null);
     }
 
-//    @Override
-//    public List<WaterDTO> getAllWaterDetails() {
-//        return operationRepo.findAllWaterDetails();
-//    }
-//
-//    @Override
-//    public List<PowerBillDTO> getAllPowerBillDetails() {
-//        return operationRepo.findAllPowerBillDetails();
-//    }
 
     @Override
     public List<WaterDTO> getWaterDetailsByPlantId(Long plantId) {
@@ -238,6 +234,53 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
     @Override
     public List<PowerBillDTO> getPowerBillDetailsByPlantId(Long plantId) {
         return operationRepo.findPowerBillDetailsByPlantId(plantId);
+    }
+
+    @Override
+    public PolymerDTO getLatestPolymerStock(Long plantId, LocalDate date) {
+        return operationRepo.findLatestPolymerStockTillDate(plantId,date).stream().findFirst().orElse(null);
+    }
+
+    @Override
+    public PilletsDTO getLatestPilletsStock(Long plantId, LocalDate date) {
+        return operationRepo.findLatestPilletsStockTillDate(plantId,date).stream().findFirst().orElse(null);
+    }
+
+    @Override
+    public List<PolymerDTO> getPolymerStockByPlantId(Long plantId) {
+        return operationRepo.findPolymerStockByPlantId(plantId);
+    }
+
+    @Override
+    public List<PilletsDTO> getPilletsStockByPlantId(Long plantId) {
+        return operationRepo.findPilletsStockByPlantId(plantId);
+    }
+
+    private double calculateHourMinuteDifference(Double morningVal, Double eveningVal) {
+
+        if (morningVal == null || eveningVal == null) {
+            return 0.0;
+        }
+
+        // Extract hours and minutes
+        int mHour = morningVal.intValue();
+        int mMin = (int) Math.round((morningVal - mHour) * 100);
+
+        int eHour = eveningVal.intValue();
+        int eMin = (int) Math.round((eveningVal - eHour) * 100);
+
+        // Convert everything to minutes
+        int totalMorningMinutes = (mHour * 60) + mMin;
+        int totalEveningMinutes = (eHour * 60) + eMin;
+
+        int diffMinutes = Math.abs(totalEveningMinutes - totalMorningMinutes);
+
+        // Convert back to hour + minute
+        int finalHour = diffMinutes / 60;
+        int finalMin = diffMinutes % 60;
+
+        // Return as HH.MM format
+        return Double.parseDouble(finalHour + "." + String.format("%02d", finalMin));
     }
 
 }

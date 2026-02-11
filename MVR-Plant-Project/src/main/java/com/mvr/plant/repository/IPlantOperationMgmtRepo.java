@@ -1,9 +1,6 @@
 package com.mvr.plant.repository;
 
-import com.mvr.plant.DTO.PlantOperationBetweenDTO;
-import com.mvr.plant.DTO.PlantOperationDTO;
-import com.mvr.plant.DTO.PowerBillDTO;
-import com.mvr.plant.DTO.WaterDTO;
+import com.mvr.plant.DTO.*;
 import com.mvr.plant.entity.PlantOperation;
 
 import java.time.LocalDate;
@@ -21,4 +18,8 @@ public interface IPlantOperationMgmtRepo
     public WaterDTO getLatestWaterFilled(Long plantId, LocalDate date);
     public List<WaterDTO> getWaterDetailsByPlantId(Long plantId);
     public List<PowerBillDTO> getPowerBillDetailsByPlantId(Long plantId);
+    public PolymerDTO getLatestPolymerStock(Long plantId, LocalDate date);
+    public PilletsDTO getLatestPilletsStock(Long plantId, LocalDate date);
+    public List<PolymerDTO> getPolymerStockByPlantId(Long plantId);
+    public List<PilletsDTO> getPilletsStockByPlantId(Long plantId);
 }

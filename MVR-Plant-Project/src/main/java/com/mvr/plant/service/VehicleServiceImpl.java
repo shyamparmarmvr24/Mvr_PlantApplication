@@ -26,4 +26,9 @@ public class VehicleServiceImpl implements IVehicleService {
     public VehicleInformation updateVehicle(Long plantId, Long vehicleId, VehicleInformation vehicle) {
         return vehicleRepo.updateVehicle(plantId, vehicleId, vehicle);
     }
+
+    @Override
+    public String deleteVehicleByVehicleId(Long vehicleId) {
+        return vehicleRepo.deleteVehicleByVehicleId(vehicleId);
+    }
 }

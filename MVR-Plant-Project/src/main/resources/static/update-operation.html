@@ -335,7 +335,7 @@
         /* ================= POWER READINGS ================= */
 
         // Import readings are ALWAYS counted
-        ["powerReadingAmImport", "powerReadingPmImport"].forEach(id => {
+        ["powerReadingAmImport", "powerReadingPmImport","powerReadingMorningImportKvah","powerReadingEveningImportKvah"].forEach(id => {
           total++;
           const el = document.getElementById(id);
           if (el && String(el.value).trim() !== "") filled++;
@@ -430,12 +430,13 @@
           const trips = document.getElementById(`trips_${vid}`);
           const sludge = document.getElementById(`sludge_${vid}`);
           const sludgeKgs = document.getElementById(`sludgeKgs_${vid}`);
+          const remark = document.getElementById(`remark_${vid}`);
 
             total += 6;
             if(am && String(am.value).trim() !== "") filled++;
             if(pm && String(pm.value).trim() !== "") filled++;
             if(fuel && String(fuel.value).trim() !== "") filled++;
-
+<!--            if (remark && String(remark.value).trim() !== "") filled++;-->
             const tripCount = Number(trips?.value || 0);
             // ---- TRIPS FIELD ----
             if (tripCount === 0) {
@@ -455,8 +456,6 @@
               if (sludge && String(sludge.value).trim() !== "") filled++;
               if (sludgeKgs && String(sludgeKgs.value).trim() !== "") filled++;
             }
-
-
 
           if(lastFuel && lastFuel.checked)
             {
@@ -527,6 +526,15 @@
         <div class="two-inline">
           ${createInput("powerReadingAmImport","Enter Power Import Morning",currentOp.powerReadingAmImport).outerHTML}
           ${createInput("powerReadingPmImport","Enter Power Import Evening",currentOp.powerReadingPmImport).outerHTML}
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>Power Import (Kvah)</th>
+      <td>
+        <div class="two-inline">
+          ${createInput("powerReadingMorningImportKvah","Enter Power Import Morning (Kvah)",currentOp.powerReadingMorningImportKvah).outerHTML}
+          ${createInput("powerReadingEveningImportKvah","Enter Power Import Evening (Kvah)",currentOp.powerReadingEveningImportKvah).outerHTML}
         </div>
       </td>
     </tr>
@@ -638,6 +646,18 @@
         </div>
       </td>
     </tr>
+    <tr>
+      <th>Water Tanker Remark</th>
+      <td>
+        <textarea
+          id="waterRemark"
+          class="input"
+          placeholder="Enter Water Remark"
+          maxlength="500"
+        >${currentOp.waterRemark ?? ""}</textarea>
+      </td>
+    </tr>
+
   `;
 
 
@@ -689,9 +709,10 @@
       const waterDateEl = document.getElementById("waterFilledDate");
       const waterLtrsEl = document.getElementById("waterLtrs");
       const waterAmtEl = document.getElementById("totalWaterAmount");
+      const waterRemarkEl = document.getElementById("waterRemark");
 
       function toggleWaterFields(enabled) {
-        [waterDateEl, waterLtrsEl, waterAmtEl].forEach(el => {
+        [waterDateEl, waterLtrsEl, waterAmtEl, waterRemarkEl].forEach(el => {
           if (!el) return;
           el.disabled = !enabled;
           if (!enabled) el.value = "";
@@ -956,6 +977,14 @@ function countTripsWithData(vehicleId) {
                       </td>
                   </tr>
 
+                  <tr>
+                        <th>Remark</th>
+                        <td>
+                            <input id="remark_${vid}" class="input" placeholder="Enter Vehicle Remark">
+                        </td>
+                    </tr>
+
+
                 </table>
               </div>
             `;
@@ -1082,6 +1111,8 @@ tripsInput.addEventListener("input", () => {
               if(fuel) fuel.value = op.vehicleFuelLevel ?? "";
               if(sludge) sludge.value = op.sludgeCollect ?? "";
               if(sludgeKgs) sludgeKgs.value = op.sludgeCollectKgs ?? "";
+              const remarkEl = document.getElementById(`remark_${vid}`);
+              if (remarkEl) remarkEl.value = op.vehicleRemark ?? "";
 
               if(lastFuel){
                   lastFuel.checked = !!op.lastFuelFilled;
@@ -1196,6 +1227,17 @@ tripsInput.addEventListener("input", () => {
           const el = document.getElementById(f.id);
           if(el && currentOp[f.id] != null) el.value = currentOp[f.id];
         });
+
+        if (currentOp.powerReadingMorningImportKvah != null) {
+          document.getElementById("powerReadingMorningImportKvah").value =
+            currentOp.powerReadingMorningImportKvah;
+        }
+
+        if (currentOp.powerReadingEveningImportKvah != null) {
+          document.getElementById("powerReadingEveningImportKvah").value =
+            currentOp.powerReadingEveningImportKvah;
+        }
+
         const remarksEl = document.getElementById("remarks");
         if(remarksEl && currentOp.remarks != null) remarksEl.value = currentOp.remarks;
 
@@ -1313,6 +1355,16 @@ tripsInput.addEventListener("input", () => {
               : null;
         }
 
+        plantPayload.powerReadingMorningImportKvah =
+          document.getElementById("powerReadingMorningImportKvah").value.trim() === ""
+            ? null
+            : Number(document.getElementById("powerReadingMorningImportKvah").value.trim());
+
+        plantPayload.powerReadingEveningImportKvah =
+          document.getElementById("powerReadingEveningImportKvah").value.trim() === ""
+            ? null
+            : Number(document.getElementById("powerReadingEveningImportKvah").value.trim());
+
 
         plantPayload.operationDate = date;
 
@@ -1335,10 +1387,14 @@ if (waterUsed) {
     document.getElementById("totalWaterAmount").value.trim() === ""
       ? null
       : Number(document.getElementById("totalWaterAmount").value);
+
+  plantPayload.waterRemark =
+    document.getElementById("waterRemark").value.trim() || null;
 } else {
   plantPayload.waterFilledDate = null;
   plantPayload.waterLtrs = null;
   plantPayload.totalWaterAmount = null;
+  plantPayload.waterRemark = null;
 }
 
         const billChecked = document.getElementById("powerBill")?.checked;
@@ -1372,6 +1428,22 @@ if (billChecked) {
         if (!plantSolar) {
           plantPayload.powerReadingAmExport = null;
           plantPayload.powerReadingPmExport = null;
+        }
+
+        const kvahFields = [
+          "powerReadingMorningImportKvah",
+          "powerReadingEveningImportKvah"
+        ];
+
+        for (const id of kvahFields) {
+          const el = document.getElementById(id);
+          if (el && !numericValid(el.value)) {
+            alert("Invalid number in Kvah fields. Use digits and '.' only.");
+            el.focus();
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit";
+            return;
+          }
         }
 
         // send plant PUT
@@ -1419,6 +1491,7 @@ if (billChecked) {
               vehicleReadingAm: (document.getElementById(`am_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`am_${vid}`).value.trim())),
               vehicleReadingPm: (document.getElementById(`pm_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`pm_${vid}`).value.trim())),
               vehicleFuelLevel: (document.getElementById(`fuel_${vid}`).value.trim() === "" ? null : Number(document.getElementById(`fuel_${vid}`).value.trim())),
+              vehicleRemark: document.getElementById(`remark_${vid}`).value.trim() || null,
               lastFuelFilled: !!(lastFuel && lastFuel.checked),
               lastFuelFilledDate: (lastFuel && lastFuel.checked && lastFuelDate && String(lastFuelDate.value).trim() !== "") ? lastFuelDate.value : null,
               filledLiters: filledLitersVal,
@@ -1739,8 +1812,6 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-
-
       // initial load
      (async function init(){
       await loadPlantMaster();
@@ -1764,8 +1835,6 @@ document.addEventListener("visibilitychange", () => {
   savedPrivateVehicleCount,
   document.querySelectorAll("#privateVehicleForms .vehicle-block").length
 );
-
-
 
   for (let i = 0; i < count; i++) {
     const ltrsEl = document.getElementById(`pv_ltrs_${i}`);
@@ -1962,10 +2031,6 @@ async function loadLatestFuelTillDate(vehicleId) {
     console.warn("Failed to load latest fuel", e);
   }
 }
-
-
-
-
 
 function updateVehicleTripSludgeTotals(vehicleId) {
   let totalLtrs = 0;

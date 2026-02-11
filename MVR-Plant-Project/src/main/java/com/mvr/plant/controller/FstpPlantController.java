@@ -1,21 +1,17 @@
 package com.mvr.plant.controller;
-
+import com.mvr.plant.DTO.SseActions;
+import com.mvr.plant.DTO.SseEntities;
 import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.service.IPlantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/plants")
 @CrossOrigin(origins = "*")
-//@CrossOrigin(origins = {
-//        "http://localhost:5173",
-//        "http://localhost:3000"
-//})
 public class FstpPlantController {
     @Autowired
     private IPlantService plantService;
@@ -28,7 +24,7 @@ public class FstpPlantController {
     public ResponseEntity<FstpPlant> createPlant(@RequestBody FstpPlant plant) {
         FstpPlant result = plantService.insertPlantDetails(plant);
         sseController.sendEvent(
-                new SseEvent("PLANT", "CREATE", result.getPlantID(), null)
+                new SseEvent(SseEntities.PLANT, SseActions.CREATE, result.getPlantID(), null)
         );
         return ResponseEntity.ok(result);
     }
@@ -52,7 +48,7 @@ public class FstpPlantController {
     public ResponseEntity<String> updatePlant(@PathVariable Long id, @RequestBody FstpPlant plant) {
         String result = plantService.updatePlantDetails(id, plant);
         sseController.sendEvent(
-                new SseEvent("PLANT", "UPDATE", id, null)
+                new SseEvent(SseEntities.PLANT, SseActions.UPDATE, id, null)
         );
         return ResponseEntity.ok(result);
     }

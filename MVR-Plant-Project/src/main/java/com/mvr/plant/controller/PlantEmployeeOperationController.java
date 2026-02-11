@@ -1,13 +1,13 @@
 package com.mvr.plant.controller;
-
 import com.mvr.plant.DTO.EmployeeOperationDTO;
+import com.mvr.plant.DTO.SseActions;
+import com.mvr.plant.DTO.SseEntities;
 import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.PlantEmployeeOperation;
 import com.mvr.plant.service.IPlantEmployeeOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class PlantEmployeeOperationController {
         Map<String, Integer> response = employeeOpService.updatePlantEmployeeOperation(plantId, employeeId, empOp);
 
         sseController.sendEvent(
-                new SseEvent("EMP_OP", "UPDATE", plantId, employeeId.longValue())
+                new SseEvent(SseEntities.EMP_OP,SseActions.CREATE, plantId, employeeId.longValue())
         );
         return ResponseEntity.ok(response);
     }
@@ -65,9 +65,8 @@ public class PlantEmployeeOperationController {
     }
 
     @GetMapping("/date-range")
-    public ResponseEntity<List<EmployeeOperationDTO>> getEmployeeOperationsBetween(
-            @RequestParam String start,
-            @RequestParam String end) {
+    public ResponseEntity<List<EmployeeOperationDTO>> getEmployeeOperationsBetween(@RequestParam String start, @RequestParam String end)
+    {
         LocalDate startDate = LocalDate.parse(start);
         LocalDate endDate = LocalDate.parse(end);
 
@@ -86,7 +85,7 @@ public class PlantEmployeeOperationController {
         PlantEmployeeOperation updated = employeeOpService.updatePlantEmployeeOperationByDate(plantId, empId, empOp);
 
         sseController.sendEvent(
-                new SseEvent("EMP_OP", "UPDATE", plantId, empId.longValue())
+                new SseEvent(SseEntities.EMP_OP, SseActions.UPDATE, plantId, empId.longValue())
         );
 
         return ResponseEntity.ok(updated);

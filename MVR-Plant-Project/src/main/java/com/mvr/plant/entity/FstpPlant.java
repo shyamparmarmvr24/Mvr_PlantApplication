@@ -62,20 +62,20 @@ public class FstpPlant {
     @Column(name = "PpMeterSerialNo",length = 50)
     private String ppMeterSerialNo;
 
+    @Column(name = "Category",length = 20)
+    private String category;
+
     @Column(name = "DiscomName",length = 50)
     private String discomName;
 
-    @Column(name = "FixedChargesInRs")
-    private Double fixedChargesInRs;
-
-    @Column(name = "FixedChargesPerKW")
-    private Double fixedChargesPerKW;
+    @Column(name = "HeadquarterName",length = 50)
+    private String headquarterName;
 
     @Column(name = "SanctionLoad")
     private Integer sanctionLoad;
 
     @Column(name = "MultiplicationFactor")
-    private Integer multiplicationFactor;
+    private Double multiplicationFactor;
 
     @Column(name = "InternetDateOfCompletion")
     private LocalDate internetDateOfCompletion;
@@ -88,6 +88,27 @@ public class FstpPlant {
 
     @Column(name = "SolarPlantCapacity")
     private Long solarPlantCapacity;
+
+    @Column(name = "SolarMultiplicationFactor")
+    private Double solarMultiplicationFactor;
+
+    @Column(name = "IsSludgeScreenInstall")
+    private Boolean isSludgeScreenInstall;
+
+    @Column(name = "SludgeScreenInstallationDate")
+    private LocalDate sludgeScreenInstallationDate;
+
+    @Column(name = "IsGuardRoomPrepared")
+    private Boolean isGuardRoomPrepared;
+
+    @Column(name = "GuardRoomPreparedDate")
+    private LocalDate guardRoomPreparedDate;
+
+    @Column(name = "IsSolarFencingDone")
+    private Boolean isSolarFencingDone;
+
+    @Column(name = "SolarFencingDoneDate")
+    private LocalDate solarFencingDoneDate;
 
     @Column(name = "ConstructionStartedDate")
     private LocalDate constructionStartedDate;
@@ -112,6 +133,12 @@ public class FstpPlant {
 
     @Column(name = "TabsReceivedDate")
     private LocalDate tabsReceivedDate;
+
+    @Column(name = "TabImeiNo",length = 70)
+    private String tabImeiNo;
+
+    @Column(name = "TabMake",length = 70)
+    private String tabMake;
 
     @Column(name = "CtoCertified")
     private Boolean ctoCertified;

@@ -1,14 +1,9 @@
 package com.mvr.plant.service;
-
-import com.mvr.plant.DTO.PlantOperationBetweenDTO;
-import com.mvr.plant.DTO.PlantOperationDTO;
-import com.mvr.plant.DTO.PowerBillDTO;
-import com.mvr.plant.DTO.WaterDTO;
+import com.mvr.plant.DTO.*;
 import com.mvr.plant.entity.PlantOperation;
 import com.mvr.plant.repository.IPlantOperationMgmtRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -58,5 +53,24 @@ public class PlantOperationServiceImpl implements IPlantOperationService {
         return plantOpRepo.getPowerBillDetailsByPlantId(plantId);
     }
 
+    @Override
+    public PolymerDTO getLatestPolymerStock(Long plantId, LocalDate date) {
+        return plantOpRepo.getLatestPolymerStock(plantId,date);
+    }
+
+    @Override
+    public PilletsDTO getLatestPilletsStock(Long plantId, LocalDate date) {
+        return plantOpRepo.getLatestPilletsStock(plantId,date);
+    }
+
+    @Override
+    public List<PolymerDTO> getPolymerStockByPlantId(Long plantId) {
+        return plantOpRepo.getPolymerStockByPlantId(plantId);
+    }
+
+    @Override
+    public List<PilletsDTO> getPilletsStockByPlantId(Long plantId) {
+        return plantOpRepo.getPilletsStockByPlantId(plantId);
+    }
 
 }

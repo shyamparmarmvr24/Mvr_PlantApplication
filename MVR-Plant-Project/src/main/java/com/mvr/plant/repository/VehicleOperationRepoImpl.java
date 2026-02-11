@@ -70,6 +70,7 @@ public class VehicleOperationRepoImpl implements IVehicleOperationRepoMgmt {
 
         existing.setSludgeCollect(vehicleOp.getSludgeCollect());
         existing.setSludgeCollectKgs(vehicleOp.getSludgeCollectKgs());
+        existing.setVehicleRemark(vehicleOp.getVehicleRemark());
 
         vehicleOpRepo.save(existing);
 

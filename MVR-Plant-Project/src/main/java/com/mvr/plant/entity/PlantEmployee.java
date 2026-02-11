@@ -69,7 +69,6 @@ public class PlantEmployee {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-
     @PrePersist
     void onCreate() {
         createdAt = LocalDateTime.now();
