@@ -1,12 +1,11 @@
-//FstpPlant
 package com.mvr.plant.entity;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,6 +159,26 @@ public class FstpPlant {
 
     public int getNoOfEmployees() {
         return plantEmployees != null ? plantEmployees.size() : 0;
+    }
+
+    @CreatedDate
+    @Column(updatable = false, name = "Created_Date")
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "Updated_Date")
+    private LocalDateTime updatedAt;
+
+
+    @PrePersist
+    void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 
 

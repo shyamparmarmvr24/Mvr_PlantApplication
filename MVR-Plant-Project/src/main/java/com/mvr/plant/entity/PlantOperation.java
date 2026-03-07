@@ -1,12 +1,10 @@
 //PlantOperation
 package com.mvr.plant.entity;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -45,6 +43,9 @@ public class PlantOperation {
 
     private LocalDate sludgeTankCleaningDate;
 
+    @Column(length = 500)
+    private String sludgeTankRemark;
+
     private Integer totalNoOfTrips;
 
     private Double sludgeProcessed;
@@ -78,6 +79,9 @@ public class PlantOperation {
     private Double rawPowerMeterReadingMorningImportKvah;
 
     private Double rawPowerMeterReadingEveningImportKvah;
+
+    @Column(length = 500)
+    private String powerRemarks;
 
     private Boolean powerBill;
 
@@ -118,6 +122,9 @@ public class PlantOperation {
     private LocalDate pilletsStockReceivedDate;
 
     private Double pilletsStockQuantity;
+
+    @Column(length = 500)
+    private String stockRemark;
 
     private Boolean privateVehicle;
 

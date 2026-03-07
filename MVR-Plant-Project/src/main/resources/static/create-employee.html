@@ -178,7 +178,7 @@ input[type=number] {
         <table class="form-table">
             <tr>
                 <td><label>Employee ID *</label></td>
-                <td><input type="number" id="employeeId" required></td>
+                <td><input type="text" id="employeeId" required placeholder="Enter Employee ID"></td>
             </tr>
 
             <tr>
@@ -225,6 +225,11 @@ input[type=number] {
                 <td><input type="date" id="dateOfJoining" required></td>
             </tr>
 
+            <tr>
+                <td><label>Date Of Leaving</label></td>
+                <td><input type="date" id="dateOfLeaving" ></td>
+            </tr>
+
             <tr class="driver-only" style="display:none;">
                 <td><label>Licence Type *</label></td>
                 <td>
@@ -266,6 +271,8 @@ input[type=number] {
 
     const plantID = new URLSearchParams(window.location.search).get("plantID");
     const FORM_KEY = "createEmployeeForm";
+    let selectedHistory = null;
+    let lastPayload = null;
 
 
     // -------------------------------------------------------
@@ -370,7 +377,7 @@ loadDraft();
         const dob = document.getElementById("dateOfBirth").value;
         const doj = document.getElementById("dateOfJoining").value;
 
-        if (!id || isNaN(id)) return "Employee ID must be a valid number.";
+        if (!id) return "Employee ID is required.";
         if (!name) return "Employee name is required.";
         if (!des) return "Designation is required.";
         if (!/^\d{10}$/.test(mob)) return "Mobile number must be exactly 10 digits.";
@@ -408,73 +415,160 @@ loadDraft();
     // -------------------------------------------------------
     // FORM SUBMIT
     // -------------------------------------------------------
-    document.getElementById("empForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
+document.getElementById("empForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-        // Client-side validation
-        const error = validateFields();
-        if (error) {
-            alert("❌ " + error);
-            return;
-        }
+    const error = validateFields();
+    if (error) {
+        alert("❌ " + error);
+        return;
+    }
 
-        const data = {
-            employeeId: document.getElementById("employeeId").value,
-            employeeName: document.getElementById("employeeName").value,
-            designation: document.getElementById("designation").value,
-            mobileNo: document.getElementById("mobileNo").value,
-            alternateMobNo: document.getElementById("alternateMobNo").value || null,
-            address: document.getElementById("address").value,
-            dateOfBirth: document.getElementById("dateOfBirth").value,
-            dateOfJoining: document.getElementById("dateOfJoining").value,
-            licenceType: document.getElementById("licenceType")?.value || null,
-            licenceNumber: document.getElementById("licenceNumber")?.value || null,
-            licenceIssueDate: document.getElementById("licenceIssueDate")?.value || null,
-            licenceExpiryDate: document.getElementById("licenceExpiryDate")?.value || null
-        };
+    const data = {
+        employeeId: document.getElementById("employeeId").value.trim(),
+        employeeName: document.getElementById("employeeName").value,
+        designation: document.getElementById("designation").value,
+        mobileNo: document.getElementById("mobileNo").value,
+        alternateMobNo: document.getElementById("alternateMobNo").value || null,
+        address: document.getElementById("address").value,
+        dateOfBirth: document.getElementById("dateOfBirth").value,
+        dateOfJoining: document.getElementById("dateOfJoining").value,
+        dateOfLeaving: document.getElementById("dateOfLeaving").value,
+        licenceType: document.getElementById("licenceType")?.value || null,
+        licenceNumber: document.getElementById("licenceNumber")?.value || null,
+        licenceIssueDate: document.getElementById("licenceIssueDate")?.value || null,
+        licenceExpiryDate: document.getElementById("licenceExpiryDate")?.value || null
+    };
 
-        let res;
-        try {
-            res = await fetch(`/api/plantemployees/create/${plantID}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json"},
-                body: JSON.stringify(data)
-            });
-        } catch (networkErr) {
-            alert("❌ Network error — please check your internet connection.");
-            return;
-        }
+    lastPayload = data; // 🔥 store for reuse
 
-        // -------------------------------------------------------
-        // HANDLE BACKEND ERRORS (400, duplicate, JSON, etc.)
-        // -------------------------------------------------------
-        if (!res.ok) {
-            let message = "❌ Failed to create employee.";
-
-            try {
-                const err = await res.json();
-                if (err.message) message = "❌ " + err.message;
-            } catch {
-                // if server sends plain text
-                const t = await res.text();
-                message = "❌ " + t;
-            }
-
-            alert(message);
-            return;
-        }
-
-        // SUCCESS
-        alert("✔ Employee created successfully!");
-
-        // clear session data ONLY after submit
-        sessionStorage.removeItem(FORM_KEY);
-
-        window.location.href = `view-employees.html?plantID=${plantID}`;
+    let res = await fetch(`/api/plantemployees/create/${plantID}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify(data)
     });
+
+    let result;
+try {
+    result = await res.json();
+} catch {
+    alert("❌ Server error");
+    return;
+}
+
+    // 🔥 HISTORY EXISTS CASE
+    if (result.exists === true) {
+        showHistoryPopup(result.historyList);
+        return;
+    }
+
+    // SUCCESS
+    alert("✔ Employee created successfully!");
+    sessionStorage.removeItem(FORM_KEY);
+    window.location.href = `view-employees.html?plantID=${plantID}`;
+});
+
+    function showHistoryPopup(list) {
+
+    const container = document.getElementById("historyList");
+    container.innerHTML = "";
+
+    list.forEach(h => {
+        container.innerHTML += `
+            <div style="border:1px solid #ddd; padding:10px; margin:5px;">
+                <input type="radio" name="history"
+                    onclick="selectHistory('${h.employeeId}','${h.dateOfJoining}')">
+
+                <b>${h.employeeName}</b><br/>
+                Joining: ${h.dateOfJoining}<br/>
+                Leaving: ${h.dateOfLeaving || "-"}
+            </div>
+        `;
+    });
+
+    // 🔥 ADD HERE (AUTO SELECT LOGIC)
+   if (list.length === 1) {
+    selectedHistory = {
+        empId: list[0].employeeId,
+        joiningDate: list[0].dateOfJoining
+    };
+
+    setTimeout(() => {
+        document.querySelector('input[name="history"]').checked = true;
+    }, 0);
+}
+
+    // 🔥 THEN SHOW MODAL
+    document.getElementById("historyModal").style.display = "block";
+}
+
+    function selectHistory(empId, joiningDate) {
+    selectedHistory = { empId, joiningDate };
+}
+
+   async function restoreSelected() {
+
+    if (!selectedHistory) {
+        alert("Please select employee");
+        return;
+    }
+
+    // ✅ CLOSE MODAL
+    document.getElementById("historyModal").style.display = "none";
+
+    const res = await fetch(`/api/plantemployees/restore/${selectedHistory.empId}?joiningDate=${selectedHistory.joiningDate}`, {
+    method: "POST"
+    });
+
+        if (!res.ok) {
+            alert("❌ Failed to restore employee");
+            return;
+        }
+
+    alert("✔ Employee restored successfully");
+
+    window.location.href = `view-employees.html?plantID=${plantID}`;
+}
+
+async function createFresh() {
+
+    // ✅ CLOSE MODAL
+    document.getElementById("historyModal").style.display = "none";
+
+    const res = await fetch(`/api/plantemployees/create/${plantID}?forceCreate=true`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify(lastPayload)
+    });
+
+    if (!res.ok) {
+        alert("❌ Failed to create fresh employee");
+        return;
+    }
+
+    alert("✔ Fresh employee created");
+
+    window.location.href = `view-employees.html?plantID=${plantID}`;
+}
 
 </script>
 
+<!-- RESTORE MODAL -->
+<div id="historyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+
+    <div style="background:white; width:500px; margin:100px auto; padding:20px; border-radius:10px;">
+
+        <h3>Employee already exists in Archive</h3>
+
+        <div id="historyList"></div>
+
+        <div style="margin-top:20px; text-align:center;">
+            <button onclick="restoreSelected()" style="margin-right:10px;">Restore</button>
+            <button onclick="createFresh()">Fresh Employee</button>
+        </div>
+
+    </div>
+</div>
 
 </body>
 </html>

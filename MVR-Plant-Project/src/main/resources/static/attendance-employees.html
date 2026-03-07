@@ -220,7 +220,7 @@ document.addEventListener("visibilitychange", () => {
 
 
     async function loadEmployees() {
-        const res = await fetch(`/api/plantemployees/plant/${plantID}`);
+        const res = await fetch(`/api/plantemployees/plant/${plantID}/date/${date}`);
         const employees = await res.json();
 
         tbody.innerHTML = "";

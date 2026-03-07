@@ -1,13 +1,10 @@
 package com.mvr.plant.repository;
-
 import com.mvr.plant.DTO.EmployeeOperationDTO;
-import com.mvr.plant.DTO.PlantOperationDTO;
 import com.mvr.plant.entity.PlantEmployee;
 import com.mvr.plant.entity.PlantEmployeeOperation;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRepoImpl {
+public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRepoImpl
+{
     @Autowired
     private IPlantEmployeeOperationRepo empOpRepo;
 
@@ -23,7 +21,7 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
     private IPlantEmployeeRepo empRepo;
 
     @Override
-    public Map<String, Integer> updatePlantEmployeeOperation(Long plantId, Integer empId, PlantEmployeeOperation empOp) {
+    public Map<String, Integer> updatePlantEmployeeOperation(Long plantId, String empId, PlantEmployeeOperation empOp) {
         LocalDate date = empOp.getOperationDate();
         if (date == null) {
             throw new IllegalStateException("operationDate is required");
@@ -66,12 +64,12 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
     }
 
     @Override
-    public PlantEmployeeOperation getEmployeeOperationByEmpIdAndDate(Integer empId, LocalDate date) {
+    public PlantEmployeeOperation getEmployeeOperationByEmpIdAndDate(String empId, LocalDate date) {
         return empOpRepo.getEmployeeOperationByEmployeeIdAndDate(empId, date).orElse(null);
     }
 
     @Override
-    public List<PlantEmployeeOperation> getAllOperationsByEmployeeId(Integer employeeId) {
+    public List<PlantEmployeeOperation> getAllOperationsByEmployeeId(String employeeId) {
         return empOpRepo.getAllOperationsByEmployeeId(employeeId);
     }
 
@@ -142,35 +140,35 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
 
     @Override
     @Transactional
-    public PlantEmployeeOperation updatePlantEmployeeOperationByDate(Long plantId, Integer empId, PlantEmployeeOperation empOp)
+    public PlantEmployeeOperation updatePlantEmployeeOperationByDate(Long plantId, String empId, PlantEmployeeOperation empOp)
     {
         LocalDate date = empOp.getOperationDate();
         if (date == null) {
             throw new IllegalStateException("operationDate is required");
         }
 
-        // 1️⃣ Fetch employee under plant
+        //Fetch employee under plant
         PlantEmployee plantEmp = empRepo
                 .getEmployeeByPlantIdAndEmployeeId(plantId, empId)
                 .orElseThrow(() -> new IllegalStateException("Employee Not Found"));
 
-        // 2️⃣ Fetch existing operation (if any)
+        //Fetch existing operation (if any)
         PlantEmployeeOperation existing = empOpRepo
                 .getEmployeeOperationByEmployeeIdAndDate(empId, date)
                 .orElse(null);
 
-        // 3️⃣ Create new if not exists
+        //Create new if not exists
         if (existing == null) {
             existing = new PlantEmployeeOperation();
             existing.setEmployee(plantEmp);
             existing.setOperationDate(date);
         }
 
-        // 4️⃣ Update fields
+        //Update fields
         existing.setAttendanceAm(empOp.getAttendanceAm());
         existing.setAttendancePm(empOp.getAttendancePm());
 
-        // 5️⃣ Save & return entity
+        //Save & return entity
         return empOpRepo.save(existing);
     }
 

@@ -1,10 +1,8 @@
 package com.mvr.plant.service;
-
 import com.mvr.plant.entity.PrivateVehicleDetails;
 import com.mvr.plant.repository.IPrivateVehicleRepoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,5 +29,10 @@ public class PrivateVehicleServiveImpl implements IPrivateVehicleService {
     @Override
     public void deletePrivateVehicle(Long privateVehicleId) {
         privateVehRepo.deletePrivateVehicle(privateVehicleId);
+    }
+
+    @Override
+    public List<PrivateVehicleDetails> findPrivateVehByPlantIdAndOperationDateBetween(Long plantId, LocalDate fromDate, LocalDate toDate) {
+        return privateVehRepo.findPrivateVehByPlantIdAndOperationDateBetween(plantId,fromDate,toDate);
     }
 }

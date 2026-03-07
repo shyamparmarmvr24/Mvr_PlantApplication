@@ -177,7 +177,7 @@
         }
 
         try {
-            const res = await fetch(`/api/plantemployees/delete/${employeeId}`, {
+            const res = await fetch(`/api/plantemployees/delete/${encodeURIComponent(employeeId)}`, {
                 method: "DELETE"
             });
 
@@ -221,12 +221,12 @@
                    <td>
                         <div class="action-buttons">
                             <button class="edit-btn"
-                                onclick="window.location.href='update-employee.html?plantID=${plantID}&edit=1&employeeId=${emp.employeeId}'">
+                                onclick="window.location.href='update-employee.html?plantID=${plantID}&edit=1&employeeId=${encodeURIComponent(emp.employeeId)}'">
                                 Edit
                             </button>
 
                             <button class="delete-btn"
-                                onclick="deleteEmployee(${emp.employeeId})">
+                                onclick="deleteEmployee('${emp.employeeId}')">
                                 Delete
                             </button>
                         </div>

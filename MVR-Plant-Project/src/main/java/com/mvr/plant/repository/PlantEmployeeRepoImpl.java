@@ -1,12 +1,10 @@
 package com.mvr.plant.repository;
-
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.PlantEmployee;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -46,11 +44,11 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl {
 
 
     @Override
-    public String updateOperationById(Long plantId, Integer empId, PlantEmployee employee) {
+    public String updateOperationById(Long plantId, String empId, PlantEmployee employee) {
         // Find existing employee for this plant + employee ID
         PlantEmployee existing = empRepo.getEmployeeByPlantIdAndEmployeeId(plantId, empId).orElseThrow(() -> new IllegalStateException("Employee Not Found For This Plant"));
 
-        // ✅ Update allowed fields
+        // Update allowed fields
         existing.setEmployeeName(employee.getEmployeeName());
         existing.setDesignation(employee.getDesignation());
         existing.setMobileNo(employee.getMobileNo());
@@ -78,8 +76,8 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl {
     }
 
     @Override
-    @Transactional   // ensure both deletes are part of one transaction
-    public String deleteEmployeeByEmpId(Integer empId) {
+    @Transactional
+    public String deleteEmployeeByEmpId(String empId) {
         Optional<PlantEmployee> emp = empRepo.findById(empId);
         if (emp.isPresent()) {
             try {
@@ -93,12 +91,15 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl {
                 // in case some other FK prevents delete
                 return "Cannot delete employee " + empId + " due to related data. Remove dependent records first.";
             } catch (Exception ex) {
-                // log and return a friendly message
-                // logger.error("deleteEmployee failed", ex);
                 return "Unexpected error while deleting employee " + empId + ".";
             }
         }
         return "Employee Not Found For Id " + empId;
+    }
+
+    @Override
+    public List<PlantEmployee> getEmployeesByPlantIdAndDateWise(Long plantId, LocalDate date) {
+        return empRepo.getEmployeesByPlantIdAndDate(plantId, date);
     }
 
     private void handleDriverLicence(PlantEmployee employee) {

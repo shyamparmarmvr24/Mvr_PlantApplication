@@ -82,6 +82,7 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
 
         existing.setSludgeTankLevelAm(plantOp.getSludgeTankLevelAm());
         existing.setSludgeTankLevelPm(plantOp.getSludgeTankLevelPm());
+        existing.setSludgeTankRemark(plantOp.getSludgeTankRemark());
 
         existing.setIsSludgeTankCleaning(plantOp.getIsSludgeTankCleaning());
         existing.setSludgeTankCleaningDate(plantOp.getSludgeTankCleaningDate());
@@ -97,7 +98,6 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
         existing.setPowerReadingMorningImportKvah(plantOp.getPowerReadingMorningImportKvah());
         existing.setPowerReadingEveningImportKvah(plantOp.getPowerReadingEveningImportKvah());
 
-//        raw data storage
         existing.setRawPowerMeterReadingAmImport(plantOp.getRawPowerMeterReadingAmImport());
         existing.setRawPowerMeterReadingAmExport(plantOp.getRawPowerMeterReadingAmExport());
         existing.setRawPowerMeterReadingPmImport(plantOp.getRawPowerMeterReadingPmImport());
@@ -105,6 +105,7 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
 
         existing.setRawPowerMeterReadingMorningImportKvah(plantOp.getRawPowerMeterReadingMorningImportKvah());
         existing.setRawPowerMeterReadingEveningImportKvah(plantOp.getRawPowerMeterReadingEveningImportKvah());
+        existing.setPowerRemarks(plantOp.getPowerRemarks());
 
         existing.setPowerBill(plantOp.getPowerBill());
         existing.setLastBillDate(plantOp.getLastBillDate());
@@ -139,6 +140,7 @@ public class PlantOperationMgmtRepoImpl implements IPlantOperationMgmtRepo {
         existing.setIsPilletsStockReceived(plantOp.getIsPilletsStockReceived());
         existing.setPilletsStockReceivedDate(plantOp.getPilletsStockReceivedDate());
         existing.setPilletsStockQuantity(plantOp.getPilletsStockQuantity());
+        existing.setStockRemark(plantOp.getStockRemark());
 
         existing.setRemarks(plantOp.getRemarks());
 

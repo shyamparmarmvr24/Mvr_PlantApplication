@@ -278,7 +278,7 @@ document.addEventListener("visibilitychange", () => {
     let attendanceData = {};
 
     async function loadEmployees() {
-        const res = await fetch(`/api/plantemployees/plant/${plantID}`);
+        const res = await fetch(`/api/plantemployees/plant/${plantID}/date/${date}`);
         employees = await res.json();
 
         if (!employees.length) {
@@ -291,30 +291,30 @@ document.addEventListener("visibilitychange", () => {
     }
 
     function renderRows() {
-        tbody.innerHTML = "";
+    tbody.innerHTML = "";
 
-        employees.forEach(emp => {
-            attendanceData[emp.employeeId] = { am: null, pm: null };
+    employees.forEach(emp => {
+        attendanceData[emp.employeeId] = { am: null, pm: null };
 
-            tbody.insertAdjacentHTML("beforeend", `
-                <tr id="row-${emp.employeeId}">
-                    <td>${emp.employeeId}</td>
-                    <td>${emp.employeeName}</td>
-                    <td>${emp.designation}</td>
+        tbody.insertAdjacentHTML("beforeend", `
+        <tr id="row-${emp.employeeId}">
+            <td>${emp.employeeId}</td>
+            <td>${emp.employeeName}</td>
+            <td>${emp.designation}</td>
 
-                    <td>
-                        <button class="btn-yes" onclick="selectAM(${emp.employeeId}, true)">Present</button>
-                        <button class="btn-no" onclick="selectAM(${emp.employeeId}, false)">Absent</button>
-                    </td>
+            <td>
+                <button class="btn-yes" onclick="selectAM('${emp.employeeId}', true)">Present</button>
+                <button class="btn-no" onclick="selectAM('${emp.employeeId}', false)">Absent</button>
+            </td>
 
-                    <td>
-                        <button class="btn-yes" onclick="selectPM(${emp.employeeId}, true)">Present</button>
-                        <button class="btn-no" onclick="selectPM(${emp.employeeId}, false)">Absent</button>
-                    </td>
-                </tr>
-            `);
-        });
-    }
+            <td>
+                <button class="btn-yes" onclick="selectPM('${emp.employeeId}', true)">Present</button>
+                <button class="btn-no" onclick="selectPM('${emp.employeeId}', false)">Absent</button>
+            </td>
+        </tr>
+        `);
+    });
+}
 
     function selectAM(empId, value) {
         attendanceData[empId].am = value;
@@ -338,7 +338,7 @@ document.addEventListener("visibilitychange", () => {
     async function loadExistingAttendance() {
         for (const emp of employees) {
             try {
-                const res = await fetch(`/api/employee-operations/${emp.employeeId}/date/${date}`);
+                const res = await fetch(`/api/employee-operations/${encodeURIComponent(emp.employeeId)}/date/${date}`);
                 if (!res.ok) continue;
 
                 const data = await res.json();
@@ -355,13 +355,14 @@ document.addEventListener("visibilitychange", () => {
 
     async function submitAttendance() {
     for (const emp of employees) {
+
         const body = {
             attendanceAm: attendanceData[emp.employeeId].am,
             attendancePm: attendanceData[emp.employeeId].pm,
             operationDate: date
         };
 
-        await fetch(`/api/employee-operations/update/${plantID}/${emp.employeeId}`, {
+        await fetch(`/api/employee-operations/update/${plantID}/${encodeURIComponent(emp.employeeId)}`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(body)
@@ -370,7 +371,6 @@ document.addEventListener("visibilitychange", () => {
 
     alert("Attendance Updated Successfully");
 
-    // 🔥 Redirect to index with same date
     window.location.href = `index.html?date=${encodeURIComponent(date)}`;
 }
 

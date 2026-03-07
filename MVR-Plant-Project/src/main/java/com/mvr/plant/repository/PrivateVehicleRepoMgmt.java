@@ -1,11 +1,9 @@
 package com.mvr.plant.repository;
-
 import com.mvr.plant.entity.FstpPlant;
 import com.mvr.plant.entity.PrivateVehicleDetails;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,8 +19,7 @@ public class PrivateVehicleRepoMgmt implements IPrivateVehicleRepoImpl {
     @Override
     public PrivateVehicleDetails createPrivateVehicle(Long plantId, PrivateVehicleDetails privateVehicle) {
         // Fetch parent plant
-        FstpPlant plant = plantRepo.findPlantByPlantID(plantId)
-                .orElseThrow(() -> new IllegalStateException("Plant not found: " + plantId));
+        FstpPlant plant = plantRepo.findPlantByPlantID(plantId).orElseThrow(() -> new IllegalStateException("Plant not found: " + plantId));
 
         // Set FK reference
         privateVehicle.setPlant(plant);
@@ -65,5 +62,11 @@ public class PrivateVehicleRepoMgmt implements IPrivateVehicleRepoImpl {
     public void deletePrivateVehicle(Long privateVehicleId)
     {
         privateVehRepo.deleteById(privateVehicleId);
+    }
+
+    @Override
+    public List<PrivateVehicleDetails> findPrivateVehByPlantIdAndOperationDateBetween(Long plantId, LocalDate fromDate, LocalDate toDate)
+    {
+        return privateVehRepo.findByPlant_PlantIDAndOperationDateBetween(plantId,fromDate,toDate);
     }
 }

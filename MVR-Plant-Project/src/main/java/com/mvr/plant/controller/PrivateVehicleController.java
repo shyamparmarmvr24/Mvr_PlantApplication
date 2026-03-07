@@ -38,6 +38,15 @@ public class PrivateVehicleController {
         return ResponseEntity.ok(list);
     }
 
+    // GET PRIVATE VEHICLES BY PLANT + DATE RANGE
+    @GetMapping("/rangeBetween/{plantId}")
+    public ResponseEntity<List<PrivateVehicleDetails>> getPrivateVehiclesByPlantAndDateRange(@PathVariable Long plantId, @RequestParam("fromDate") LocalDate fromDate, @RequestParam("toDate") LocalDate toDate)
+    {
+        List<PrivateVehicleDetails> list = privateVehicleService.findPrivateVehByPlantIdAndOperationDateBetween(plantId, fromDate, toDate);
+
+        return ResponseEntity.ok(list);
+    }
+
     // UPDATE PRIVATE VEHICLE
     @PutMapping("/update/{plantId}/{privateVehicleId}")
     public ResponseEntity<PrivateVehicleDetails> updatePrivateVehicle(@PathVariable Long plantId, @PathVariable Long privateVehicleId, @RequestBody PrivateVehicleDetails updated) {

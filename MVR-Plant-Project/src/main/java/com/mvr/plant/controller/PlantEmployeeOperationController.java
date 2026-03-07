@@ -15,7 +15,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/employee-operations")
 @CrossOrigin(origins = "*")
-public class PlantEmployeeOperationController {
+public class PlantEmployeeOperationController
+{
     @Autowired
     private IPlantEmployeeOperationService employeeOpService;
 
@@ -23,21 +24,20 @@ public class PlantEmployeeOperationController {
     private SseController sseController;
 
     @PostMapping("/update/{plantId}/{employeeId}")
-    public ResponseEntity<Map<String, Integer>> updateOperation(@PathVariable Long plantId, @PathVariable Integer employeeId, @RequestBody PlantEmployeeOperation empOp) {
+    public ResponseEntity<Map<String, Integer>> updateOperation(@PathVariable Long plantId, @PathVariable String employeeId, @RequestBody PlantEmployeeOperation empOp) {
         Map<String, Integer> response = employeeOpService.updatePlantEmployeeOperation(plantId, employeeId, empOp);
 
         sseController.sendEvent(
-                new SseEvent(SseEntities.EMP_OP,SseActions.CREATE, plantId, employeeId.longValue())
+                new SseEvent(SseEntities.EMP_OP,SseActions.CREATE, plantId, null)
         );
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{employeeId}/date/{date}")
-    public ResponseEntity<PlantEmployeeOperation> getByDate(@PathVariable Integer employeeId, @PathVariable String date) {
+    public ResponseEntity<PlantEmployeeOperation> getByDate(@PathVariable String employeeId, @PathVariable String date) {
         LocalDate localDate = LocalDate.parse(date);
 
-        PlantEmployeeOperation op = employeeOpService
-                .getEmployeeOperationByEmpIdAndDate(employeeId, localDate);
+        PlantEmployeeOperation op = employeeOpService.getEmployeeOperationByEmpIdAndDate(employeeId, localDate);
 
         if (op == null) {
             return ResponseEntity.ok().build();
@@ -46,18 +46,16 @@ public class PlantEmployeeOperationController {
     }
 
     @GetMapping("/{employeeId}/all")
-    public ResponseEntity<List<PlantEmployeeOperation>> getAllByEmployee(@PathVariable Integer employeeId) {
-        List<PlantEmployeeOperation> list =
-                employeeOpService.getAllOperationsByEmployeeId(employeeId);
+    public ResponseEntity<List<PlantEmployeeOperation>> getAllByEmployee(@PathVariable String employeeId) {
+        List<PlantEmployeeOperation> list = employeeOpService.getAllOperationsByEmployeeId(employeeId);
 
         return ResponseEntity.ok(list);
     }
 
     // inside PlantEmployeeOperationController
     @GetMapping("/date")
-    public ResponseEntity<List<EmployeeOperationDTO>> getEmployeeOperationsByDate(
-            @RequestParam("date") String date
-    ) {
+    public ResponseEntity<List<EmployeeOperationDTO>> getEmployeeOperationsByDate(@RequestParam("date") String date)
+    {
         LocalDate localDate = LocalDate.parse(date);
 
         List<EmployeeOperationDTO> list = employeeOpService.getAllEmployeesOperationByDate(localDate);
@@ -76,7 +74,7 @@ public class PlantEmployeeOperationController {
     }
 
     @PutMapping("/employee/{plantId}/{empId}")
-    public ResponseEntity<PlantEmployeeOperation> updateEmployeeOperation(@PathVariable Long plantId, @PathVariable Integer empId,@RequestParam("date") String date, @RequestBody PlantEmployeeOperation empOp)
+    public ResponseEntity<PlantEmployeeOperation> updateEmployeeOperation(@PathVariable Long plantId, @PathVariable String empId,@RequestParam("date") String date, @RequestBody PlantEmployeeOperation empOp)
     {
         // parse and set date
         LocalDate localDate = LocalDate.parse(date);
@@ -85,7 +83,7 @@ public class PlantEmployeeOperationController {
         PlantEmployeeOperation updated = employeeOpService.updatePlantEmployeeOperationByDate(plantId, empId, empOp);
 
         sseController.sendEvent(
-                new SseEvent(SseEntities.EMP_OP, SseActions.UPDATE, plantId, empId.longValue())
+                new SseEvent(SseEntities.EMP_OP, SseActions.UPDATE, plantId, null)
         );
 
         return ResponseEntity.ok(updated);

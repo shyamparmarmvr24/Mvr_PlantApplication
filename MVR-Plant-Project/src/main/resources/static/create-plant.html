@@ -1263,7 +1263,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Employee ID <span class="req">*</span></label>
-                    <input type="number" id="emp_${i}_id" required />
+                    <input type="text" id="emp_${i}_id" required placeholder="Enter Employee Id">
                 </div>
                 <div class="form-group">
                     <label>Employee Name <span class="req">*</span></label>
@@ -1508,7 +1508,7 @@
 
 employees.push({
     employeeId: document.getElementById(`emp_${i}_id`)?.value
-        ? Number(document.getElementById(`emp_${i}_id`).value)
+        ? document.getElementById(`emp_${i}_id`).value.trim()
         : null,
 
     employeeName: document.getElementById(`emp_${i}_name`).value.trim(),

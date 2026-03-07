@@ -1,16 +1,12 @@
 package com.mvr.plant.entity;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,7 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 public class PlantEmployee {
     @Id
-    private Integer employeeId;
+    @Column(length = 70)
+    private String employeeId;
 
     @ManyToOne
     @JoinColumn(name = "PlantID", referencedColumnName = "PlantID")
@@ -49,6 +46,8 @@ public class PlantEmployee {
     @Column(nullable = false)
     private LocalDate dateOfJoining;
 
+    private LocalDate dateOfLeaving;
+
     private String licenceType;
 
     private String licenceNumber;
@@ -58,7 +57,6 @@ public class PlantEmployee {
     private LocalDate licenceExpiryDate;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    //@JsonManagedReference
     @JsonIgnore
     private List<PlantEmployeeOperation> plantEmployeesOp = new ArrayList<>();
 

@@ -1,12 +1,16 @@
 package com.mvr.plant.controller;
+import com.mvr.plant.DTO.EmployeeHistoryCheckDTO;
 import com.mvr.plant.DTO.SseActions;
 import com.mvr.plant.DTO.SseEntities;
 import com.mvr.plant.DTO.SseEvent;
 import com.mvr.plant.entity.PlantEmployee;
+import com.mvr.plant.repository.IPlantEmployeeHistoryImpl;
+import com.mvr.plant.service.EmployeeHistoryService;
 import com.mvr.plant.service.IPlantEmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,13 +25,33 @@ public class PlantEmployeeController {
     @Autowired
     private SseController sseController;
 
-    //creating employee
+    @Autowired
+    private IPlantEmployeeHistoryImpl empHistory;
+
+    @Autowired
+    private EmployeeHistoryService historyService;
+
     @PostMapping("/create/{plantId}")
-    public ResponseEntity<PlantEmployee> createEmployee(@PathVariable Long plantId, @RequestBody PlantEmployee employee) {
-        PlantEmployee savedEmployee = employeeService.createEmployee(plantId, employee);
-        sseController.sendEvent(
-                new SseEvent(SseEntities.EMPLOYEE, SseActions.CREATE, plantId, savedEmployee.getEmployeeId().longValue())
-        );
+    public ResponseEntity<?> createEmployee(
+            @PathVariable Long plantId,
+            @RequestBody PlantEmployee employee,
+            @RequestParam(required = false, defaultValue = "false") boolean forceCreate
+    ) {
+
+        // 🔥 CHECK HISTORY ONLY IF NOT FORCE
+        if (!forceCreate) {
+            EmployeeHistoryCheckDTO check =
+                    historyService.checkHistory(employee.getEmployeeId());
+
+            if (check.isExists()) {
+                return ResponseEntity.ok(check);
+            }
+        }
+
+        // NORMAL CREATE
+        PlantEmployee savedEmployee =
+                employeeService.createEmployee(plantId, employee);
+
         return ResponseEntity.ok(savedEmployee);
     }
 
@@ -40,10 +64,7 @@ public class PlantEmployeeController {
     }
 
     @PutMapping("/update/{plantId}/{employeeId}")
-    public ResponseEntity<Map<String, String>> updateEmployee(
-            @PathVariable Long plantId,
-            @PathVariable Integer employeeId,
-            @RequestBody PlantEmployee employee
+    public ResponseEntity<Map<String, String>> updateEmployee(@PathVariable Long plantId, @PathVariable String employeeId, @RequestBody PlantEmployee employee
     ) {
         String message = employeeService.updateOperationById(plantId, employeeId, employee);
 
@@ -52,22 +73,34 @@ public class PlantEmployeeController {
         response.put("status", "success");
         response.put("message", message);
         sseController.sendEvent(
-                new SseEvent(SseEntities.EMPLOYEE, SseActions.UPDATE, plantId, employeeId.longValue())
+                new SseEvent(SseEntities.EMPLOYEE, SseActions.UPDATE, plantId, null)
         );
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/plant/{plantId}/date/{date}")
+    public ResponseEntity<List<PlantEmployee>> getEmployeesByPlantAndDate(@PathVariable Long plantId, @PathVariable String date)
+    {
+
+        LocalDate localDate = LocalDate.parse(date);
+
+        List<PlantEmployee> employees = employeeService.getEmployeesByPlantIdAndDateWise(plantId, localDate);
+
+        return ResponseEntity.ok(employees);
+    }
+
     @DeleteMapping("/delete/{employeeId}")
-    public ResponseEntity<String> deleteEmployee(@PathVariable Integer employeeId) {
-        String result = employeeService.deleteEmployeeByEmpId(employeeId);
-        // If deletion successful
-        if (result.equals("Employee Deleted Successfully")) {
+    public ResponseEntity<String> deleteEmployee(@PathVariable String employeeId) {
+
+        String result = empHistory.archiveAndDeleteEmployee(employeeId);
+
+        if (result.contains("Successfully")) {
             sseController.sendEvent(
-                    new SseEvent(SseEntities.EMPLOYEE, SseActions.DELETE, null, employeeId.longValue())
+                    new SseEvent(SseEntities.EMPLOYEE, SseActions.DELETE, null, null)
             );
-            return ResponseEntity.ok(result); // 200 OK
+            return ResponseEntity.ok(result);
         }
-        // If employee not found
-        return ResponseEntity.status(404).body(result); // 404 NOT FOUND
+
+        return ResponseEntity.status(404).body(result);
     }
 }
