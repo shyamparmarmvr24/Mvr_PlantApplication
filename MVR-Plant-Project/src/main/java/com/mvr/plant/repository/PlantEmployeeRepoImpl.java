@@ -56,6 +56,7 @@ public class PlantEmployeeRepoImpl implements IPlantEmployeeRepoImpl {
         existing.setAddress(employee.getAddress());
         existing.setDateOfBirth(employee.getDateOfBirth());
         existing.setDateOfJoining(employee.getDateOfJoining());
+        existing.setDateOfLeaving(employee.getDateOfLeaving());
 
         //DRIVER LICENCE UPDATE (ONLY FOR DRIVER)
         if ("Driver".equalsIgnoreCase(employee.getDesignation())) {
