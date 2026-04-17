@@ -55,6 +55,7 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
 
         existing.setAttendanceAm(empOp.getAttendanceAm());
         existing.setAttendancePm(empOp.getAttendancePm());
+        existing.setAttendanceRemark(empOp.getAttendanceRemark());
 
         empOpRepo.save(existing);
 
@@ -167,6 +168,7 @@ public class PlantEmployeeOperationRepoImpl implements IPlantEmployeeOperationRe
         //Update fields
         existing.setAttendanceAm(empOp.getAttendanceAm());
         existing.setAttendancePm(empOp.getAttendancePm());
+        existing.setAttendanceRemark(empOp.getAttendanceRemark());
 
         //Save & return entity
         return empOpRepo.save(existing);

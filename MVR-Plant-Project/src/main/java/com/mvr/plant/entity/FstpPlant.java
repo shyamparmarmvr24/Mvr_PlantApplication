@@ -109,6 +109,12 @@ public class FstpPlant {
     @Column(name = "SolarFencingDoneDate")
     private LocalDate solarFencingDoneDate;
 
+    @Column(name = "EsslDevice")
+    private Boolean esslDevice;
+
+    @Column(name = "EsslDeviceDate")
+    private LocalDate esslDeviceDate;
+
     @Column(name = "ConstructionStartedDate")
     private LocalDate constructionStartedDate;
 

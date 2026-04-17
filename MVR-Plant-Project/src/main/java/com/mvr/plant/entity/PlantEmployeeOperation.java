@@ -36,6 +36,8 @@ public class PlantEmployeeOperation {
 
     private Boolean attendancePm;
 
+    private String attendanceRemark;
+
     private LocalDate operationDate;
 
     @CreatedDate
