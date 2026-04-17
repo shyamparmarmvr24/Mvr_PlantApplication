@@ -215,5 +215,4 @@ public class FstpPlant {
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<MotorDetails> motorDetails = new ArrayList<>();
-//    hii changes test
 }
