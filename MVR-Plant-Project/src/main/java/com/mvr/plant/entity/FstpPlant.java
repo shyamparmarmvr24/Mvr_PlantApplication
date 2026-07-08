@@ -163,6 +163,9 @@ public class FstpPlant {
     @Column(name = "NoOfVehicle")
     private Integer noOfVehicle;
 
+    @Column(name = "PlantPhase")
+    private Integer plantPhase;
+
     public int getNoOfEmployees() {
         return plantEmployees != null ? plantEmployees.size() : 0;
     }

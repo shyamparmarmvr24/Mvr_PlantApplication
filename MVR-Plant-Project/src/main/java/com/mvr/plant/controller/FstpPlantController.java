@@ -12,7 +12,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/plants")
 @CrossOrigin(origins = "*")
-public class FstpPlantController {
+public class FstpPlantController
+{
     @Autowired
     private IPlantService plantService;
 
@@ -64,6 +65,12 @@ public class FstpPlantController {
     @GetMapping("/all")
     public ResponseEntity<List<FstpPlant>> getAllPlantsDetails() {
         List<FstpPlant> plants = plantService.getAllPlantsDetails();
+        return ResponseEntity.ok(plants);
+    }
+
+    @GetMapping("/phase/{plantPhase}")
+    public ResponseEntity<List<FstpPlant>> getPlantsByPhase(@PathVariable Integer plantPhase) {
+        List<FstpPlant> plants = plantService.getPlantsByPhase(plantPhase);
         return ResponseEntity.ok(plants);
     }
 }

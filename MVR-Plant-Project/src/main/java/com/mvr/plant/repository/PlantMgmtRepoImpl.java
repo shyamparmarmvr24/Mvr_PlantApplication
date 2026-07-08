@@ -50,4 +50,9 @@ public class PlantMgmtRepoImpl implements IPlantMgmtRepo {
     public List<FstpPlant> getAllPlantsDetails() {
         return plantRepo.findAll();
     }
+
+    @Override
+    public List<FstpPlant> getPlantsByPhase(Integer plantPhase) {
+        return plantRepo.getPlantsByPhase(plantPhase);
+    }
 }

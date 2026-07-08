@@ -42,4 +42,9 @@ public class PlantServiceImpl implements IPlantService
     public List<FstpPlant> getAllPlantsDetails() {
         return plantRepo.getAllPlantsDetails();
     }
+
+    @Override
+    public List<FstpPlant> getPlantsByPhase(Integer plantPhase) {
+        return plantRepo.getPlantsByPhase(plantPhase);
+    }
 }

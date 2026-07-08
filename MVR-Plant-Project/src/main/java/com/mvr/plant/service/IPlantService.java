@@ -13,4 +13,5 @@ public interface IPlantService
     public List<FstpPlant> getPlantsByZone(Integer zone);
     // no change done test file
     public List<FstpPlant> getAllPlantsDetails();
+    public List<FstpPlant> getPlantsByPhase(Integer plantPhase);
 }

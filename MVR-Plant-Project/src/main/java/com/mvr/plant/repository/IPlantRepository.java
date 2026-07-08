@@ -20,4 +20,7 @@ public interface IPlantRepository extends JpaRepository<FstpPlant,Long>
     @Query("SELECT p FROM FstpPlant p WHERE p.mnit = true")
     List<FstpPlant> getAllPlantsWhereMnitIsTrue();
 
+    @Query("SELECT p FROM FstpPlant p WHERE p.plantPhase = :plantPhase")
+    List<FstpPlant> getPlantsByPhase(@Param("plantPhase") Integer plantPhase);
+
 }

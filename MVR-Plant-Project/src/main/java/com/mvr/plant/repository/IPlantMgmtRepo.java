@@ -12,4 +12,5 @@ public interface IPlantMgmtRepo
     public String updatePlantDetails(Long id,FstpPlant plant);
     public List<FstpPlant> getPlantsByZone(Integer zone);
     public List<FstpPlant> getAllPlantsDetails();
+    public List<FstpPlant> getPlantsByPhase(Integer plantPhase);
 }
