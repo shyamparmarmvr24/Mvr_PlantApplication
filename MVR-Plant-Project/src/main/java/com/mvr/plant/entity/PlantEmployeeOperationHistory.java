@@ -7,7 +7,21 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Plant_Employee_Operation_History_Table")
+@Table(name = "Plant_Employee_Operation_History_Table",
+        indexes = {
+
+                @Index(
+                        name = "idx_emp_joining",
+                        columnList = "employeeId, dateOfJoining"
+                ),
+
+                @Index(
+                        name = "idx_operationdate",
+                        columnList = "operationDate"
+                )
+
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

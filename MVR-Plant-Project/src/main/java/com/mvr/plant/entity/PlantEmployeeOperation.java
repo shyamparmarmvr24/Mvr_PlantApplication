@@ -13,7 +13,21 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "Plant_Employee_Operation_Table")
+@Table(name = "Plant_Employee_Operation_Table",
+        indexes = {
+
+                @Index(
+                        name = "idx_emp_operation_date",
+                        columnList = "employeeId, operationDate"
+                ),
+
+                @Index(
+                        name = "idx_operation_date",
+                        columnList = "operationDate"
+                )
+
+        }
+)
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlantEmployeeOperation {

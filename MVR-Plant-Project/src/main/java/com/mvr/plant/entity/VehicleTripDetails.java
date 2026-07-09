@@ -13,7 +13,16 @@ import java.time.LocalTime;
 
 @Data
 @Entity
-@Table(name = "Vehicle_Trip_Details")
+@Table(name = "Vehicle_Trip_Details",
+        indexes = {
+
+                @Index(
+                        name = "idx_vehicleop_triptime",
+                        columnList = "vehicleOpID, tripTime"
+                )
+
+        }
+)
 @AllArgsConstructor
 @NoArgsConstructor
 public class VehicleTripDetails {

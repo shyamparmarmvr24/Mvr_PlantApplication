@@ -16,7 +16,21 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "Vehicle_Operation_Table")
+@Table(name = "Vehicle_Operation_Table",
+        indexes = {
+
+                @Index(
+                        name = "idx_vehicle_operation_date",
+                        columnList = "vehicleID, operationDate"
+                ),
+
+                @Index(
+                        name = "idx_vehicle_date",
+                        columnList = "operationDate"
+                )
+
+        }
+)
 @AllArgsConstructor
 @NoArgsConstructor
 public class VehicleOperation {

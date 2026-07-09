@@ -13,7 +13,21 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "Laboratory_Table")
+@Table(name = "Laboratory_Table",
+        indexes = {
+
+                @Index(
+                        name = "idx_lab_plantId_date",
+                        columnList = "PlantID, operationDate"
+                ),
+
+                @Index(
+                        name = "idx_lab_operation_date",
+                        columnList = "operationDate"
+                )
+
+        }
+)
 @AllArgsConstructor
 @NoArgsConstructor
 public class LaboratoryOperation {
